@@ -1190,10 +1190,20 @@
     }
   }
 
-  // 닉네임 금칙어 사전 검사 (클라이언트, 서버 보호 외 즉시 피드백용)
+  // 닉네임 형식/금칙어 사전 검사 (클라이언트)
   // 정식 검증은 서버 RPC가 마지막에 수행
+  // 보안상 차단 사유는 노출 X — 사용자에게는 "사용할 수 없는 닉네임"만 표시
   function isNicknameForbidden(nickname){
-    const normalized = nickname.replace(/\s+/g, '').toLowerCase();
+    const trimmed = nickname.trim();
+
+    // 1) 형식 검증: 완성형 한글 + 영문 + 숫자만 허용
+    //    한글 자모 단독(ㄱ-ㅎ, ㅏ-ㅣ), 특수문자, 이모지, 공백 차단
+    if(!/^[가-힣a-zA-Z0-9]+$/.test(trimmed)){
+      return true;
+    }
+
+    // 2) 금칙어 검사 (운영 사칭 / 욕설 / 19금)
+    const normalized = trimmed.toLowerCase();
     const patterns = [
       /운영|관리자|admin|staff|official|공식|매니저|manager|공지|notice/,
       /공부하는감자|studypotato|감자운영|감자공식|감자관리/,
@@ -1222,9 +1232,9 @@
       hint.classList.remove('success');
       return;
     }
-    // 금칙어 사전 검사 (운영 사칭 / 욕설 / 19금)
+    // 형식 + 금칙어 사전 검사 (사유는 노출 X — 우회 방지)
     if(isNicknameForbidden(value)){
-      hint.textContent = '운영자 사칭이나 부적절한 단어가 포함된 닉네임이에요.';
+      hint.textContent = '이 닉네임은 사용할 수 없습니다.';
       hint.classList.add('error');
       hint.classList.remove('success');
       return;
@@ -1546,7 +1556,7 @@
           alert('이미 사용 중인 닉네임이에요. 닉네임 단계로 돌아갈게요.');
           go('signup-profile');
         } else if(msg.includes('nickname_forbidden')){
-          alert('운영자 사칭이나 부적절한 단어가 포함된 닉네임이에요. 다른 닉네임으로 바꿔주세요.');
+          alert('이 닉네임은 사용할 수 없습니다. 다른 닉네임으로 바꿔주세요.');
           go('signup-profile');
         } else if(msg.includes('notify_email_taken')){
           alert('이미 다른 계정에서 쓰고 있는 알림 메일이에요. 알림 메일 단계로 돌아갈게요.');
