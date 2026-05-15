@@ -137,7 +137,6 @@
     margin-bottom: 6px;
   }
   .hero h1 .accent{color: var(--knu-orange);}
-  /* 부제목: 서비스 정체성 명확히 (단순 공부 앱 X, 스터디 매칭) */
   .hero .subtitle{
     font-family: var(--font-mono);
     font-size: 12px;
@@ -451,7 +450,6 @@
     transition: all 0.2s;
   }
   .share-btn:active{transform: scale(0.97);}
-  /* 모달 안 공유 버튼 (메인 액션) */
   .modal-btn.share{
     background: var(--ink);
     color: var(--cream);
@@ -546,7 +544,6 @@
     line-height: 1.6;
     margin-bottom: 24px;
   }
-  /* 모달 인풋 */
   .modal .input-wrap{
     background: var(--paper);
     border: 1.5px solid var(--line);
@@ -608,7 +605,6 @@
     color: var(--ink-mute);
     cursor: not-allowed;
   }
-  /* 완료 모달 */
   .done-content{
     text-align: center;
     padding: 16px 0;
@@ -674,7 +670,7 @@
       <div class="progress-bar-fill" id="progress-fill"></div>
     </div>
     <p class="progress-hint" id="progress-hint">
-      <span id="remaining">100</span>명만 더 모이면 서비스가 오픈돼요.<br>가장 먼저 알림 받으실래요?
+      <span id="remaining">100</span>명만 더 모이면 서비스가 오픈돼요.<br>사전신청 후 가장 먼저 알림을 받아보세요!
     </p>
   </div>
   <!-- ========== CTA ========== -->
@@ -704,14 +700,26 @@
         <h3>팀장으로 직접 모집</h3>
         <p>이미 스터디 컨셉이 명확하다면, 팀장이 되어 원하는 팀원을 직접 모집해보세요.</p>
       </div>
+      <div class="preview-card orange">
+        <div class="card-num">— 03 / BROWSE</div>
+        <div class="card-emoji">🔍</div>
+        <h3>스터디 직접 찾기</h3>
+        <p>이미 모집 중인 스터디를 검색하고 마음에 드는 팀에 바로 지원할 수 있어요.</p>
+      </div>
       <div class="preview-card">
-        <div class="card-num">— 03 / SAFETY</div>
+        <div class="card-num">— 04 / COMMUNITY</div>
+        <div class="card-emoji">💬</div>
+        <h3>스터디 커뮤니티</h3>
+        <p>학과·과목·시험 정보를 자유롭게 나누는 공간이에요. 질문, 정보 공유, 가벼운 소통까지.</p>
+      </div>
+      <div class="preview-card blue">
+        <div class="card-num">— 05 / SAFETY</div>
         <div class="card-emoji">🎓</div>
         <h3>강원대학교 학생만</h3>
         <p>강원대학교 웹메일 인증을 거친 학생만 가입할 수 있어요. 현재는 춘천캠퍼스만 지원하며, 추후 확장 예정입니다.</p>
       </div>
       <div class="preview-card orange">
-        <div class="card-num">— 04 / FREE</div>
+        <div class="card-num">— 06 / FREE</div>
         <div class="card-emoji">💸</div>
         <h3>완전 무료</h3>
         <p>광고 없음, 결제 없음.<br>강원대학교 재학생이 운영하는 비영리 서비스입니다.</p>
@@ -719,6 +727,8 @@
     </div>
     <div class="dots" id="dots">
       <span class="dot active"></span>
+      <span class="dot"></span>
+      <span class="dot"></span>
       <span class="dot"></span>
       <span class="dot"></span>
       <span class="dot"></span>
@@ -750,9 +760,9 @@
   <div class="modal-sheet">
     <div class="modal-handle"></div>
     <h2>사전신청 🥔</h2>
-    <p class="modal-desc">서비스가 오픈되면 이 메일로 가장 먼저 알려드릴게요.</p>
+    <p class="modal-desc">서비스 출시 알림을 받을 메일 주소예요.<br>자주 사용하시는 메일을 입력해주세요. (학교 메일 아니어도 OK)</p>
     <div class="input-wrap">
-      <input type="email" id="apply-email" placeholder="202312345@kangwon.ac.kr" inputmode="email">
+      <input type="email" id="apply-email" placeholder="example@gmail.com" inputmode="email">
     </div>
     <div class="consent-row" id="consent-row" onclick="toggleConsent()">
       <div class="checkbox" id="consent-check"></div>
@@ -793,71 +803,12 @@
 </div>
 <script>
   // ============================================================
-  // Supabase 연결
+  // 1. 모든 함수 먼저 정의 (Supabase 초기화 실패해도 onclick 작동하도록)
   // ============================================================
-  const SUPABASE_URL = 'https://mleypjquzggtyouepfha.supabase.co';
-  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1sZXlwanF1emdndHlvdWVwZmhhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg4MTAzMDIsImV4cCI6MjA5NDM4NjMwMn0.eM4nh50tC-ZxVRoIA1NZit4JtMJqPlUBZ5LEnTrRB5Q';
-  const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-  // ============================================================
-  // 사전신청 등록 (Supabase에 INSERT)
-  // ============================================================
-  async function registerPreApplicant(email) {
-    const { error } = await supabase
-      .from('pre_register')
-      .insert({ email });
-    if (error) {
-      // 23505 = unique 위반 = 이미 신청한 메일
-      if (error.code === '23505') {
-        throw new Error('이미 사전신청한 메일이에요. 알림이 갈 때까지 기다려주세요!');
-      }
-      // 23514 = check 위반 = 강대 메일 아님
-      if (error.code === '23514') {
-        throw new Error('강원대학교 웹메일(@kangwon.ac.kr)만 신청할 수 있어요.');
-      }
-      throw new Error('등록 중 문제가 생겼어요. 잠시 후 다시 시도해주세요.');
-    }
-  }
-
-  // ============================================================
-  // 사전신청자 수 가져오기 (RPC 함수 호출)
-  // ============================================================
-  async function fetchPreRegisterCount() {
-    const { data, error } = await supabase.rpc('get_pre_register_count');
-    if (error) {
-      console.error('카운트 가져오기 실패:', error);
-      return 0;
-    }
-    return data || 0;
-  }
-
-  // ============================================================
-  // 진행률 갱신 (DB 카운트 → 화면)
-  // ============================================================
-  async function refreshProgress() {
-    const count = await fetchPreRegisterCount();
-    const total = 100;
-    const remaining = Math.max(0, total - count);
-
-    document.getElementById('current-count').textContent = count;
-    document.getElementById('remaining').textContent = remaining;
-
-    const fill = document.getElementById('progress-fill');
-    if (fill) fill.style.width = Math.min(100, (count / total) * 100) + '%';
-
-    // 100명 넘으면 사전신청 마감 처리
-    if (count >= total) {
-      document.getElementById('progress-hint').innerHTML =
-        '🎉 사전신청 마감! 곧 서비스가 오픈됩니다.';
-      const ctaBtn = document.getElementById('cta-btn');
-      ctaBtn.classList.add('done');
-      ctaBtn.innerHTML = '신청 마감되었어요';
-    }
-  }
-
-  // 페이지 로드 + 5초마다 새로고침 (다른 사람 신청도 반영)
-  document.addEventListener('DOMContentLoaded', refreshProgress);
-  setInterval(refreshProgress, 5000);
+  // 공유 텍스트 (한 곳에서 관리)
+  const SHARE_TITLE = '공부하는 감자';
+  const SHARE_TEXT  = '강원대학교 스터디 매칭 플랫폼 "공부하는 감자" 출시 예정!\n아래 링크를 통해 사전신청해보세요 🥔';
 
   /* ========== 모달 ========== */
   function openApplyModal(){
@@ -868,111 +819,11 @@
     document.getElementById('apply-modal').classList.remove('open');
     document.getElementById('done-modal').classList.remove('open');
     document.body.style.overflow = '';
-    // 입력 초기화
     document.getElementById('apply-email').value = '';
     document.getElementById('consent-check').classList.remove('checked');
   }
-  // 배경 클릭 시 닫기
-  document.querySelectorAll('.modal').forEach(m => {
-    m.addEventListener('click', e => {
-      if(e.target === m) closeAllModals();
-    });
-  });
   function toggleConsent(){
     document.getElementById('consent-check').classList.toggle('checked');
-  }
-
-  // ============================================================
-  // 사전신청 제출 (실제 DB 저장)
-  // ============================================================
-  async function submitApply(event){
-    const email = document.getElementById('apply-email').value.trim();
-    const consent = document.getElementById('consent-check').classList.contains('checked');
-
-    // 1. 강대 메일 형식 검증 (DB에서도 검증되지만 사용자 경험 위해 미리)
-    if(!email.endsWith('@kangwon.ac.kr') || email.split('@')[0].length === 0){
-      alert('강원대학교 웹메일(@kangwon.ac.kr)만 신청할 수 있어요.');
-      return;
-    }
-    // 2. 동의 확인
-    if(!consent){
-      alert('알림 메일 수신 동의가 필요해요.');
-      return;
-    }
-
-    // 3. 버튼 잠금 (중복 클릭 방지)
-    const submitBtn = event.target;
-    const originalText = submitBtn.textContent;
-    submitBtn.disabled = true;
-    submitBtn.textContent = '신청 중...';
-
-    try {
-      // 4. Supabase에 등록
-      await registerPreApplicant(email);
-
-      // 5. 새 카운트 받아오기
-      const newCount = await fetchPreRegisterCount();
-
-      // 6. 카운트 팝 애니메이션 + 화면 갱신
-      const countEl = document.getElementById('current-count');
-      countEl.classList.add('pop');
-      setTimeout(() => countEl.classList.remove('pop'), 400);
-      await refreshProgress();
-
-      // 7. 완료 모달 열기
-      document.getElementById('apply-modal').classList.remove('open');
-      document.getElementById('rank-num').textContent = newCount;
-      document.getElementById('done-modal').classList.add('open');
-    } catch(err) {
-      // 8. 에러 표시
-      alert(err.message);
-    } finally {
-      // 9. 버튼 복구
-      submitBtn.disabled = false;
-      submitBtn.textContent = originalText;
-    }
-  }
-
-  /* ========== 미리보기 가로 스와이프 페이지 인디케이터 ========== */
-  const scrollArea = document.getElementById('preview-scroll');
-  const dots = document.querySelectorAll('#dots .dot');
-  scrollArea.addEventListener('scroll', () => {
-    // 카드 한 장 너비 = (컨테이너 너비 - 28px gap*2 padding)
-    const cardWidth = scrollArea.querySelector('.preview-card').offsetWidth + 14; // gap 14
-    const idx = Math.round(scrollArea.scrollLeft / cardWidth);
-    dots.forEach((d, i) => d.classList.toggle('active', i === Math.min(idx, dots.length - 1)));
-  });
-  // 점 클릭 시 해당 카드로 스크롤
-  dots.forEach((dot, i) => {
-    dot.addEventListener('click', () => {
-      const cardWidth = scrollArea.querySelector('.preview-card').offsetWidth + 14;
-      scrollArea.scrollTo({ left: cardWidth * i, behavior: 'smooth' });
-    });
-  });
-
-  /* ========== 공유 기능 ========== */
-  async function shareLink(){
-    const shareData = {
-      title: '공부하는 감자 (공감)',
-      text: '강원대학교 학생들의 스터디 매칭 서비스가 곧 오픈해요! 같이 사전신청해요 🥔',
-      url: window.location.href
-    };
-    try {
-      // 모바일: Web Share API (카톡/메시지/인스타 등 네이티브 공유 시트)
-      if(navigator.share){
-        await navigator.share(shareData);
-      } else {
-        // 데스크톱 등: 링크 복사로 폴백
-        await navigator.clipboard.writeText(window.location.href);
-        showToast('링크가 복사되었어요');
-      }
-    } catch(err){
-      // 사용자가 공유 취소한 경우는 무시
-      if(err.name !== 'AbortError'){
-        // 클립보드도 실패하면 안내
-        showToast('공유에 실패했어요. 다시 시도해주세요.');
-      }
-    }
   }
 
   /* ========== 토스트 ========== */
@@ -987,6 +838,185 @@
       toast.classList.remove('show');
     }, 2400);
   }
+
+  /* ========== 공유 기능 ========== */
+  async function shareLink(){
+    const url = window.location.href;
+    const fullText = SHARE_TEXT + '\n' + url;
+    const shareData = { title: SHARE_TITLE, text: SHARE_TEXT, url: url };
+
+    try {
+      // 모바일: Web Share API (카톡/메시지/인스타 등 네이티브 공유 시트)
+      if (navigator.share && navigator.canShare && navigator.canShare(shareData)) {
+        await navigator.share(shareData);
+        return;
+      }
+      // 데스크톱 또는 미지원: 클립보드에 텍스트 + 링크 같이 복사
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        await navigator.clipboard.writeText(fullText);
+        showToast('내용이 복사되었어요. 붙여넣으세요!');
+        return;
+      }
+      // 마지막 폴백 (구형 브라우저)
+      const ta = document.createElement('textarea');
+      ta.value = fullText;
+      ta.style.position = 'fixed';
+      ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta);
+      showToast('내용이 복사되었어요. 붙여넣으세요!');
+    } catch (err) {
+      if (err.name === 'AbortError') return; // 사용자가 공유 취소
+      console.error('공유 실패:', err);
+      showToast('공유에 실패했어요. 다시 시도해주세요.');
+    }
+  }
+
+  /* ========== Supabase 호출 함수들 ========== */
+  async function registerPreApplicant(email) {
+    if (!supabase) {
+      throw new Error('서버 연결을 준비 중이에요. 잠시 후 다시 시도해주세요.');
+    }
+    const { error } = await supabase
+      .from('pre_register')
+      .insert({ email });
+    if (error) {
+      if (error.code === '23505') {
+        throw new Error('이미 사전신청한 메일이에요. 알림이 갈 때까지 기다려주세요!');
+      }
+      console.error('Supabase 등록 에러:', error);
+      throw new Error('등록 중 문제가 생겼어요. 잠시 후 다시 시도해주세요.');
+    }
+  }
+
+  async function fetchPreRegisterCount() {
+    if (!supabase) return 0;
+    const { data, error } = await supabase.rpc('get_pre_register_count');
+    if (error) {
+      console.error('카운트 가져오기 실패:', error);
+      return 0;
+    }
+    return data || 0;
+  }
+
+  async function refreshProgress() {
+    if (!supabase) return;
+    const count = await fetchPreRegisterCount();
+    const total = 100;
+    const remaining = Math.max(0, total - count);
+
+    document.getElementById('current-count').textContent = count;
+    document.getElementById('remaining').textContent = remaining;
+
+    const fill = document.getElementById('progress-fill');
+    if (fill) fill.style.width = Math.min(100, (count / total) * 100) + '%';
+
+    if (count >= total) {
+      document.getElementById('progress-hint').innerHTML =
+        '🎉 사전신청 마감! 곧 서비스가 오픈됩니다.';
+      const ctaBtn = document.getElementById('cta-btn');
+      ctaBtn.classList.add('done');
+      ctaBtn.innerHTML = '신청 마감되었어요';
+    }
+  }
+
+  /* ========== 사전신청 제출 ========== */
+  async function submitApply(event){
+    const email = document.getElementById('apply-email').value.trim();
+    const consent = document.getElementById('consent-check').classList.contains('checked');
+
+    // 일반 메일 형식 검증 (학교 메일 아니어도 OK)
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      alert('올바른 메일 주소를 입력해주세요.');
+      return;
+    }
+    if (!consent) {
+      alert('알림 메일 수신 동의가 필요해요.');
+      return;
+    }
+
+    const submitBtn = event.target;
+    const originalText = submitBtn.textContent;
+    submitBtn.disabled = true;
+    submitBtn.textContent = '신청 중...';
+
+    try {
+      await registerPreApplicant(email);
+      const newCount = await fetchPreRegisterCount();
+
+      const countEl = document.getElementById('current-count');
+      countEl.classList.add('pop');
+      setTimeout(() => countEl.classList.remove('pop'), 400);
+      await refreshProgress();
+
+      document.getElementById('apply-modal').classList.remove('open');
+      document.getElementById('rank-num').textContent = newCount;
+      document.getElementById('done-modal').classList.add('open');
+    } catch (err) {
+      alert(err.message);
+    } finally {
+      submitBtn.disabled = false;
+      submitBtn.textContent = originalText;
+    }
+  }
+
+  // ============================================================
+  // 2. Supabase 초기화 (실패해도 onclick은 동작함)
+  // ============================================================
+  let supabase = null;
+  const SUPABASE_URL = 'https://mleypjquzggtyouepfha.supabase.co';
+  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1sZXlwanF1emdndHlvdWVwZmhhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg4MTAzMDIsImV4cCI6MjA5NDM4NjMwMn0.eM4nh50tC-ZxVRoIA1NZit4JtMJqPlUBZ5LEnTrRB5Q';
+
+  try {
+    if (window.supabase && window.supabase.createClient) {
+      supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+      console.log('✓ Supabase 연결 성공');
+    } else {
+      console.error('Supabase SDK가 로드되지 않았어요. CDN 차단 또는 인터넷 연결 확인.');
+    }
+  } catch (err) {
+    console.error('Supabase 초기화 실패:', err);
+  }
+
+  // ============================================================
+  // 3. 이벤트 리스너 등록 (DOM은 이미 로드된 상태)
+  // ============================================================
+
+  // 모달 배경 클릭 시 닫기
+  document.querySelectorAll('.modal').forEach(m => {
+    m.addEventListener('click', e => {
+      if (e.target === m) closeAllModals();
+    });
+  });
+
+  // 미리보기 가로 스와이프 페이지 인디케이터
+  const scrollArea = document.getElementById('preview-scroll');
+  const dots = document.querySelectorAll('#dots .dot');
+  if (scrollArea) {
+    scrollArea.addEventListener('scroll', () => {
+      const card = scrollArea.querySelector('.preview-card');
+      if (!card) return;
+      const cardWidth = card.offsetWidth + 14;
+      const idx = Math.round(scrollArea.scrollLeft / cardWidth);
+      dots.forEach((d, i) => d.classList.toggle('active', i === Math.min(idx, dots.length - 1)));
+    });
+  }
+  dots.forEach((dot, i) => {
+    dot.addEventListener('click', () => {
+      const card = scrollArea && scrollArea.querySelector('.preview-card');
+      if (!card) return;
+      const cardWidth = card.offsetWidth + 14;
+      scrollArea.scrollTo({ left: cardWidth * i, behavior: 'smooth' });
+    });
+  });
+
+  // ============================================================
+  // 4. 페이지 로드 후 진행률 갱신 (5초마다 자동 새로고침)
+  // ============================================================
+  refreshProgress();
+  setInterval(refreshProgress, 5000);
 </script>
 </body>
 </html>
