@@ -56,6 +56,11 @@
   - RPC에 `profile_exists` 분기 추가 (이미 가입된 계정 vs 닉네임 중복 구분)
   - OTP 인증 직후 profiles 체크 → 이미 가입이면 로그인 화면으로 자동 이동
   - `updateUser`의 'same password' 에러는 무시하고 RPC 진행 (자연 복구)
+- ✅ 사전신청 완료 안내 메일 자동 발송
+  - Edge Function: `supabase/functions/send-pre-register-email/index.ts`
+  - Resend API 호출 + 한글 디자인 메일 본문
+  - 클라이언트에서 fire-and-forget 호출 (메일 실패해도 등록은 성공)
+  - 환경변수: `RESEND_API_KEY` (Project Settings → Edge Functions → Secrets)
 
 ---
 

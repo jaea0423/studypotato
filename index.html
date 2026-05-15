@@ -900,6 +900,26 @@
     }
   }
 
+  // 사전신청 완료 안내 메일 발송 (Edge Function 호출)
+  // fire-and-forget: 실패해도 사용자 등록은 이미 성공한 상태이므로 alert 안 띄움
+  async function sendWelcomeEmail(email) {
+    if (!supabaseClient) return;
+    try {
+      const { data, error } = await supabaseClient.functions.invoke(
+        'send-pre-register-email',
+        { body: { email } }
+      );
+      if (error) {
+        // 메일 발송 실패는 콘솔에만 남김 (사용자에게는 알리지 않음)
+        console.error('환영 메일 발송 실패:', error);
+        return;
+      }
+      console.log('✓ 환영 메일 발송 완료:', data);
+    } catch (err) {
+      console.error('환영 메일 발송 중 오류:', err);
+    }
+  }
+
   async function fetchPreRegisterCount() {
     if (!supabaseClient) return 0;
     const { data, error } = await supabaseClient.rpc('get_pre_register_count');
@@ -953,6 +973,10 @@
 
     try {
       await registerPreApplicant(email);
+
+      // 환영 메일 발송 (await 없이 백그라운드 처리 — 사용자 흐름 끊지 않음)
+      sendWelcomeEmail(email);
+
       const newCount = await fetchPreRegisterCount();
 
       const countEl = document.getElementById('current-count');
