@@ -192,6 +192,23 @@
     letter-spacing: 0.05em;
     margin-left: 4px;
   }
+  /* 운영자 댓글 강조 */
+  .comment.op-reply{
+    background: var(--knu-orange-soft);
+    border-radius: var(--radius-s);
+    padding: 12px 14px;
+    margin: 8px 0;
+    border-bottom: 0;
+  }
+  .comment-author-tag.admin{ background: var(--knu-orange); }
+  /* 익명 댓글 */
+  .comment-avatar.anon{
+    background: var(--line-soft);
+    color: var(--ink-mute);
+  }
+  .comment-author.anon{
+    color: var(--ink-mute);
+  }
   .comment-time{
     margin-left: auto;
     font-family: var(--font-mono);
@@ -407,6 +424,33 @@
       <div class="comment-actions">
         <button class="comment-action">답글</button>
         <button class="comment-action">🤍 1</button>
+      </div>
+    </div>
+
+    <!-- 익명 댓글 -->
+    <div class="comment">
+      <div class="comment-head">
+        <div class="comment-avatar anon">🎭</div>
+        <div class="comment-author anon">익명 똘똘한고구마</div>
+        <div class="comment-time">15분 전</div>
+      </div>
+      <div class="comment-body">저도 같은 강의 듣는데, 교수님이 직접 정리해주신 PDF 있어요. e-class 자료실에 올라와 있을 거예요!</div>
+      <div class="comment-actions">
+        <button class="comment-action">답글</button>
+        <button class="comment-action">🤍 7</button>
+      </div>
+    </div>
+
+    <!-- 운영자 댓글 (강조) -->
+    <div class="comment op-reply">
+      <div class="comment-head">
+        <div class="comment-avatar op">🥔</div>
+        <div class="comment-author">감자운영자 <span class="comment-author-tag admin">운영자</span></div>
+        <div class="comment-time">10분 전</div>
+      </div>
+      <div class="comment-body">자료 공유 관련해서 학생회와 협의 중이에요. 곧 공식 자료실 메뉴 추가할 예정이니 조금만 기다려주세요 🙏</div>
+      <div class="comment-actions">
+        <button class="comment-action">🤍 12</button>
       </div>
     </div>
 

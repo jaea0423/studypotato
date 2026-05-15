@@ -983,6 +983,12 @@
       <button class="side-item" onclick="closeSidemenu(); switchTab('community-monitor')">
         <span class="ico">💬</span> 커뮤니티 모니터링
       </button>
+      <button class="side-item" onclick="closeSidemenu(); switchTab('match-monitor')">
+        <span class="ico">🃏</span> 매칭 카드 모니터링
+      </button>
+      <button class="side-item" onclick="closeSidemenu(); switchTab('team-monitor')">
+        <span class="ico">👥</span> 팀 모니터링
+      </button>
       <button class="side-item" onclick="closeSidemenu(); switchTab('announcements')">
         <span class="ico">📢</span> 공지사항 관리
       </button>
@@ -1108,6 +1114,190 @@
       <div class="actions" style="margin-top:10px;">
         <button class="btn-action reject" onclick="showToast('상세 화면 (추후 구현)')">상세보기</button>
         <button class="btn-action process" onclick="showToast('댓글 입력 모달 (추후 구현)')">[운영자] 댓글 달기</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 🃏 매칭 카드 모니터링 -->
+  <div class="tab-content" id="tab-match-monitor">
+    <div class="section-head">
+      <h2>🃏 매칭 카드 모니터링</h2>
+      <div class="desc">자동 매칭에 등록된 카드를 검토하고 관리해요</div>
+    </div>
+
+    <div style="background: var(--admin-purple-soft); color: var(--admin-purple-deep); border-radius: var(--radius-m); padding: 12px 14px; font-size: 12px; line-height: 1.6; margin-bottom: 16px;">
+      ℹ️ 익명 카드는 다른 사용자에게는 익명 닉네임으로 표시되지만, 운영자에게는 부적절한 카드 검토를 위해 작성자 닉네임이 보입니다.
+    </div>
+
+    <div class="filter-bar">
+      <button class="filter-chip active" onclick="filterChip(this)">전체</button>
+      <button class="filter-chip" onclick="filterChip(this)">대기 중</button>
+      <button class="filter-chip" onclick="filterChip(this)">매칭 중</button>
+      <button class="filter-chip" onclick="filterChip(this)">완료</button>
+      <button class="filter-chip" onclick="filterChip(this)">신고됨</button>
+    </div>
+
+    <div class="search-bar">
+      <span style="color: var(--ink-mute);">🔍</span>
+      <input type="text" placeholder="제목/카테고리 검색">
+    </div>
+
+    <!-- 정상 카드 -->
+    <div class="item-card">
+      <div class="meta">
+        <span>🃏 자동매칭 카드 · 03/15 14:00 등록</span>
+        <span class="badge active">대기 중</span>
+      </div>
+      <div class="target">컴공 자료구조 같이 공부할 사람</div>
+      <div class="preview">평일 저녁 7~9시, 카페 또는 도서관, 일주일 2회 정도 만나면서 시험 대비하실 분 구해요. 저는 2학년이고 진도는 트리/그래프까지 했어요.</div>
+      <div class="meta" style="margin-bottom: 10px;">
+        <span>작성자: <strong>씩씩한감자</strong> (2학년 · 공과대학)</span>
+      </div>
+      <div class="actions">
+        <button class="btn-action reject" onclick="showToast('카드 상세 (추후 구현)')">상세</button>
+        <button class="btn-action warn" onclick="if(confirm('카드를 비활성화하시겠어요?')) showToast('비활성화됨')">비활성화</button>
+      </div>
+    </div>
+
+    <!-- 익명 카드 -->
+    <div class="item-card">
+      <div class="meta">
+        <span>🃏 자동매칭 카드 · 03/15 11:30 등록</span>
+        <span class="badge active">대기 중</span>
+      </div>
+      <div class="target">🎭 토익 750 → 850 목표 같이 공부할 분</div>
+      <div class="preview">아침에 도서관에서 같이 단어 외우고 LC 풀고 싶어요. 점수 비슷하신 분이면 좋겠어요.</div>
+      <div class="meta" style="margin-bottom: 10px;">
+        <span style="color: var(--admin-purple);">🎭 익명 표시: <strong>익명 졸린대파</strong></span>
+        <span>운영자만: <strong style="color: var(--ink);">대파마스터</strong> (3학년 · 경영대학)</span>
+      </div>
+      <div class="actions">
+        <button class="btn-action reject" onclick="showToast('카드 상세 (추후 구현)')">상세</button>
+        <button class="btn-action warn" onclick="if(confirm('카드를 비활성화하시겠어요?')) showToast('비활성화됨')">비활성화</button>
+      </div>
+    </div>
+
+    <!-- 신고된 카드 -->
+    <div class="item-card" style="border-left: 3px solid var(--knu-orange);">
+      <div class="meta">
+        <span>🃏 자동매칭 카드 · 03/15 10:05</span>
+        <span class="badge pending">신고 1건</span>
+      </div>
+      <div class="target">고액 알바 같이 할 사람 구해요 (월 200+)</div>
+      <div class="preview">간단한 일이고 시간 자유로워요. 카톡 plus_xxx로 연락주세요.</div>
+      <div class="meta" style="margin-bottom: 10px;">
+        <span>작성자: <strong>호빵123</strong> (4학년)</span>
+        <span>신고 사유: <strong style="color: var(--error);">광고/외부 유도</strong></span>
+      </div>
+      <div class="actions">
+        <button class="btn-action reject" onclick="showToast('유지')">유지</button>
+        <button class="btn-action process" onclick="showToast('카드 삭제 + 작성자 경고')">삭제 + 경고</button>
+        <button class="btn-action ban" onclick="if(confirm('정지하시겠어요?')) showToast('정지됨')">정지</button>
+      </div>
+    </div>
+
+    <!-- 매칭 중 -->
+    <div class="item-card" style="opacity: 0.85;">
+      <div class="meta">
+        <span>🃏 자동매칭 카드 · 03/14 18:00</span>
+        <span class="badge processed">매칭 중 (3/4)</span>
+      </div>
+      <div class="target">알고리즘 코딩테스트 대비 스터디</div>
+      <div class="meta" style="margin-bottom: 0;">
+        <span>작성자: 똘똘한고구마 · 매칭 일자: 03/15 20:00</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 👥 팀 모니터링 -->
+  <div class="tab-content" id="tab-team-monitor">
+    <div class="section-head">
+      <h2>👥 팀 모니터링</h2>
+      <div class="desc">활동 중인 팀과 모집 중인 팀을 검토해요</div>
+    </div>
+
+    <div style="background: var(--admin-purple-soft); color: var(--admin-purple-deep); border-radius: var(--radius-m); padding: 12px 14px; font-size: 12px; line-height: 1.6; margin-bottom: 16px;">
+      ℹ️ 팀 확정 후에는 팀원끼리 닉네임이 모두 공개돼요. 운영자는 No-Show/분쟁 처리 위해 멤버 닉네임을 볼 수 있어요.
+    </div>
+
+    <div class="filter-bar">
+      <button class="filter-chip active" onclick="filterChip(this)">전체</button>
+      <button class="filter-chip" onclick="filterChip(this)">모집 중</button>
+      <button class="filter-chip" onclick="filterChip(this)">활동 중</button>
+      <button class="filter-chip" onclick="filterChip(this)">종료</button>
+      <button class="filter-chip" onclick="filterChip(this)">신고됨</button>
+    </div>
+
+    <!-- 모집 중 팀 (팀장 익명) -->
+    <div class="item-card">
+      <div class="meta">
+        <span>👥 직접 모집 · 03/15 13:00 생성</span>
+        <span class="badge active">모집 중 (2/4)</span>
+      </div>
+      <div class="target">🎭 영어 회화 스터디 (초급)</div>
+      <div class="preview">간단한 영어 회화 같이 연습하실 분! 부담 없이 일주일에 한 번, 카페에서 1시간 정도.</div>
+      <div class="meta" style="margin-bottom: 10px;">
+        <span style="color: var(--admin-purple);">🎭 팀장 익명 표시: <strong>익명 귀여운고구마</strong></span>
+        <span>운영자만: <strong style="color: var(--ink);">고구마123</strong></span>
+      </div>
+      <div class="meta" style="margin-bottom: 10px;">
+        <span>지원자 2명: <strong>씩씩한감자</strong>, <strong>똘똘한대파</strong> (모두 닉네임 공개됨)</span>
+      </div>
+      <div class="actions">
+        <button class="btn-action reject" onclick="showToast('팀 상세 (추후 구현)')">상세</button>
+        <button class="btn-action warn" onclick="if(confirm('팀을 비활성화?')) showToast('비활성화됨')">비활성화</button>
+      </div>
+    </div>
+
+    <!-- 활동 중 팀 -->
+    <div class="item-card">
+      <div class="meta">
+        <span>👥 활동 중 · 03/10부터</span>
+        <span class="badge processed">활동 중 (4/4)</span>
+      </div>
+      <div class="target">자료구조/알고리즘 4인 스터디</div>
+      <div class="preview">매주 화/금 19시, 공대 도서관 4층 그룹스터디룸. 백준 문제 풀이.</div>
+      <div class="meta" style="margin-bottom: 10px;">
+        <span>팀장: <strong>씩씩한감자</strong></span>
+      </div>
+      <div class="meta" style="margin-bottom: 10px;">
+        <span>멤버: 똘똘한고구마, 졸린대파, 귀여운양파 (총 4명)</span>
+      </div>
+      <div class="actions">
+        <button class="btn-action reject" onclick="showToast('팀 상세 (추후 구현)')">상세</button>
+        <button class="btn-action warn" onclick="if(confirm('강제 종료?')) showToast('종료됨')">강제 종료</button>
+      </div>
+    </div>
+
+    <!-- 신고된 팀 -->
+    <div class="item-card" style="border-left: 3px solid var(--knu-orange);">
+      <div class="meta">
+        <span>👥 모집 중 · 03/15 09:00</span>
+        <span class="badge pending">신고 2건 · No-Show</span>
+      </div>
+      <div class="target">스터디 모집합니다 (반복 모집)</div>
+      <div class="meta" style="margin-bottom: 10px;">
+        <span>팀장: <strong>호빵123</strong></span>
+        <span>신고 사유: <strong style="color: var(--error);">No-Show 반복</strong></span>
+      </div>
+      <div class="meta" style="margin-bottom: 10px;">
+        <span>지원자 1명, 모집 후 약속 시간에 잠수 (이전 No-Show 2회 누적)</span>
+      </div>
+      <div class="actions">
+        <button class="btn-action reject" onclick="switchTab('reports')">신고 처리로 이동</button>
+        <button class="btn-action process" onclick="showToast('팀 삭제 + 작성자 매칭 정지')">팀 삭제 + 정지</button>
+      </div>
+    </div>
+
+    <!-- 종료 팀 -->
+    <div class="item-card" style="opacity: 0.7;">
+      <div class="meta">
+        <span>👥 종료 · 03/13 종료</span>
+        <span class="badge rejected">정상 종료</span>
+      </div>
+      <div class="target">중간고사 영어 작문 4인 스터디</div>
+      <div class="meta" style="margin-bottom: 0;">
+        <span>2주 활동 · 팀장: 똘똘한대파 · 평가 평균 4.8/5.0</span>
       </div>
     </div>
   </div>
@@ -1498,7 +1688,29 @@
     <div class="sub-head">2차 비밀번호 변경</div>
     <div class="write-form">
       <div class="form-block">
+        <label class="form-label">현재 2차 비밀번호</label>
+        <div class="pin-grid">
+          <input class="pin-cell pin-pwd" type="text" inputmode="numeric" maxlength="1" />
+          <input class="pin-cell pin-pwd" type="text" inputmode="numeric" maxlength="1" />
+          <input class="pin-cell pin-pwd" type="text" inputmode="numeric" maxlength="1" />
+          <input class="pin-cell pin-pwd" type="text" inputmode="numeric" maxlength="1" />
+          <input class="pin-cell pin-pwd" type="text" inputmode="numeric" maxlength="1" />
+          <input class="pin-cell pin-pwd" type="text" inputmode="numeric" maxlength="1" />
+        </div>
+      </div>
+      <div class="form-block">
         <label class="form-label">새 2차 비밀번호</label>
+        <div class="pin-grid">
+          <input class="pin-cell pin-pwd" type="text" inputmode="numeric" maxlength="1" />
+          <input class="pin-cell pin-pwd" type="text" inputmode="numeric" maxlength="1" />
+          <input class="pin-cell pin-pwd" type="text" inputmode="numeric" maxlength="1" />
+          <input class="pin-cell pin-pwd" type="text" inputmode="numeric" maxlength="1" />
+          <input class="pin-cell pin-pwd" type="text" inputmode="numeric" maxlength="1" />
+          <input class="pin-cell pin-pwd" type="text" inputmode="numeric" maxlength="1" />
+        </div>
+      </div>
+      <div class="form-block">
+        <label class="form-label">새 2차 비밀번호 확인</label>
         <div class="pin-grid">
           <input class="pin-cell pin-pwd" type="text" inputmode="numeric" maxlength="1" />
           <input class="pin-cell pin-pwd" type="text" inputmode="numeric" maxlength="1" />
