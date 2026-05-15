@@ -56,6 +56,7 @@
   - RPC에 `profile_exists` 분기 추가 (이미 가입된 계정 vs 닉네임 중복 구분)
   - OTP 인증 직후 profiles 체크 → 이미 가입이면 로그인 화면으로 자동 이동
   - `updateUser`의 'same password' 에러는 무시하고 RPC 진행 (자연 복구)
+- ✅ studypotato 21개 HTML 파일에 🥔 favicon 일괄 추가 (인라인 SVG)
 - ✅ profiles_enrollment_valid CHECK 제약 한글 값으로 재정의 + grade도 정리
 - ✅ 알림 메일 가입 단계 사전 중복 검사 (`is_notify_email_available` RPC)
 - ✅ done 화면 summary card에 매칭 동의 / 커뮤니티 동의 / 가입일 표시
