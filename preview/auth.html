@@ -852,14 +852,6 @@
         <a href="#" class="terms-link" onclick="event.stopPropagation();">보기</a>
       </div>
 
-      <div class="terms-row" data-consent-type="service_email" data-consent-required="true" onclick="toggleOne(this)">
-        <div class="checkbox"></div>
-        <div class="terms-text">
-          <span class="req">[필수]</span> 매칭 알림 메일 수신
-          <div style="font-size:11px; color: var(--ink-mute); margin-top: 3px; font-weight: 400;">매칭 결과를 받으려면 필요해요</div>
-        </div>
-      </div>
-
       <div class="terms-row" data-consent-type="community_email" data-consent-required="false" onclick="toggleOne(this)">
         <div class="checkbox"></div>
         <div class="terms-text">
@@ -936,10 +928,6 @@
       <div class="summary-row">
         <span class="k">알림 받을 메일</span>
         <span class="v" id="summary-notify">—</span>
-      </div>
-      <div class="summary-row">
-        <span class="k">매칭 알림</span>
-        <span class="v" style="color: var(--success);">✓ 수신 동의</span>
       </div>
       <div class="summary-row">
         <span class="k">커뮤니티/공지 알림</span>
@@ -1447,6 +1435,14 @@
         version: CONSENT_VERSION,
         consented: checked
       });
+    });
+
+    // 매칭 알림 메일 수신 동의는 화면에 표시하지 않지만,
+    // 서비스 이용을 위한 필수 동의로 자동 기록 (법적 기록 보관)
+    consents.push({
+      type: 'service_email',
+      version: CONSENT_VERSION,
+      consented: true
     });
 
     if(missingRequired){

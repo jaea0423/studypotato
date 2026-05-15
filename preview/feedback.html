@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<title>공부하는 감자 — 고객의 소리</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🥔</text></svg>">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/variable/pretendardvariable.css" />
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+  /* ========== 디자인 토큰 (다른 화면들과 동일) ========== */
+  :root{
+    --knu-blue: #0047BB;
+    --knu-blue-deep: #00347E;
+    --knu-blue-soft: #E5ECF8;
+    --knu-orange: #FE5000;
+    --knu-orange-soft: #FFE8DD;
+    --cream: #F7F3EC;
+    --paper: #FFFFFF;
+    --paper-warm: #FBF8F2;
+    --ink: #1A1A1A;
+    --ink-soft: #555E68;
+    --ink-mute: #8B95A4;
+    --line: #E8E2D4;
+    --line-soft: #F0EBDF;
+    --error: #DC3545;
+    --success: #2D7A3E;
+    --font-kr: 'Pretendard Variable', Pretendard, -apple-system, sans-serif;
+    --font-mono: 'JetBrains Mono', monospace;
+    --radius-s: 10px;
+    --radius-m: 16px;
+    --radius-l: 22px;
+  }
+
+  /* ========== 리셋 ========== */
+  *, *::before, *::after{
+    margin: 0; padding: 0; box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+  }
+  html, body{ overflow-x: hidden; max-width: 100%; width: 100%; }
+  html{ font-size: 16px; -webkit-text-size-adjust: 100%; }
+  body{
+    font-family: var(--font-kr);
+    background: var(--paper-warm);
+    color: var(--ink);
+    line-height: 1.5;
+    min-height: 100vh;
+    word-break: keep-all;
+    overflow-wrap: break-word;
+  }
+  button{ font-family: inherit; cursor: pointer; border: 0; background: none; color: inherit; }
+  input, textarea{ font-family: inherit; color: inherit; border: 0; outline: none; background: none; }
+  a{ text-decoration: none; color: inherit; }
+
+  /* ========== 모바일 컨테이너 ========== */
+  .app{
+    max-width: 480px;
+    min-height: 100vh;
+    margin: 0 auto;
+    background: var(--cream);
+    position: relative;
+    box-shadow: 0 0 40px rgba(0,0,0,0.06);
+  }
+  @media (min-width: 481px){
+    body{ background: #E8E2D4; }
+  }
+
+  /* ========== 화면 ========== */
+  .screen{
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    padding: 24px 24px 32px;
+  }
+
+  /* 상단 바 */
+  .topbar{
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 24px;
+    min-height: 36px;
+  }
+  .back-btn{
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .back-btn:active{ background: var(--line-soft); }
+  .topbar-title{
+    font-size: 17px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+  }
+
+  /* 페이지 타이틀 */
+  .page-title{
+    font-size: 24px;
+    font-weight: 800;
+    letter-spacing: -0.025em;
+    line-height: 1.25;
+    margin-bottom: 8px;
+  }
+  .page-desc{
+    font-size: 14px;
+    color: var(--ink-soft);
+    line-height: 1.55;
+    margin-bottom: 28px;
+  }
+
+  /* ========== 카테고리 칩 ========== */
+  .category-group{
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    margin-bottom: 20px;
+  }
+  .cat-chip{
+    background: var(--paper);
+    border: 1.5px solid var(--line);
+    padding: 14px 10px;
+    border-radius: var(--radius-m);
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--ink);
+    transition: all 0.15s;
+    text-align: center;
+    line-height: 1.3;
+  }
+  .cat-chip:active{ transform: scale(0.96); }
+  .cat-chip.active{
+    background: var(--knu-blue);
+    color: white;
+    border-color: var(--knu-blue);
+  }
+  .cat-chip .ico{
+    display: block;
+    font-size: 22px;
+    margin-bottom: 4px;
+    line-height: 1;
+  }
+
+  /* ========== 카테고리 안내 박스 ========== */
+  .category-guide{
+    background: var(--knu-blue-soft);
+    color: var(--knu-blue-deep);
+    border-radius: var(--radius-m);
+    padding: 14px 16px;
+    font-size: 13px;
+    line-height: 1.6;
+    margin-bottom: 24px;
+  }
+  .category-guide.warning{
+    background: var(--knu-orange-soft);
+    color: #8B4500;
+  }
+  .category-guide.success{
+    background: #DEF1E2;
+    color: #1F5A2E;
+  }
+  .category-guide strong{ font-weight: 700; }
+
+  /* ========== 폼 ========== */
+  .form-block{ margin-bottom: 20px; }
+  .form-label{
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--ink-soft);
+    margin-bottom: 8px;
+  }
+  .input-wrap{
+    position: relative;
+    background: var(--paper);
+    border: 1.5px solid var(--line);
+    border-radius: var(--radius-m);
+    transition: border-color 0.2s;
+  }
+  .input-wrap:focus-within{ border-color: var(--knu-blue); }
+  .input-wrap input{
+    width: 100%;
+    padding: 14px 16px;
+    font-size: 15px;
+    font-weight: 500;
+    background: transparent;
+  }
+  .input-wrap textarea{
+    width: 100%;
+    padding: 14px 16px;
+    font-size: 15px;
+    font-weight: 500;
+    background: transparent;
+    resize: vertical;
+    min-height: 160px;
+    line-height: 1.55;
+  }
+  .input-hint{
+    font-size: 12px;
+    color: var(--ink-mute);
+    margin-top: 8px;
+    padding: 0 4px;
+    display: flex;
+    justify-content: space-between;
+  }
+  .char-count{
+    font-family: var(--font-mono);
+  }
+  .char-count.warn{ color: var(--error); }
+
+  /* ========== 메일 안내 박스 ========== */
+  .reply-info{
+    background: var(--paper);
+    border: 1px dashed var(--line);
+    border-radius: var(--radius-m);
+    padding: 14px 16px;
+    font-size: 13px;
+    color: var(--ink-soft);
+    line-height: 1.6;
+    margin-bottom: 16px;
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+  }
+  .reply-info .ico{
+    flex-shrink: 0;
+    font-size: 16px;
+  }
+  .reply-info strong{ color: var(--ink); font-weight: 700; }
+
+  /* ========== 하단 영역 ========== */
+  .bottom-area{
+    margin-top: auto;
+    padding-top: 20px;
+  }
+  .btn-primary{
+    width: 100%;
+    background: var(--knu-blue);
+    color: white;
+    padding: 17px;
+    border-radius: var(--radius-m);
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    transition: all 0.2s;
+  }
+  .btn-primary:active{ transform: scale(0.98); background: var(--knu-blue-deep); }
+  .btn-primary:disabled{
+    background: var(--line);
+    color: var(--ink-mute);
+    cursor: not-allowed;
+  }
+</style>
+</head>
+<body>
+
+<div class="app">
+
+  <section class="screen">
+
+    <div class="topbar">
+      <button class="back-btn" onclick="history.back()">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+      </button>
+      <div class="topbar-title">고객의 소리</div>
+    </div>
+
+    <h1 class="page-title">무엇을 도와드릴까요</h1>
+    <p class="page-desc">카테고리를 골라주세요. 운영진이 검토 후 답변드릴게요.</p>
+
+    <!-- 카테고리 선택 -->
+    <div class="category-group" id="cat-group">
+      <button class="cat-chip active" data-cat="inquiry" onclick="selectCategory(this)">
+        <span class="ico">💬</span>문의
+      </button>
+      <button class="cat-chip" data-cat="report" onclick="selectCategory(this)">
+        <span class="ico">🚨</span>신고
+      </button>
+      <button class="cat-chip" data-cat="suggest" onclick="selectCategory(this)">
+        <span class="ico">💡</span>제안
+      </button>
+    </div>
+
+    <!-- 카테고리별 안내 (동적 변경) -->
+    <div class="category-guide" id="cat-guide">
+      <strong>서비스 이용 중 궁금한 점</strong>을 자유롭게 남겨주세요.<br>
+      답변까지 다소 시간이 걸릴 수 있어요. 개인 운영 서비스라 양해 부탁드려요 🙏
+    </div>
+
+    <!-- 제목 -->
+    <div class="form-block">
+      <label class="form-label">제목</label>
+      <div class="input-wrap">
+        <input type="text" id="input-title" placeholder="간단히 요약해주세요" maxlength="50">
+      </div>
+      <div class="input-hint">
+        <span></span>
+        <span class="char-count" id="title-count">0 / 50</span>
+      </div>
+    </div>
+
+    <!-- 내용 -->
+    <div class="form-block">
+      <label class="form-label">내용</label>
+      <div class="input-wrap">
+        <textarea id="input-content" placeholder="자세히 적어주실수록 빠르게 도와드릴 수 있어요" maxlength="1000"></textarea>
+      </div>
+      <div class="input-hint">
+        <span></span>
+        <span class="char-count" id="content-count">0 / 1000</span>
+      </div>
+    </div>
+
+    <!-- 답변 안내 -->
+    <div class="reply-info">
+      <span class="ico">📬</span>
+      <span>답변은 가입 시 등록하신 <strong>알림 메일</strong>로 보내드려요. 운영진이 한 명이라 답변이 늦어질 수 있어요. 미리 양해 부탁드립니다.</span>
+    </div>
+
+    <div class="bottom-area">
+      <button class="btn-primary" onclick="submitFeedback()">접수하기</button>
+    </div>
+
+  </section>
+
+</div>
+
+<script>
+  /* ========== 카테고리별 안내 문구 ========== */
+  const categoryGuides = {
+    inquiry: {
+      class: 'category-guide',
+      html: '<strong>서비스 이용 중 궁금한 점</strong>을 자유롭게 남겨주세요.<br>답변까지 다소 시간이 걸릴 수 있어요. 개인 운영 서비스라 양해 부탁드려요 🙏'
+    },
+    report: {
+      class: 'category-guide warning',
+      html: '<strong>No-Show, 부적절한 행동, 불쾌한 메시지</strong> 등을 신고해주세요.<br>운영진이 검토 후 운영 규칙에 따라 처리합니다. 모든 신고가 반영되지 않을 수 있고, 처리 결과는 별도 안내드리지 않을 수 있어요.'
+    },
+    suggest: {
+      class: 'category-guide success',
+      html: '<strong>불편한 점이나 더 개선했으면 하는 부분</strong>이 있으면 적극적으로 제안해주세요!<br>검토 후 반영될 수 있도록 노력하겠습니다 ✨'
+    }
+  };
+
+  let currentCategory = 'inquiry';
+
+  function selectCategory(btn){
+    document.querySelectorAll('#cat-group .cat-chip').forEach(c => c.classList.remove('active'));
+    btn.classList.add('active');
+    currentCategory = btn.dataset.cat;
+
+    const guide = document.getElementById('cat-guide');
+    guide.className = categoryGuides[currentCategory].class;
+    guide.innerHTML = categoryGuides[currentCategory].html;
+  }
+
+  /* ========== 글자 수 카운트 ========== */
+  const titleInput = document.getElementById('input-title');
+  const contentInput = document.getElementById('input-content');
+  const titleCount = document.getElementById('title-count');
+  const contentCount = document.getElementById('content-count');
+
+  titleInput.addEventListener('input', () => {
+    const len = titleInput.value.length;
+    titleCount.textContent = `${len} / 50`;
+    titleCount.classList.toggle('warn', len >= 50);
+  });
+
+  contentInput.addEventListener('input', () => {
+    const len = contentInput.value.length;
+    contentCount.textContent = `${len} / 1000`;
+    contentCount.classList.toggle('warn', len >= 950);
+  });
+
+  /* ========== 접수 (현재는 화면만 — 백엔드 연동은 추후) ========== */
+  function submitFeedback(){
+    const title = titleInput.value.trim();
+    const content = contentInput.value.trim();
+
+    if(!title){
+      alert('제목을 입력해주세요.');
+      titleInput.focus();
+      return;
+    }
+    if(content.length < 10){
+      alert('내용은 10자 이상 적어주세요.');
+      contentInput.focus();
+      return;
+    }
+
+    // TODO: Supabase feedback 테이블 INSERT + 운영진 알림 메일
+    console.log('[Feedback Submit]', { category: currentCategory, title, content });
+    alert('접수가 완료됐어요!\n답변은 가입 시 등록한 알림 메일로 보내드릴게요.');
+
+    // 입력 초기화
+    titleInput.value = '';
+    contentInput.value = '';
+    titleCount.textContent = '0 / 50';
+    contentCount.textContent = '0 / 1000';
+    history.back();
+  }
+</script>
+</body>
+</html>
