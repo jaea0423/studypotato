@@ -964,6 +964,26 @@
     console.error('❌ Supabase 초기화 실패:', err);
   }
 
+  // 역방향 인증 가드:
+  // 이미 로그인 + 가입 완료 상태면 가입/로그인 화면 들어오는 게 의미 없음 → dashboard로 자동 이동
+  // (단, 가입 미완성 상태는 유지 — 다시 가입 흐름 진행할 수 있도록)
+  (async () => {
+    if(!supabaseClient) return;
+    const { data: { session } } = await supabaseClient.auth.getSession();
+    if(!session) return;  // 비로그인이면 그대로
+
+    // 로그인 + profile 있으면 dashboard로
+    const { data: profile } = await supabaseClient
+      .from('profiles')
+      .select('id')
+      .eq('id', session.user.id)
+      .maybeSingle();
+    if(profile){
+      console.log('이미 가입+로그인된 계정 → dashboard로 이동');
+      location.href = 'dashboard.html';
+    }
+  })();
+
   /* ========== 상태 저장 ========== */
   const state = {
     email: '',
@@ -1165,6 +1185,19 @@
     }
   }
 
+  // 닉네임 금칙어 사전 검사 (클라이언트, 서버 보호 외 즉시 피드백용)
+  // 정식 검증은 서버 RPC가 마지막에 수행
+  function isNicknameForbidden(nickname){
+    const normalized = nickname.replace(/\s+/g, '').toLowerCase();
+    const patterns = [
+      /운영|관리자|admin|staff|official|공식|매니저|manager|공지|notice/,
+      /공부하는감자|studypotato|감자운영|감자공식|감자관리/,
+      /씨발|시발|ㅅㅂ|존나|ㅈㄴ|좆|닥쳐|개새|병신|fuck|shit|asshole/,
+      /섹스|야동|자위|강간|porn|sex/
+    ];
+    return patterns.some(p => p.test(normalized));
+  }
+
   // 닉네임 중복확인 — Supabase RPC 함수 호출 (RLS 우회 안전)
   async function checkNickname(){
     const input = document.getElementById('input-nickname');
@@ -1180,6 +1213,13 @@
     }
     if(value.length > 10){
       hint.textContent = '닉네임은 10자 이하여야 해요.';
+      hint.classList.add('error');
+      hint.classList.remove('success');
+      return;
+    }
+    // 금칙어 사전 검사 (운영 사칭 / 욕설 / 19금)
+    if(isNicknameForbidden(value)){
+      hint.textContent = '운영자 사칭이나 부적절한 단어가 포함된 닉네임이에요.';
       hint.classList.add('error');
       hint.classList.remove('success');
       return;
@@ -1499,6 +1539,9 @@
         const msg = (rpcError.message || '').toLowerCase();
         if(msg.includes('nickname_taken')){
           alert('이미 사용 중인 닉네임이에요. 닉네임 단계로 돌아갈게요.');
+          go('signup-profile');
+        } else if(msg.includes('nickname_forbidden')){
+          alert('운영자 사칭이나 부적절한 단어가 포함된 닉네임이에요. 다른 닉네임으로 바꿔주세요.');
           go('signup-profile');
         } else if(msg.includes('notify_email_taken')){
           alert('이미 다른 계정에서 쓰고 있는 알림 메일이에요. 알림 메일 단계로 돌아갈게요.');

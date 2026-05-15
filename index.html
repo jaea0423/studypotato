@@ -671,7 +671,7 @@
       <div class="progress-bar-fill" id="progress-fill"></div>
     </div>
     <p class="progress-hint" id="progress-hint">
-      <span id="remaining">100</span>명만 더 모이면 서비스가 오픈돼요.<br>사전신청 후 가장 먼저 알림을 받아보세요!
+      <span id="remaining">100</span>명만 더 모이면 <strong>3일 후 정식 오픈</strong>해요.<br>그 사이에 친구들에게 알려서 더 많은 감자와 함께 시작해요!
     </p>
   </div>
   <!-- ========== CTA ========== -->
@@ -739,7 +739,7 @@
   <section class="share-section">
     <div class="share-emoji">📣</div>
     <h3>같이 공부할 <em>감자</em>가<br>많을수록 좋아요</h3>
-    <p>친구에게도 알려주세요.<br>100명이 빨리 모일수록 빨리 만나요!</p>
+    <p>친구에게도 알려주세요.<br>100명이 모이면 <strong>3일 후 정식 오픈</strong>해요!</p>
     <button class="share-btn" onclick="shareLink()">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/>
@@ -945,10 +945,8 @@
 
     if (count >= total) {
       document.getElementById('progress-hint').innerHTML =
-        '🎉 사전신청 마감! 곧 서비스가 오픈됩니다.';
-      const ctaBtn = document.getElementById('cta-btn');
-      ctaBtn.classList.add('done');
-      ctaBtn.innerHTML = '신청 마감되었어요';
+        '🎉 100명 달성! <strong>3일 후 정식 오픈</strong>해요. 그 사이에도 사전신청은 계속 받아요!';
+      // 마감 처리는 하지 않음 — 100명 도달 후에도 추가 가입 받기 (홍보 기간)
     }
   }
 

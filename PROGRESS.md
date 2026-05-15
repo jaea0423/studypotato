@@ -68,6 +68,21 @@
   - 로그인 화면: suffix 제거, 자유 입력 (웹메일/알림 메일 둘 다 OK)
   - 알림 메일 입력 화면에 "로그인 가능, 신중히 입력" 안내
   - 보안: 비밀번호 재설정 등 민감 작업은 웹메일 OTP만 사용 (예정)
+- ✅ 100명 사전신청 카피 변경 ("3일 후 정식 오픈" + 100명 도달해도 가입 계속 받음)
+- ✅ 닉네임 금칙어 검증
+  - 클라이언트 사전 검사 (`isNicknameForbidden`) — 즉시 피드백
+  - 서버 RPC `is_nickname_forbidden` + create_user_profile에서 차단
+  - 차단 카테고리: 운영 사칭 / 서비스명 사칭 / 욕설 / 19금
+  - rules.html에 닉네임 규칙 섹션 추가
+  - finishSignup `nickname_forbidden` 분기 추가
+- ✅ auth.html 역방향 인증 가드 (로그인+가입 완료 상태면 dashboard 자동 이동)
+- ✅ dashboard Supabase 연동 Phase 1
+  - SDK + supabaseClient 초기화
+  - `bootAuth()`: 세션 없으면 auth.html로 강제 이동
+  - profile 미존재 시 (가입 미완성) auth로 안내
+  - `fillUserInfo()`: 홈 헤더 인사말 + 프로필 탭 정보 5종 자동 채움
+  - `logout()`: 진짜 signOut + auth로 이동
+  - 매칭/팀/커뮤니티 데이터 연동은 Phase 2 (백엔드 만든 후)
 - ✅ 매칭 알림 동의 항목 가입 화면에서 제거 (필수라 표시 X)
   - finishSignup이 service_email은 자동으로 consents에 추가 (법적 동의 기록 유지)
   - done 화면 summary card에서도 매칭 알림 행 제거
@@ -149,6 +164,19 @@ Authentication → Providers → Email 에서 두 값 모두 변경
 
 ### 그 이후
 - 다른 이메일 템플릿 한글화 (Reset Password, Change Email)
+
+### 🚀 정식 출시 전환 작업
+- studypotato.com 루트(`index.html`)를 사전신청 페이지 → auth.html로 교체
+- 비로그인 상태: auth.html (가입/로그인 화면)
+- 로그인 + 가입 완료: dashboard.html 자동 이동 (역방향 가드 이미 적용됨)
+- 사전신청 페이지는 별도 경로(`/early-access` 등)로 옮기거나 삭제
+
+### ⚠️ 정식 출시 전 법적 체크 (정보통신망법 §50)
+- 거래성 메일 (OTP, 가입환영, 매칭결과, 비번변경, 신고결과 등) — 동의 불필요 ✓
+- **광고성 메일 (커뮤니티/공지) 발송 시 필수**:
+  - [ ] 메일 제목 시작에 `(광고)` 표기
+  - [ ] 메일 하단에 1-clik 수신거부 링크 (현재 알림 설정 토글만 있음)
+  - [ ] 야간(21시~08시) 광고 발송 시 별도 동의 받기 (또는 발송 시간 제한)
 - **[보안 검토]** 6자리 숫자 PIN은 100만 조합이라 약함.
   로그인 시도 횟수 제한 + rate limiting 외에 정식 출시 전 추가 방어 검토 필요
   (예: 잠금 후 메일 인증으로만 해제, 동일 IP 다중 시도 차단)
