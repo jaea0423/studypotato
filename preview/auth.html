@@ -572,12 +572,12 @@
     <div class="form-block">
       <label class="form-label">비밀번호</label>
       <div class="pin-grid">
-        <input class="pin-cell" type="password" inputmode="numeric" maxlength="1" />
-        <input class="pin-cell" type="password" inputmode="numeric" maxlength="1" />
-        <input class="pin-cell" type="password" inputmode="numeric" maxlength="1" />
-        <input class="pin-cell" type="password" inputmode="numeric" maxlength="1" />
-        <input class="pin-cell" type="password" inputmode="numeric" maxlength="1" />
-        <input class="pin-cell" type="password" inputmode="numeric" maxlength="1" />
+        <input class="pin-cell pin-pwd" type="text" inputmode="numeric" maxlength="1" />
+        <input class="pin-cell pin-pwd" type="text" inputmode="numeric" maxlength="1" />
+        <input class="pin-cell pin-pwd" type="text" inputmode="numeric" maxlength="1" />
+        <input class="pin-cell pin-pwd" type="text" inputmode="numeric" maxlength="1" />
+        <input class="pin-cell pin-pwd" type="text" inputmode="numeric" maxlength="1" />
+        <input class="pin-cell pin-pwd" type="text" inputmode="numeric" maxlength="1" />
       </div>
       <div class="input-hint">5회 틀리면 메일 인증으로 잠금을 풀 수 있어요.</div>
     </div>
@@ -628,6 +628,11 @@
     <h1 class="page-title">메일함을 확인해주세요</h1>
     <p class="page-desc"><strong id="verify-email-display" style="color:var(--ink);">아직 입력 안 됨</strong>로<br>6자리 인증코드를 보냈어요.</p>
 
+    <div class="info-box" style="margin-bottom: 24px;">
+      <span class="ico">⏱️</span>
+      <span>강원대학교 웹메일은 도착까지 <strong>1~2분</strong> 걸릴 수 있어요.<br>스팸함도 함께 확인해주세요.</span>
+    </div>
+
     <div class="form-block">
       <label class="form-label">인증코드</label>
       <div class="pin-grid">
@@ -674,12 +679,12 @@
     <div class="form-block">
       <label class="form-label">비밀번호 등록</label>
       <div class="pin-grid" id="pin-set-1">
-        <input class="pin-cell" type="password" inputmode="numeric" maxlength="1" />
-        <input class="pin-cell" type="password" inputmode="numeric" maxlength="1" />
-        <input class="pin-cell" type="password" inputmode="numeric" maxlength="1" />
-        <input class="pin-cell" type="password" inputmode="numeric" maxlength="1" />
-        <input class="pin-cell" type="password" inputmode="numeric" maxlength="1" />
-        <input class="pin-cell" type="password" inputmode="numeric" maxlength="1" />
+        <input class="pin-cell pin-pwd" type="text" inputmode="numeric" maxlength="1" />
+        <input class="pin-cell pin-pwd" type="text" inputmode="numeric" maxlength="1" />
+        <input class="pin-cell pin-pwd" type="text" inputmode="numeric" maxlength="1" />
+        <input class="pin-cell pin-pwd" type="text" inputmode="numeric" maxlength="1" />
+        <input class="pin-cell pin-pwd" type="text" inputmode="numeric" maxlength="1" />
+        <input class="pin-cell pin-pwd" type="text" inputmode="numeric" maxlength="1" />
       </div>
       <div class="input-hint">숫자 6자리. 로그인할 때 사용해요.</div>
     </div>
@@ -687,12 +692,12 @@
     <div class="form-block">
       <label class="form-label">비밀번호 확인</label>
       <div class="pin-grid" id="pin-set-2">
-        <input class="pin-cell" type="password" inputmode="numeric" maxlength="1" />
-        <input class="pin-cell" type="password" inputmode="numeric" maxlength="1" />
-        <input class="pin-cell" type="password" inputmode="numeric" maxlength="1" />
-        <input class="pin-cell" type="password" inputmode="numeric" maxlength="1" />
-        <input class="pin-cell" type="password" inputmode="numeric" maxlength="1" />
-        <input class="pin-cell" type="password" inputmode="numeric" maxlength="1" />
+        <input class="pin-cell pin-pwd" type="text" inputmode="numeric" maxlength="1" />
+        <input class="pin-cell pin-pwd" type="text" inputmode="numeric" maxlength="1" />
+        <input class="pin-cell pin-pwd" type="text" inputmode="numeric" maxlength="1" />
+        <input class="pin-cell pin-pwd" type="text" inputmode="numeric" maxlength="1" />
+        <input class="pin-cell pin-pwd" type="text" inputmode="numeric" maxlength="1" />
+        <input class="pin-cell pin-pwd" type="text" inputmode="numeric" maxlength="1" />
       </div>
       <div class="input-hint" id="pin-confirm-hint">위에서 입력한 비밀번호와 같게 입력해주세요.</div>
     </div>
@@ -869,7 +874,7 @@
   <section class="screen" id="screen-done">
     <div class="done-emoji">🥔</div>
     <h1 class="done-title">환영해요, <span id="done-nickname">감자</span> 님!</h1>
-    <p class="done-desc">같이 공부할 사람을 찾으러 가볼까요.<br>매칭은 매일 12시와 자정에 진행돼요.</p>
+    <p class="done-desc">같이 공부할 사람을 찾으러 가볼까요.</p>
 
     <div class="summary-card">
       <div class="summary-row">
@@ -1086,10 +1091,18 @@
     }
   });
 
+  // PIN 셀의 실제 값 읽기 — 마스킹된 비밀번호 셀은 dataset.actualValue 사용
+  function readPinValue(cell){
+    if(cell.classList.contains('pin-pwd')){
+      return cell.dataset.actualValue || '';
+    }
+    return cell.value || '';
+  }
+
   // 비밀번호 두 칸 실시간 일치 검사
   function checkPinMatch(){
-    const pin1 = Array.from(document.querySelectorAll('#pin-set-1 .pin-cell')).map(c => c.value).join('');
-    const pin2 = Array.from(document.querySelectorAll('#pin-set-2 .pin-cell')).map(c => c.value).join('');
+    const pin1 = Array.from(document.querySelectorAll('#pin-set-1 .pin-cell')).map(readPinValue).join('');
+    const pin2 = Array.from(document.querySelectorAll('#pin-set-2 .pin-cell')).map(readPinValue).join('');
     const hint = document.getElementById('pin-confirm-hint');
     if(!hint) return;
 
@@ -1112,8 +1125,8 @@
   function submitNickname(){
     const nickname = document.getElementById('input-nickname').value.trim();
     const btn = document.getElementById('nickname-check-btn');
-    const pin1 = Array.from(document.querySelectorAll('#pin-set-1 .pin-cell')).map(c => c.value).join('');
-    const pin2 = Array.from(document.querySelectorAll('#pin-set-2 .pin-cell')).map(c => c.value).join('');
+    const pin1 = Array.from(document.querySelectorAll('#pin-set-1 .pin-cell')).map(readPinValue).join('');
+    const pin2 = Array.from(document.querySelectorAll('#pin-set-2 .pin-cell')).map(readPinValue).join('');
 
     if(!nickname){
       alert('닉네임을 입력해주세요.');
@@ -1323,17 +1336,39 @@
     go('landing');
   }
 
-  /* ========== PIN 셀 자동 이동 ========== */
+  /* ========== PIN 셀 자동 이동 + 숫자만 허용 + 비밀번호 즉시 마스킹 ========== */
   document.addEventListener('input', e => {
     if(e.target.classList.contains('pin-cell')){
       const cell = e.target;
+      const isPwd = cell.classList.contains('pin-pwd');
+
+      // 1) 마스킹 문자(●)는 입력값에서 제외하고 숫자만 추출
+      //    한글/영문/특수문자 차단 + ● 자체가 다시 입력으로 들어오는 경우 방지
+      const cleaned = cell.value.replace(/[^0-9]/g, '');
+      if(cell.value !== cleaned){
+        cell.value = cleaned;
+      }
+
       if(cell.value){
+        // 실제 값을 dataset에 저장 (마스킹돼도 검증 시 사용)
+        cell.dataset.actualValue = cell.value;
         cell.classList.add('filled');
+
         const next = cell.nextElementSibling;
-        if(next && next.classList.contains('pin-cell')) next.focus();
+        const hasNext = next && next.classList.contains('pin-cell');
+
+        if(isPwd){
+          // 비밀번호 셀은 즉시 ●로 마스킹
+          // (다음 셀이 있든 없든 — 마지막 셀 포함 전부 즉시 마스킹)
+          cell.value = '●';
+        }
+
+        if(hasNext) next.focus();
       } else {
         cell.classList.remove('filled');
+        delete cell.dataset.actualValue;
       }
+
       // 비밀번호 등록/확인 그리드면 일치 검사
       const parentId = cell.parentElement.id;
       if(parentId === 'pin-set-1' || parentId === 'pin-set-2'){
@@ -1342,18 +1377,47 @@
     }
   });
 
+  // 모든 PIN 셀에 pattern="\d*" 추가 (iOS Safari가 숫자 키패드만 띄우도록 보장)
+  document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('.pin-cell').forEach(c => {
+      c.setAttribute('pattern', '\\d*');
+      c.setAttribute('autocomplete', 'one-time-code');
+    });
+  });
+
   document.addEventListener('keydown', e => {
-    if(e.target.classList.contains('pin-cell') && e.key === 'Backspace' && !e.target.value){
-      const prev = e.target.previousElementSibling;
-      if(prev && prev.classList.contains('pin-cell')){
-        prev.focus();
-        prev.value = '';
-        prev.classList.remove('filled');
+    if(e.target.classList.contains('pin-cell') && e.key === 'Backspace'){
+      const cell = e.target;
+      // 현재 셀이 비어있으면 이전 셀로 이동해서 클리어
+      // (마스킹된 비밀번호 셀은 cell.value === '●'이지만 사실상 빈 동작은 dataset 기준)
+      const isEmpty = cell.classList.contains('pin-pwd')
+        ? !cell.dataset.actualValue
+        : !cell.value;
+
+      if(isEmpty){
+        const prev = cell.previousElementSibling;
+        if(prev && prev.classList.contains('pin-cell')){
+          prev.focus();
+          prev.value = '';
+          delete prev.dataset.actualValue;
+          prev.classList.remove('filled');
+        }
+      } else if(cell.classList.contains('pin-pwd') && cell.value === '●'){
+        // 마스킹된 비밀번호 셀에서 backspace → 즉시 비우고 dataset도 제거
+        e.preventDefault();
+        cell.value = '';
+        delete cell.dataset.actualValue;
+        cell.classList.remove('filled');
+        // 비밀번호 일치 재검사
+        const parentId = cell.parentElement.id;
+        if(parentId === 'pin-set-1' || parentId === 'pin-set-2'){
+          checkPinMatch();
+        }
       }
     }
   });
 
-  /* ========== 타이머 (5분 카운트다운) ========== */
+  /* ========== 타이머 (5분 카운트다운, Supabase OTP Expiration과 일치) ========== */
   let timerInterval = null;
   let timerSeconds = 300;
 

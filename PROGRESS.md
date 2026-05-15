@@ -44,7 +44,25 @@
 - ✅ 5-2: OTP 검증 (verifyOtp)
 - ✅ 5-3: 닉네임 중복확인 (RPC) + 비밀번호(PIN 6자리)
 - ✅ 5-4: 학년/재학상태/출생연도 + **학과 입력 필드 추가** (Option A)
-- ✅ OTP 6자리 / 5분 만료 설정
+- ✅ OTP 6자리 / 5분 만료 설정 (Supabase Expiration 300 유지)
+- ✅ PIN 셀 영문/한글 입력 차단 + iOS 숫자 키패드 보장
+- ✅ 인증 화면에 메일 도착 지연 안내
+- ✅ 비밀번호 PIN 즉시 마스킹 (type=text + ● 직접 치환, 실제 값은 dataset.actualValue)
+
+---
+
+## 🔍 현재 진단 중
+
+### 메일 지연 (1분 30초)
+원인 후보 (확률 순):
+1. **그레이리스팅** — 강원대 메일 서버가 새 발신자 1차 거부, 재시도 시 수락. 두 번째 메일은 빨라짐
+2. **DNS 인증 미완료** — Resend Domains에서 SPF/DKIM/DMARC 모두 Verified 상태인지 확인 필요
+3. **평판 낮음** — 신규 도메인이라 시간 지나며 자연 해결
+
+진단 액션:
+- [ ] 두 번째 메일 속도 측정 (그레이리스팅 판정)
+- [ ] Resend → Domains → studypotato.com Verified 확인
+- [ ] 받은 메일 원본 보기 → Received 헤더 시간 도장 분석
 - ✅ RPC `create_user_profile` (profiles + consents 트랜잭션 묶음)
 - ✅ 5-5: `finishSignup()` 실제 Supabase 저장 — updateUser(password) + RPC 호출 + 에러 분기
 - ✅ 약관 화면 6개 항목 (필수 5 + 선택 1) + data-consent-type 식별자
@@ -88,6 +106,9 @@ Authentication → Providers → Email 에서 두 값 모두 변경
 
 ### 그 이후
 - 다른 이메일 템플릿 한글화 (Reset Password, Change Email)
+- **[보안 검토]** 6자리 숫자 PIN은 100만 조합이라 약함.
+  로그인 시도 횟수 제한 + rate limiting 외에 정식 출시 전 추가 방어 검토 필요
+  (예: 잠금 후 메일 인증으로만 해제, 동일 IP 다중 시도 차단)
 - **사전신청 완료 자동 메일** (studypotato.com 메인)
   - 내용: "사전신청 완료 / 6개월간 보관 / 정식 출시 시 알림 / 감사합니다"
   - 구현 옵션: Supabase Edge Function + Resend API, 또는 DB 트리거 + pg_net
