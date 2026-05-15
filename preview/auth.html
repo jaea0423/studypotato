@@ -778,7 +778,7 @@
 
     <div class="info-box">
       <span class="ico">📬</span>
-      <span>강원대학교 웹메일은 자주 확인하지 않는 분이 많아요.<br>네이버, 구글 등 평소 쓰시는 메일을 추천해요.</span>
+      <span>강원대학교 웹메일은 자주 확인하지 않는 분이 많아요.<br>네이버, 구글 등 평소 쓰시는 메일을 추천해요.<br><span style="opacity: 0.85; font-size: 12px;">(자주 확인하신다면 강원대 웹메일도 사용 가능해요)</span></span>
     </div>
 
     <div class="info-box" style="background: var(--knu-blue-soft); color: var(--knu-blue); margin-bottom: 24px;">
@@ -875,6 +875,30 @@
 
     <div class="bottom-area">
       <button class="btn-primary" onclick="finishSignup()">가입 완료하기</button>
+    </div>
+  </section>
+
+  <!-- ========== 이미 가입된 메일 안내 (가입 흐름 도중 차단) ========== -->
+  <section class="screen" id="screen-already-registered">
+    <div class="topbar">
+      <button class="back-btn" onclick="go('signup-email')">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+      </button>
+    </div>
+
+    <div style="text-align: center; padding-top: 32px; flex: 1;">
+      <div style="font-size: 72px; margin-bottom: 20px;">👋</div>
+      <h1 class="page-title" style="text-align: center;">이미 가입된 메일이에요</h1>
+      <p class="page-desc" style="text-align: center;"><strong id="already-email" style="color: var(--ink);">—</strong>로<br>이미 가입을 완료하셨어요!</p>
+
+      <div style="background: var(--knu-blue-soft); border-radius: var(--radius-m); padding: 16px; margin-bottom: 24px; font-size: 13px; color: var(--knu-blue); text-align: left; line-height: 1.6;">
+        💡 같은 메일로 두 계정을 만들 수는 없어요.<br>로그인하시거나, 비밀번호를 잊으셨다면 비밀번호 찾기를 이용해주세요.
+      </div>
+    </div>
+
+    <div class="bottom-area">
+      <button class="btn-primary" onclick="goToLoginWithEmail()">로그인하러 가기</button>
+      <button class="btn-text" onclick="alert('비밀번호 찾기는 곧 추가될 예정이에요!')">비밀번호를 잊으셨나요? <strong>찾기 →</strong></button>
     </div>
   </section>
 
@@ -1378,6 +1402,25 @@
     }
   }
 
+  // 회원가입 환영 메일 발송 (Edge Function 호출, fire-and-forget)
+  // 실패해도 가입은 이미 성공한 상태이므로 사용자에게 알리지 않음
+  async function sendWelcomeEmail(email, nickname){
+    if(!supabaseClient || !email) return;
+    try {
+      const { data, error } = await supabaseClient.functions.invoke(
+        'send-welcome-email',
+        { body: { email, nickname } }
+      );
+      if(error){
+        console.error('환영 메일 발송 실패:', error);
+        return;
+      }
+      console.log('✓ 환영 메일 발송 완료:', data);
+    } catch(err){
+      console.error('환영 메일 발송 중 오류:', err);
+    }
+  }
+
   // 약관 정책 버전 (운영정책 변경 시 이 값을 올림 → 재동의 받을 수 있음)
   const CONSENT_VERSION = '2026-05-15';
 
@@ -1465,11 +1508,9 @@
           alert('이미 다른 계정에서 쓰고 있는 알림 메일이에요. 알림 메일 단계로 돌아갈게요.');
           go('signup-notify');
         } else if(msg.includes('profile_exists')){
-          alert('이미 가입이 완료된 계정이에요. 로그인 화면으로 이동할게요.');
-          // 로그인 화면 메일 input 미리 채우기
-          const loginEmailInput = document.getElementById('input-login-email');
-          if(loginEmailInput) loginEmailInput.value = state.email.replace('@kangwon.ac.kr', '');
-          go('login');
+          // 이미 가입된 메일 — 별도 화면으로
+          document.getElementById('already-email').textContent = state.email;
+          go('already-registered');
         } else if(msg.includes('not_authenticated')){
           alert('인증 세션이 만료됐어요. 처음부터 다시 시도해주세요.');
           go('signup-email');
@@ -1480,6 +1521,10 @@
       }
 
       console.log('✓ 가입 완료. user_id:', userId);
+
+      // 환영 메일 발송 (fire-and-forget — 실패해도 가입에 영향 없음)
+      // 알림 메일로 발송 (강원대 웹메일 X)
+      sendWelcomeEmail(state.notifyEmail, state.nickname);
 
       // 5. 완료 화면 채우기
       document.getElementById('done-nickname').textContent = state.nickname || '감자';
@@ -1517,6 +1562,23 @@
       btn.disabled = false;
       btn.textContent = originalText;
     }
+  }
+
+  // 이미 가입된 메일 화면 → 로그인 화면 이동 (메일 미리 채움)
+  function goToLoginWithEmail(){
+    const loginEmailInput = document.getElementById('input-login-email');
+    const loginEmailSuffix = document.getElementById('login-email-suffix');
+    if(loginEmailInput && state.email){
+      // 강원대 웹메일이면 아이디만, 다른 도메인이면 그대로
+      if(state.email.endsWith('@kangwon.ac.kr')){
+        loginEmailInput.value = state.email.replace('@kangwon.ac.kr', '');
+        if(loginEmailSuffix) loginEmailSuffix.style.display = '';
+      } else {
+        loginEmailInput.value = state.email;
+        if(loginEmailSuffix) loginEmailSuffix.style.display = 'none';
+      }
+    }
+    go('login');
   }
 
   function resetAll(){
@@ -1783,12 +1845,10 @@
         console.warn('가입 여부 확인 실패(무시하고 진행):', chkError);
       }
       if(existing){
-        alert('이미 가입이 완료된 계정이에요. 로그인 화면으로 이동할게요.');
+        // 이미 가입된 메일이면 별도 화면으로 (alert 대신)
+        document.getElementById('already-email').textContent = state.email;
         stopTimer();
-        // 로그인 화면 메일 input 미리 채워두기
-        const loginEmailInput = document.getElementById('input-login-email');
-        if(loginEmailInput) loginEmailInput.value = state.email.replace('@kangwon.ac.kr', '');
-        go('login');
+        go('already-registered');
         return;
       }
 

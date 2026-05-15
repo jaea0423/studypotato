@@ -68,6 +68,14 @@
   - 로그인 화면: suffix 제거, 자유 입력 (웹메일/알림 메일 둘 다 OK)
   - 알림 메일 입력 화면에 "로그인 가능, 신중히 입력" 안내
   - 보안: 비밀번호 재설정 등 민감 작업은 웹메일 OTP만 사용 (예정)
+- ✅ 이미 가입된 메일 전용 화면 (alert → screen-already-registered)
+  - "로그인하러 가기" 버튼으로 메일 자동 채움
+  - "비밀번호 찾기" 자리는 마련됨 (실제 화면은 5-6-C에서)
+- ✅ 회원가입 환영 메일 자동 발송
+  - Edge Function: `supabase/functions/send-welcome-email/index.ts`
+  - 알림 메일로 발송 (강원대 웹메일 X)
+  - `nickname` 동적 삽입 + 시작하기 버튼
+- ✅ 알림 메일 입력 화면에 "강원대 웹메일도 사용 가능" 안내 추가
 - ✅ 사전신청 완료 안내 메일 자동 발송
   - Edge Function: `supabase/functions/send-pre-register-email/index.ts`
   - Resend API 호출 + 한글 디자인 메일 본문
