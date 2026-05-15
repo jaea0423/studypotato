@@ -559,14 +559,15 @@
     </div>
 
     <h1 class="page-title">다시 오셨군요 👋</h1>
-    <p class="page-desc">강원대학교 웹메일과 비밀번호로 들어가세요.</p>
+    <p class="page-desc">강원대 웹메일이나 가입 시 등록한<br>알림 메일로 로그인할 수 있어요.</p>
 
     <div class="form-block">
-      <label class="form-label">강원대학교 웹메일</label>
+      <label class="form-label">메일 주소</label>
       <div class="input-wrap">
-        <input type="text" id="input-login-email" placeholder="아이디 입력" inputmode="email" autocomplete="username">
-        <span class="suffix">@kangwon.ac.kr</span>
+        <input type="text" id="input-login-email" placeholder="아이디 또는 메일" inputmode="email" autocomplete="username">
+        <span class="suffix" id="login-email-suffix">@kangwon.ac.kr</span>
       </div>
+      <div class="input-hint">강원대 웹메일은 아이디만, 다른 메일은 <strong>@</strong>를 직접 입력</div>
     </div>
 
     <div class="form-block">
@@ -778,6 +779,11 @@
       <span>강원대학교 웹메일은 자주 확인하지 않는 분이 많아요.<br>네이버, 구글 등 평소 쓰시는 메일을 추천해요.</span>
     </div>
 
+    <div class="info-box" style="background: var(--knu-blue-soft); color: var(--knu-blue); margin-bottom: 24px;">
+      <span class="ico">🔑</span>
+      <span><strong>이 메일로도 로그인이 가능해요.</strong><br>웹메일 아이디가 잘 기억 안 날 때 편하게 들어올 수 있어요. 신중히 입력해주세요. <em>(비밀번호 재설정 등 민감 작업은 웹메일로만 가능)</em></span>
+    </div>
+
     <div class="form-block">
       <label class="form-label">알림 받을 메일 주소</label>
       <div class="input-wrap">
@@ -906,8 +912,16 @@
         <span class="v" id="summary-notify">—</span>
       </div>
       <div class="summary-row">
+        <span class="k">매칭 알림</span>
+        <span class="v" style="color: var(--success);">✓ 수신 동의</span>
+      </div>
+      <div class="summary-row">
+        <span class="k">커뮤니티/공지 알림</span>
+        <span class="v" id="summary-community">—</span>
+      </div>
+      <div class="summary-row">
         <span class="k">가입일</span>
-        <span class="v">2026.05.13</span>
+        <span class="v" id="summary-joined">—</span>
       </div>
     </div>
 
@@ -970,23 +984,40 @@
       return;
     }
 
-    const emailPrefix = document.getElementById('input-login-email').value.trim();
+    const rawInput = document.getElementById('input-login-email').value.trim().toLowerCase();
     const pinCells = document.querySelectorAll('#pin-login .pin-cell');
     // 마스킹된 셀이라 readPinValue로 실제 값 추출
     const password = Array.from(pinCells).map(readPinValue).join('');
     const hint = document.getElementById('login-hint');
 
     // 입력 검증
-    if(!emailPrefix){
-      alert('웹메일 아이디를 입력해주세요.');
-      return;
-    }
-    if(password.length !== 6 || !/^\d{6}$/.test(password)){
-      alert('비밀번호 6자리를 입력해주세요.');
+    if(!rawInput){
+      hint.textContent = '메일 주소를 입력해주세요.';
+      hint.classList.add('error');
       return;
     }
 
-    const fullEmail = emailPrefix + '@kangwon.ac.kr';
+    // @ 포함 여부에 따라 입력 처리:
+    // - 포함: 사용자가 도메인까지 직접 입력함 → 그대로 사용 + 메일 형식 검증
+    // - 미포함: 아이디만 입력 → 강원대 웹메일로 가정하고 suffix 추가
+    let inputValue;
+    if(rawInput.includes('@')){
+      if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(rawInput)){
+        hint.textContent = '올바른 메일 주소 형식이 아니에요.';
+        hint.classList.add('error');
+        return;
+      }
+      inputValue = rawInput;
+    } else {
+      // 아이디만 → 강원대 웹메일
+      inputValue = rawInput + '@kangwon.ac.kr';
+    }
+
+    if(password.length !== 6 || !/^\d{6}$/.test(password)){
+      hint.textContent = '비밀번호 6자리를 입력해주세요.';
+      hint.classList.add('error');
+      return;
+    }
 
     // 버튼 잠금
     const btn = document.querySelector('#screen-login .btn-primary');
@@ -996,8 +1027,34 @@
     hint.classList.remove('error');
 
     try {
+      // 입력이 알림 메일이면 RPC로 진짜 인증용 웹메일로 변환
+      // (강원대 웹메일이면 RPC가 그대로 반환, 알림 메일이면 lookup)
+      const { data: resolvedEmail, error: rpcError } = await supabaseClient.rpc(
+        'resolve_login_email',
+        { p_input: inputValue }
+      );
+
+      if(rpcError){
+        console.error('메일 변환 실패:', rpcError);
+        hint.textContent = '서버 오류가 발생했어요. 잠시 후 다시 시도해주세요.';
+        hint.classList.add('error');
+        return;
+      }
+      if(!resolvedEmail){
+        // 알림 메일로 가입한 사용자가 없음
+        hint.textContent = '해당 메일로 가입된 계정이 없어요.';
+        hint.classList.add('error');
+        // 비밀번호 클리어 (메일이 잘못된 거니 비번 노출 위험 줄임)
+        pinCells.forEach(c => {
+          c.value = '';
+          delete c.dataset.actualValue;
+          c.classList.remove('filled');
+        });
+        return;
+      }
+
       const { data, error } = await supabaseClient.auth.signInWithPassword({
-        email: fullEmail,
+        email: resolvedEmail,
         password: password
       });
 
@@ -1277,14 +1334,46 @@
     go('signup-notify');
   }
 
-  function submitNotify(){
-    const input = document.getElementById('input-notify-email').value.trim();
+  async function submitNotify(){
+    const input = document.getElementById('input-notify-email').value.trim().toLowerCase();
     if(!input){
       alert('알림 받을 메일을 입력해주세요.');
       return;
     }
-    state.notifyEmail = input;
-    go('signup-terms');
+    // 일반 메일 형식 검증
+    if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(input)){
+      alert('올바른 메일 형식이 아니에요.');
+      return;
+    }
+    if(!supabaseClient){
+      alert('서버 연결을 준비 중이에요.');
+      return;
+    }
+
+    const btn = document.querySelector('#screen-signup-notify .btn-primary');
+    const originalText = btn.textContent;
+    btn.disabled = true;
+    btn.textContent = '확인 중...';
+
+    try {
+      // 알림 메일 중복 사전 검사 (가입 마지막에 거부당해서 짜증나는 일 방지)
+      const { data: available, error } = await supabaseClient.rpc(
+        'is_notify_email_available',
+        { check_email: input }
+      );
+      if(error){
+        console.warn('알림 메일 검사 실패(무시하고 진행):', error);
+        // 검사 실패해도 일단 진행 — 가입 시점에서 다시 잡힘
+      } else if(available === false){
+        alert('이미 다른 계정에서 사용 중인 알림 메일이에요. 다른 메일을 입력해주세요.');
+        return;
+      }
+      state.notifyEmail = input;
+      go('signup-terms');
+    } finally {
+      btn.disabled = false;
+      btn.textContent = originalText;
+    }
   }
 
   // 약관 정책 버전 (운영정책 변경 시 이 값을 올림 → 재동의 받을 수 있음)
@@ -1370,6 +1459,9 @@
         if(msg.includes('nickname_taken')){
           alert('이미 사용 중인 닉네임이에요. 닉네임 단계로 돌아갈게요.');
           go('signup-profile');
+        } else if(msg.includes('notify_email_taken')){
+          alert('이미 다른 계정에서 쓰고 있는 알림 메일이에요. 알림 메일 단계로 돌아갈게요.');
+          go('signup-notify');
         } else if(msg.includes('profile_exists')){
           alert('이미 가입이 완료된 계정이에요. 로그인 화면으로 이동할게요.');
           // 로그인 화면 메일 input 미리 채우기
@@ -1396,6 +1488,25 @@
       document.getElementById('summary-birth').textContent = state.birthYear ? state.birthYear + '년' : '—';
       document.getElementById('summary-major').textContent = state.major || '—';
       document.getElementById('summary-notify').textContent = state.notifyEmail || '—';
+
+      // 커뮤니티 알림 동의 여부 (선택 동의)
+      const communityConsent = consents.find(c => c.type === 'community_email');
+      const communityEl = document.getElementById('summary-community');
+      if(communityConsent && communityConsent.consented){
+        communityEl.textContent = '✓ 수신 동의';
+        communityEl.style.color = 'var(--success)';
+      } else {
+        communityEl.textContent = '✗ 수신 안 함';
+        communityEl.style.color = 'var(--ink-mute)';
+      }
+
+      // 가입일 (오늘 날짜)
+      const today = new Date();
+      const yyyy = today.getFullYear();
+      const mm = String(today.getMonth() + 1).padStart(2, '0');
+      const dd = String(today.getDate()).padStart(2, '0');
+      document.getElementById('summary-joined').textContent = `${yyyy}.${mm}.${dd}`;
+
       go('done');
     } catch(err){
       console.error(err);
@@ -1477,6 +1588,22 @@
       c.setAttribute('pattern', '\\d*');
       c.setAttribute('autocomplete', 'one-time-code');
     });
+
+    // 로그인 화면 동적 suffix:
+    // - 기본: @kangwon.ac.kr suffix 보임
+    // - 사용자가 @ 입력 → suffix 숨김 (자유 도메인 입력)
+    // - 모든 @를 지움 → suffix 다시 보임
+    const loginEmailInput = document.getElementById('input-login-email');
+    const loginEmailSuffix = document.getElementById('login-email-suffix');
+    if(loginEmailInput && loginEmailSuffix){
+      loginEmailInput.addEventListener('input', () => {
+        if(loginEmailInput.value.includes('@')){
+          loginEmailSuffix.style.display = 'none';
+        } else {
+          loginEmailSuffix.style.display = '';
+        }
+      });
+    }
   });
 
   document.addEventListener('keydown', e => {

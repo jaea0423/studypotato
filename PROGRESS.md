@@ -56,6 +56,17 @@
   - RPC에 `profile_exists` 분기 추가 (이미 가입된 계정 vs 닉네임 중복 구분)
   - OTP 인증 직후 profiles 체크 → 이미 가입이면 로그인 화면으로 자동 이동
   - `updateUser`의 'same password' 에러는 무시하고 RPC 진행 (자연 복구)
+- ✅ profiles_enrollment_valid CHECK 제약 한글 값으로 재정의 + grade도 정리
+- ✅ 알림 메일 가입 단계 사전 중복 검사 (`is_notify_email_available` RPC)
+- ✅ done 화면 summary card에 매칭 동의 / 커뮤니티 동의 / 가입일 표시
+- ✅ 로그인 화면 동적 suffix
+  - 기본은 `@kangwon.ac.kr` 표시 → 사용자가 `@` 입력하면 자동 숨김
+  - 아이디만 입력 → 강원대 웹메일로 자동 보정 후 RPC 변환
+- ✅ 알림 메일로도 로그인 가능
+  - SQL: `notify_email` UNIQUE 제약 + RPC `resolve_login_email`
+  - 로그인 화면: suffix 제거, 자유 입력 (웹메일/알림 메일 둘 다 OK)
+  - 알림 메일 입력 화면에 "로그인 가능, 신중히 입력" 안내
+  - 보안: 비밀번호 재설정 등 민감 작업은 웹메일 OTP만 사용 (예정)
 - ✅ 사전신청 완료 안내 메일 자동 발송
   - Edge Function: `supabase/functions/send-pre-register-email/index.ts`
   - Resend API 호출 + 한글 디자인 메일 본문
