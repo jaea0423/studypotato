@@ -644,7 +644,7 @@
     </div>
 
     <div class="bottom-area">
-      <button class="btn-primary" onclick="go('signup-profile')">인증 완료</button>
+      <button class="btn-primary" onclick="verifyOtpCode()">인증 완료</button>
     </div>
   </section>
 
@@ -739,6 +739,14 @@
         <input type="text" id="input-birth-year" class="year-input" placeholder="2005" inputmode="numeric" maxlength="4">
       </div>
       <div class="input-hint">⚠️ 4자리 숫자. <strong>가입 후 수정할 수 없으니 정확하게 입력해주세요.</strong></div>
+    </div>
+
+    <div class="form-block">
+      <label class="form-label">학과</label>
+      <div class="input-wrap">
+        <input type="text" id="input-major" placeholder="예: 컴퓨터공학과" maxlength="30">
+      </div>
+      <div class="input-hint">정식 명칭으로 입력해주세요. <strong>변경은 180일에 1회만 가능해요.</strong></div>
     </div>
 
     <div class="bottom-area">
@@ -876,6 +884,10 @@
         <span class="v" id="summary-birth">—</span>
       </div>
       <div class="summary-row">
+        <span class="k">학과</span>
+        <span class="v" id="summary-major">—</span>
+      </div>
+      <div class="summary-row">
         <span class="k">알림 받을 메일</span>
         <span class="v" id="summary-notify">—</span>
       </div>
@@ -959,10 +971,12 @@
 
     try {
       // Supabase OTP 발송 (이메일로 6자리 코드)
+      // emailRedirectTo를 명시적으로 빈 값으로 → 매직 링크 모드 회피, OTP 코드만 사용
       const { error } = await supabaseClient.auth.signInWithOtp({
         email: state.email,
         options: {
-          shouldCreateUser: true   // 신규 사용자 자동 생성 허용
+          shouldCreateUser: true,
+          emailRedirectTo: undefined
         }
       });
 
@@ -989,8 +1003,8 @@
     }
   }
 
-  // 닉네임 중복확인 (더미: 항상 성공)
-  function checkNickname(){
+  // 닉네임 중복확인 — Supabase RPC 함수 호출 (RLS 우회 안전)
+  async function checkNickname(){
     const input = document.getElementById('input-nickname');
     const btn = document.getElementById('nickname-check-btn');
     const hint = document.getElementById('nickname-hint');
@@ -1002,13 +1016,53 @@
       hint.classList.remove('success');
       return;
     }
+    if(value.length > 10){
+      hint.textContent = '닉네임은 10자 이하여야 해요.';
+      hint.classList.add('error');
+      hint.classList.remove('success');
+      return;
+    }
+    if(!supabaseClient){
+      alert('서버 연결을 준비 중이에요.');
+      return;
+    }
 
-    // 실제로는 서버 호출. 지금은 더미로 항상 성공 처리
-    btn.textContent = '✓ 확인됨';
-    btn.classList.add('success');
-    hint.textContent = '사용 가능한 닉네임이에요!';
-    hint.classList.add('success');
-    hint.classList.remove('error');
+    btn.disabled = true;
+    btn.textContent = '확인 중...';
+
+    try {
+      const { data: available, error } = await supabaseClient.rpc(
+        'is_nickname_available',
+        { check_nickname: value }
+      );
+
+      if(error){
+        console.error('닉네임 검색 에러:', error);
+        alert('확인 중 문제가 생겼어요. 잠시 후 다시 시도해주세요.');
+        btn.textContent = '중복확인';
+        return;
+      }
+
+      if(available === true){
+        btn.textContent = '✓ 확인됨';
+        btn.classList.add('success');
+        hint.textContent = '사용 가능한 닉네임이에요!';
+        hint.classList.add('success');
+        hint.classList.remove('error');
+      } else {
+        btn.textContent = '중복확인';
+        btn.classList.remove('success');
+        hint.textContent = '이미 사용 중인 닉네임이에요.';
+        hint.classList.add('error');
+        hint.classList.remove('success');
+      }
+    } catch(err){
+      console.error(err);
+      alert('네트워크 오류가 발생했어요.');
+      btn.textContent = '중복확인';
+    } finally {
+      btn.disabled = false;
+    }
   }
 
   // 닉네임 변경 시 중복확인 상태 리셋
@@ -1060,8 +1114,8 @@
       alert('닉네임 중복확인을 해주세요.');
       return;
     }
-    if(pin1.length !== 6 || pin2.length !== 6){
-      alert('비밀번호 6자리를 모두 입력해주세요.');
+    if(pin1.length !== 6 || !/^\d{6}$/.test(pin1)){
+      alert('비밀번호는 숫자 6자리로 입력해주세요.');
       return;
     }
     if(pin1 !== pin2){
@@ -1069,7 +1123,9 @@
       return;
     }
 
+    // state에 임시 저장 (최종 finishSignup에서 Supabase Auth + profiles에 저장)
     state.nickname = nickname;
+    state.password = pin1;
     go('signup-grade');
   }
 
@@ -1089,6 +1145,8 @@
 
   function submitGrade(){
     const birthYear = document.getElementById('input-birth-year').value.trim();
+    const major = document.getElementById('input-major').value.trim();
+
     if(!state.grade){
       alert('학년을 선택해주세요.');
       return;
@@ -1106,7 +1164,17 @@
       alert('출생연도가 올바르지 않아요.');
       return;
     }
+    if(!major || major.length < 2){
+      alert('학과를 정식 명칭으로 입력해주세요.');
+      return;
+    }
+    if(major.length > 30){
+      alert('학과 이름은 30자 이하로 입력해주세요.');
+      return;
+    }
+
     state.birthYear = birthYear;
+    state.major = major;
     go('signup-notify');
   }
 
@@ -1127,20 +1195,25 @@
     document.getElementById('summary-grade').textContent = state.grade || '—';
     document.getElementById('summary-status').textContent = state.enrollmentStatus || '—';
     document.getElementById('summary-birth').textContent = state.birthYear ? state.birthYear + '년' : '—';
+    document.getElementById('summary-major').textContent = state.major || '—';
     document.getElementById('summary-notify').textContent = state.notifyEmail || '—';
     go('done');
   }
 
   function resetAll(){
     state.email = '';
+    state.password = '';
     state.nickname = '';
     state.grade = '';
     state.enrollmentStatus = '';
     state.birthYear = '';
+    state.major = '';
     state.notifyEmail = '';
+    state.consentCommunity = false;
     document.getElementById('input-email').value = '';
     document.getElementById('input-nickname').value = '';
     document.getElementById('input-birth-year').value = '';
+    document.getElementById('input-major').value = '';
     document.getElementById('input-notify-email').value = '';
     document.querySelectorAll('.pin-cell').forEach(c => {
       c.value = '';
@@ -1217,8 +1290,112 @@
     el.textContent = `${m} : ${s}`;
   }
 
-  function resetTimer(){
-    startTimer();
+  /* ========== 인증코드 재전송 ========== */
+  async function resetTimer(){
+    if(!supabaseClient){
+      alert('서버 연결을 준비 중이에요.');
+      return;
+    }
+    if(!state.email){
+      alert('이메일 정보가 없어요. 처음부터 다시 시도해주세요.');
+      go('signup-email');
+      return;
+    }
+
+    const btn = document.querySelector('#screen-signup-verify .resend-btn');
+    const originalText = btn.textContent;
+    btn.disabled = true;
+    btn.textContent = '재전송 중...';
+
+    try {
+      const { error } = await supabaseClient.auth.signInWithOtp({
+        email: state.email,
+        options: { shouldCreateUser: true }
+      });
+      if(error){
+        console.error('재전송 실패:', error);
+        if(error.message && error.message.includes('rate limit')){
+          alert('너무 자주 시도하셨어요. 1시간 후 다시 시도해주세요.');
+        } else {
+          alert('재전송에 실패했어요. 잠시 후 다시 시도해주세요.');
+        }
+        return;
+      }
+      // 성공 — 타이머 리셋 + 입력 칸 초기화
+      startTimer();
+      document.querySelectorAll('#screen-signup-verify .pin-cell').forEach(c => {
+        c.value = '';
+        c.classList.remove('filled');
+      });
+      document.querySelector('#screen-signup-verify .pin-cell').focus();
+      alert('새 인증코드를 보냈어요. 메일함을 확인해주세요.');
+    } catch(err){
+      console.error(err);
+      alert('네트워크 오류가 발생했어요.');
+    } finally {
+      btn.disabled = false;
+      btn.textContent = originalText;
+    }
+  }
+
+  /* ========== 인증코드 검증 (verifyOtp) ========== */
+  async function verifyOtpCode(){
+    if(!supabaseClient){
+      alert('서버 연결을 준비 중이에요.');
+      return;
+    }
+
+    // 6개 PIN 셀에서 코드 모으기
+    const cells = document.querySelectorAll('#screen-signup-verify .pin-cell');
+    const code = Array.from(cells).map(c => c.value).join('');
+
+    if(code.length !== 6){
+      alert('6자리 인증코드를 모두 입력해주세요.');
+      return;
+    }
+
+    const btn = document.querySelector('#screen-signup-verify .btn-primary');
+    const originalText = btn.textContent;
+    btn.disabled = true;
+    btn.textContent = '확인 중...';
+
+    try {
+      const { data, error } = await supabaseClient.auth.verifyOtp({
+        email: state.email,
+        token: code,
+        type: 'email'
+      });
+
+      if(error){
+        console.error('OTP 검증 실패:', error);
+        // 가장 흔한 케이스
+        if(error.message && error.message.toLowerCase().includes('expired')){
+          alert('인증코드가 만료됐어요. 재전송 버튼을 눌러주세요.');
+        } else if(error.message && error.message.toLowerCase().includes('invalid')){
+          alert('인증코드가 일치하지 않아요. 다시 확인해주세요.');
+          // 입력 칸 초기화
+          cells.forEach(c => { c.value = ''; c.classList.remove('filled'); });
+          cells[0].focus();
+        } else {
+          alert('인증에 실패했어요. 잠시 후 다시 시도해주세요.');
+        }
+        return;
+      }
+
+      // 인증 성공 — auth.users에 row 생성됨, session 받음
+      // data.user / data.session 사용 가능
+      console.log('✓ OTP 인증 성공:', data.user?.email);
+
+      // 타이머 정지 + 다음 화면 (닉네임 + 비밀번호)
+      stopTimer();
+      go('signup-profile');
+    } catch(err){
+      console.error(err);
+      alert('네트워크 오류가 발생했어요.');
+    } finally {
+      btn.disabled = false;
+      btn.textContent = originalText;
+    }
   }
 
   /* ========== 약관 동의 ========== */
