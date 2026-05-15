@@ -10,6 +10,9 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/variable/pretendardvariable.css" />
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 
+<!-- Supabase JS SDK (UMD 빌드) -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+
 <style>
   /* ========== 디자인 토큰 ========== */
   :root{
@@ -891,14 +894,33 @@
 </div>
 
 <script>
+  /* ========== Supabase 초기화 ========== */
+  let supabaseClient = null;
+  const SUPABASE_URL = 'https://mleypjquzggtyouepfha.supabase.co';
+  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1sZXlwanF1emdndHlvdWVwZmhhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg4MTAzMDIsImV4cCI6MjA5NDM4NjMwMn0.eM4nh50tC-ZxVRoIA1NZit4JtMJqPlUBZ5LEnTrRB5Q';
+
+  try {
+    if (window.supabase && typeof window.supabase.createClient === 'function') {
+      supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+      console.log('✓ Supabase 연결 성공');
+    } else {
+      console.error('❌ Supabase SDK 로드 실패. window.supabase =', window.supabase);
+    }
+  } catch (err) {
+    console.error('❌ Supabase 초기화 실패:', err);
+  }
+
   /* ========== 상태 저장 ========== */
   const state = {
     email: '',
+    password: '',         // 비밀번호 (5-3에서 채워짐)
     nickname: '',
     grade: '',
     enrollmentStatus: '',
     birthYear: '',
-    notifyEmail: ''
+    major: '',            // 학과 (5-4에서 채워짐)
+    notifyEmail: '',
+    consentCommunity: false  // 선택 동의 (커뮤니티/공지)
   };
 
   /* ========== 화면 전환 ========== */
@@ -915,16 +937,56 @@
     }
   }
 
-  /* ========== 입력값 처리 ========== */
-  function submitEmail(){
+  /* ========== 이메일 입력 → OTP 발송 (Supabase) ========== */
+  async function submitEmail(){
     const input = document.getElementById('input-email').value.trim();
     if(!input){
       alert('메일 아이디를 입력해주세요.');
       return;
     }
+    if(!supabaseClient){
+      alert('서버 연결을 준비 중이에요. 잠시 후 다시 시도해주세요.');
+      return;
+    }
+
     state.email = input + '@kangwon.ac.kr';
-    document.getElementById('verify-email-display').textContent = state.email;
-    go('signup-verify');
+
+    // 버튼 잠금 (중복 클릭 방지)
+    const btn = document.querySelector('#screen-signup-email .btn-primary');
+    const originalText = btn.textContent;
+    btn.disabled = true;
+    btn.textContent = '코드 발송 중...';
+
+    try {
+      // Supabase OTP 발송 (이메일로 6자리 코드)
+      const { error } = await supabaseClient.auth.signInWithOtp({
+        email: state.email,
+        options: {
+          shouldCreateUser: true   // 신규 사용자 자동 생성 허용
+        }
+      });
+
+      if(error){
+        console.error('OTP 발송 실패:', error);
+        // 자주 발생하는 에러 분기
+        if(error.message && error.message.includes('rate limit')){
+          alert('너무 자주 시도하셨어요. 잠시 후 다시 시도해주세요.');
+        } else {
+          alert('인증 코드 발송에 실패했어요. 잠시 후 다시 시도해주세요.');
+        }
+        return;
+      }
+
+      // 성공 → 인증코드 입력 화면으로
+      document.getElementById('verify-email-display').textContent = state.email;
+      go('signup-verify');
+    } catch(err) {
+      console.error(err);
+      alert('네트워크 오류가 발생했어요. 잠시 후 다시 시도해주세요.');
+    } finally {
+      btn.disabled = false;
+      btn.textContent = originalText;
+    }
   }
 
   // 닉네임 중복확인 (더미: 항상 성공)
