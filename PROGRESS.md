@@ -68,14 +68,26 @@
   - 로그인 화면: suffix 제거, 자유 입력 (웹메일/알림 메일 둘 다 OK)
   - 알림 메일 입력 화면에 "로그인 가능, 신중히 입력" 안내
   - 보안: 비밀번호 재설정 등 민감 작업은 웹메일 OTP만 사용 (예정)
-- ✅ 권한 모델 + 운영자 사이트 admin.html 더미
-  - DB: `profiles.role` (user/moderator/admin) + CHECK 제약
-  - RPC: `my_role()` — 본인 role 조회 (인증 가드용)
-  - admin.html 한 페이지 + 탭 4개 (대시보드/신고/사용자/게시글)
-  - 보라톤 헤더로 일반 dashboard와 시각적 구분
-  - 권한 가드: admin/moderator만 접근, 그 외 "권한 없음" 화면
-  - dashboard 프로필 메뉴에 "운영자 페이지" 진입점 (role 체크 후 표시)
-  - 모든 액션은 더미(alert) — 실제 처리는 매칭/커뮤니티 백엔드 만든 후
+- ✅ 운영자 콘솔 admin.html 대대적 개편 (별도 인증 시스템)
+  - **별도 로그인**: 강원대 메일과 분리된 운영자 ID + 강력 PW + 2차 PIN 6자리 (2FA)
+  - **sessionStorage 사용**: 탭 닫으면 즉시 로그아웃
+  - **30분 idle 자동 로그아웃** (활동 감지: click/keydown/touch/scroll)
+  - **시각적 구분**: 좌우 4px 검은 띠 + 보라톤 헤더 + "ADMIN CONSOLE" 상단 표식
+  - dashboard에서 운영자 진입점 제거 (완전 분리, 직접 URL 접근)
+  - **탭 4개**: 📊 대시보드 / 🚨 신고 / 👥 사용자 / 💬 CS (고객의 소리 통합)
+  - **사이드 메뉴 (햄버거)**: 📢 공지사항 관리 / 🗨️ 운영자 게시판 / 👮 운영자 관리(admin) / 📜 활동 로그(admin) / ⚙️ 시스템 설정(admin) / 🙂 내 정보 / 🚪 로그아웃
+  - **공지사항**: 발송 대상 선택 (전체/최근/활성) + 발송 옵션 (인앱/메일)
+  - **운영자 게시판**: 운영자끼리 내부 소통 (공지+자유)
+  - **운영자 관리** (admin만): 운영자 추가(본명/ID/임시PW/권한) + 목록 + 정지/해임
+  - **활동 로그** (admin만): 누가 언제 무엇을 했나 + CSV 내보내기
+  - **시스템 설정** (admin만): 매칭 정책, 페널티 정책, 시스템 헬스
+  - **내 정보**: 공개 닉네임 / 비번 변경 / 2차 PIN 변경
+  - moderator는 admin 전용 메뉴 잠금 (시각적 표시)
+  - 더미 계정: `jaea_admin` / `jaea1234` / `123456`
+  - **권한 차이 정리** (admin vs moderator):
+    - moderator: 신고/사용자/CS/공지/운영자게시판
+    - admin 추가: 운영자 임명·해임, 활동 로그, 시스템 설정
+    - 둘 다: 익명 작성자 직접 조회 X (필요 시 DB 직접)
 - ✅ 익명 글에 댓글 달 때 익명 디폴트 정책 명시 (rules.html)
 - ✅ 닉네임 정책 강화
   - 차단 메시지: "이 닉네임은 사용할 수 없습니다" (사유 노출 X — 우회 방지)
@@ -216,6 +228,17 @@ Authentication → Providers → Email 에서 두 값 모두 변경
     team-detail, matchcard, groupcreate, matchresponse, teamresponse,
     teamconfirm-leader/member, notifications, community-write/detail
   - dashboard와 같은 패턴 (head visibility hidden + bootAuth 후 ready 클래스)
+
+### 🛠️ 운영자 콘솔 백엔드 (정식 출시 전 필수)
+- [ ] `admin_users` 테이블 (별도 인증, profiles와 분리)
+  - id (uuid), username, password_hash, pin_hash, real_name, nickname, role, status
+- [ ] `admin_logs` 테이블 (활동 로그)
+  - id, admin_id, action (enum), target_type, target_id, details (jsonb), created_at, ip
+- [ ] `admin_announcements` 테이블 (공지사항, 사용자 발송용)
+- [ ] `admin_board_posts` 테이블 (운영자 내부 게시판)
+- [ ] Supabase Auth와는 분리된 별도 인증 (RPC 함수로 처리)
+- [ ] admin.html에서 더미 → 실제 RPC 호출로 전환
+- [ ] 본인 admin 계정 생성 SQL (1회성)
 
 ### 🚀 정식 출시 전환 작업
 - studypotato.com 루트(`index.html`)를 사전신청 페이지 → auth.html로 교체

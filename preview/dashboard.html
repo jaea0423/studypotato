@@ -2391,15 +2391,6 @@
       </button>
     </div>
 
-    <!-- 운영자 메뉴 (admin/moderator일 때만 표시 — JS에서 숨김 해제) -->
-    <div class="menu-section-title" id="admin-menu-title" style="display: none;">운영자</div>
-    <div class="menu-list" id="admin-menu-list" style="display: none;">
-      <button class="menu-item" onclick="location.href='admin.html'" style="color: #6B46C1; font-weight: 700;">
-        <span>🛠️ 운영자 페이지로 이동</span>
-        <span class="right">→</span>
-      </button>
-    </div>
-
     <div class="menu-section-title">계정</div>
     <div class="menu-list">
       <button class="menu-item danger" onclick="logout()">
@@ -2588,14 +2579,6 @@
 
     currentProfile = profile;
     fillUserInfo();
-
-    // role이 admin 또는 moderator면 운영자 메뉴 표시
-    if(profile.role === 'admin' || profile.role === 'moderator'){
-      const t = document.getElementById('admin-menu-title');
-      const l = document.getElementById('admin-menu-list');
-      if(t) t.style.display = '';
-      if(l) l.style.display = '';
-    }
 
     // 인증+프로필 모두 통과 → 콘텐츠 표시
     document.body.classList.add('ready');

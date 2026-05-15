@@ -3,22 +3,13 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-<title>공부하는 감자 — 운영자</title>
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🥔</text></svg>">
+<title>공부하는 감자 — 운영자 콘솔</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🛠️</text></svg>">
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/variable/pretendardvariable.css" />
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
-
-<!-- Supabase JS SDK -->
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
-
-<!-- 인증 + 권한 확인 전 콘텐츠 숨김 (보안) -->
-<style>
-  body { visibility: hidden; }
-  body.ready { visibility: visible; }
-</style>
 
 <style>
   :root{
@@ -38,8 +29,13 @@
     --error: #DC3545;
     --success: #2D7A3E;
     --warning: #B8860B;
+
+    /* 운영자 전용 색상 — 일반 사이트와 시각적 구분 */
     --admin-purple: #6B46C1;
+    --admin-purple-deep: #4C2A99;
     --admin-purple-soft: #EDE7F6;
+    --admin-stripe: #1A1A1A;          /* 좌우 띠 */
+
     --font-kr: 'Pretendard Variable', Pretendard, -apple-system, sans-serif;
     --font-mono: 'JetBrains Mono', monospace;
     --radius-s: 10px;
@@ -61,60 +57,80 @@
   button{ font-family: inherit; cursor: pointer; border: 0; background: none; color: inherit; }
   input, textarea{ font-family: inherit; color: inherit; border: 0; outline: none; background: none; }
 
+  /* ========== 좌우 검은 띠 (운영자 사이트 시각적 표식) ========== */
   .app{
     max-width: 480px;
     min-height: 100vh;
     margin: 0 auto;
     background: var(--cream);
     position: relative;
-    box-shadow: 0 0 40px rgba(0,0,0,0.06);
-    padding-bottom: 72px; /* 하단 탭바 공간 */
+    border-left: 4px solid var(--admin-stripe);
+    border-right: 4px solid var(--admin-stripe);
+    box-shadow: 0 0 40px rgba(0,0,0,0.08);
   }
-  @media (min-width: 481px){ body{ background: #E8E2D4; } }
+  @media (min-width: 481px){ body{ background: #2A2A2A; } }
 
-  /* ========== 운영자 헤더 (보라 톤으로 일반 화면과 구분) ========== */
+  /* ========== 운영자 헤더 (보라톤) ========== */
   .admin-header{
     background: var(--admin-purple);
     color: white;
-    padding: 16px 20px;
+    padding: 14px 18px;
     display: flex;
     align-items: center;
     justify-content: space-between;
     position: sticky;
     top: 0;
-    z-index: 10;
+    z-index: 30;
   }
+  .admin-header .left{
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .admin-header .menu-btn{
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    color: white;
+  }
+  .admin-header .menu-btn:active{ background: rgba(255,255,255,0.15); }
   .admin-header .title{
-    font-size: 17px;
+    font-size: 16px;
     font-weight: 700;
     letter-spacing: -0.02em;
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 6px;
   }
-  .admin-header .badge{
+  .admin-header .role-badge{
     font-size: 10px;
-    background: rgba(255,255,255,0.2);
+    background: rgba(255,255,255,0.22);
     padding: 3px 8px;
     border-radius: 999px;
     font-family: var(--font-mono);
-    font-weight: 600;
+    font-weight: 700;
   }
   .admin-header .who{
-    font-size: 13px;
-    opacity: 0.95;
-    display: flex;
-    gap: 8px;
-    align-items: center;
-  }
-  .admin-header .back-link{
     font-size: 12px;
-    text-decoration: underline;
-    text-underline-offset: 2px;
-    opacity: 0.9;
+    opacity: 0.95;
   }
 
-  /* ========== 본문 ========== */
+  /* 운영자 사이트 표식 띠 (헤더 위) */
+  .admin-stripe{
+    background: var(--admin-stripe);
+    color: white;
+    text-align: center;
+    font-size: 10px;
+    font-family: var(--font-mono);
+    font-weight: 700;
+    padding: 4px 0;
+    letter-spacing: 0.1em;
+  }
+
+  /* ========== 탭 콘텐츠 ========== */
   .tab-content{
     display: none;
     padding: 20px;
@@ -122,21 +138,12 @@
   .tab-content.active{ display: block; animation: fadeIn 0.25s; }
   @keyframes fadeIn{ from{opacity:0; transform:translateY(4px);} to{opacity:1; transform:translateY(0);} }
 
-  .section-head{
-    margin-bottom: 16px;
-  }
-  .section-head h2{
-    font-size: 22px;
-    font-weight: 800;
-    letter-spacing: -0.025em;
-    margin-bottom: 4px;
-  }
-  .section-head .desc{
-    font-size: 13px;
-    color: var(--ink-soft);
-  }
+  .section-head{ margin-bottom: 16px; }
+  .section-head h2{ font-size: 22px; font-weight: 800; letter-spacing: -0.025em; margin-bottom: 4px; }
+  .section-head .desc{ font-size: 13px; color: var(--ink-soft); }
+  .sub-head{ font-size: 15px; font-weight: 700; margin: 24px 0 10px; }
 
-  /* ========== 통계 카드 (대시보드) ========== */
+  /* ========== 통계 카드 ========== */
   .stat-grid{
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -149,69 +156,62 @@
     border-radius: var(--radius-m);
     padding: 16px;
   }
-  .stat-card.alert{
-    background: var(--knu-orange-soft);
-    border-color: transparent;
-  }
-  .stat-card .k{
-    font-size: 12px;
-    color: var(--ink-mute);
-    margin-bottom: 6px;
-    font-weight: 600;
-  }
-  .stat-card .v{
-    font-size: 26px;
-    font-weight: 800;
-    letter-spacing: -0.02em;
-    font-family: var(--font-mono);
-  }
+  .stat-card.alert{ background: var(--knu-orange-soft); border-color: transparent; }
+  .stat-card.purple{ background: var(--admin-purple-soft); border-color: transparent; }
+  .stat-card .k{ font-size: 12px; color: var(--ink-mute); margin-bottom: 6px; font-weight: 600; }
+  .stat-card .v{ font-size: 26px; font-weight: 800; letter-spacing: -0.02em; font-family: var(--font-mono); }
   .stat-card.alert .v{ color: var(--knu-orange); }
-  .stat-card .delta{
-    font-size: 11px;
-    color: var(--success);
-    font-weight: 600;
-    margin-top: 4px;
-  }
+  .stat-card.purple .v{ color: var(--admin-purple); }
+  .stat-card .delta{ font-size: 11px; color: var(--success); font-weight: 600; margin-top: 4px; }
   .stat-card .delta.minus{ color: var(--error); }
 
-  /* ========== 빠른 액션 ========== */
-  .quick-actions{
+  /* ========== 빠른 액션 / 메뉴 리스트 ========== */
+  .menu-list{
     background: var(--paper);
     border: 1px solid var(--line);
     border-radius: var(--radius-m);
-    padding: 6px 8px;
-    margin-bottom: 20px;
+    padding: 4px 6px;
+    margin-bottom: 16px;
   }
-  .quick-action-row{
+  .menu-item{
+    width: 100%;
     display: flex;
     align-items: center;
     padding: 12px;
     gap: 12px;
     border-bottom: 1px solid var(--line-soft);
     cursor: pointer;
+    text-align: left;
+    background: none;
   }
-  .quick-action-row:last-child{ border-bottom: 0; }
-  .quick-action-row:active{ background: var(--line-soft); }
-  .quick-action-row .ico{
+  .menu-item:last-child{ border-bottom: 0; }
+  .menu-item:active{ background: var(--line-soft); }
+  .menu-item .ico{
     width: 36px; height: 36px;
     border-radius: var(--radius-s);
-    background: var(--knu-blue-soft);
+    background: var(--admin-purple-soft);
     display: flex;
     align-items: center;
     justify-content: center;
     font-size: 18px;
     flex-shrink: 0;
+    color: var(--admin-purple);
   }
-  .quick-action-row .label{
-    flex: 1;
-    font-size: 14px;
-    font-weight: 600;
+  .menu-item .body{ flex: 1; min-width: 0; }
+  .menu-item .label{ font-size: 14px; font-weight: 600; }
+  .menu-item .sub{ font-size: 11px; color: var(--ink-mute); margin-top: 2px; }
+  .menu-item .right-tag{
+    background: var(--error);
+    color: white;
+    font-size: 10px;
+    padding: 2px 7px;
+    border-radius: 999px;
+    font-family: var(--font-mono);
+    font-weight: 700;
   }
-  .quick-action-row .arrow{
-    color: var(--ink-mute);
-  }
+  .menu-item .arrow{ color: var(--ink-mute); font-size: 14px; }
 
-  /* ========== 신고 카드 ========== */
+  /* ========== 필터 칩 ========== */
   .filter-bar{
     display: flex;
     gap: 8px;
@@ -231,17 +231,14 @@
     white-space: nowrap;
     flex-shrink: 0;
   }
-  .filter-chip.active{
-    background: var(--admin-purple);
-    color: white;
-    border-color: var(--admin-purple);
-  }
+  .filter-chip.active{ background: var(--admin-purple); color: white; border-color: var(--admin-purple); }
 
+  /* ========== 카드 (신고/사용자/게시글 공통) ========== */
   .item-card{
     background: var(--paper);
     border: 1px solid var(--line);
     border-radius: var(--radius-m);
-    padding: 16px;
+    padding: 14px 16px;
     margin-bottom: 10px;
   }
   .item-card .meta{
@@ -259,36 +256,17 @@
     font-weight: 700;
     font-family: var(--font-mono);
   }
-  .item-card .badge.pending{
-    background: var(--knu-orange-soft);
-    color: var(--knu-orange);
-  }
-  .item-card .badge.processed{
-    background: #DEF1E2;
-    color: var(--success);
-  }
-  .item-card .badge.rejected{
-    background: var(--line-soft);
-    color: var(--ink-mute);
-  }
-  .item-card .badge.banned{
-    background: #FFE0E0;
-    color: var(--error);
-  }
-  .item-card .badge.warned{
-    background: var(--knu-orange-soft);
-    color: var(--knu-orange);
-  }
-  .item-card .badge.active{
-    background: #DEF1E2;
-    color: var(--success);
-  }
-  .item-card .target{
-    font-size: 14px;
-    font-weight: 700;
-    margin-bottom: 6px;
-  }
-  .item-card .reason{
+  .badge.pending{ background: var(--knu-orange-soft); color: var(--knu-orange); }
+  .badge.processed{ background: #DEF1E2; color: var(--success); }
+  .badge.rejected{ background: var(--line-soft); color: var(--ink-mute); }
+  .badge.banned{ background: #FFE0E0; color: var(--error); }
+  .badge.warned{ background: var(--knu-orange-soft); color: var(--knu-orange); }
+  .badge.active{ background: #DEF1E2; color: var(--success); }
+  .badge.draft{ background: var(--line-soft); color: var(--ink-mute); }
+  .badge.published{ background: var(--admin-purple-soft); color: var(--admin-purple); }
+
+  .item-card .target{ font-size: 14px; font-weight: 700; margin-bottom: 6px; }
+  .item-card .reason, .item-card .preview{
     font-size: 13px;
     color: var(--ink-soft);
     line-height: 1.55;
@@ -297,58 +275,39 @@
     padding: 10px 12px;
     margin-bottom: 10px;
   }
-  .item-card .actions{
-    display: flex;
-    gap: 8px;
-  }
+  .item-card .preview{ max-height: 100px; overflow: hidden; position: relative; }
+  .item-card .actions{ display: flex; gap: 6px; flex-wrap: wrap; }
   .btn-action{
     flex: 1;
-    padding: 10px;
+    min-width: 80px;
+    padding: 9px;
     border-radius: var(--radius-s);
     font-size: 13px;
     font-weight: 700;
-    transition: all 0.15s;
   }
   .btn-action:active{ transform: scale(0.97); }
-  .btn-action.process{
-    background: var(--admin-purple);
-    color: white;
-  }
-  .btn-action.reject{
-    background: var(--paper-warm);
-    color: var(--ink-soft);
-    border: 1.5px solid var(--line);
-  }
-  .btn-action.warn{
-    background: var(--knu-orange);
-    color: white;
-  }
-  .btn-action.ban{
-    background: var(--error);
-    color: white;
-  }
-  .btn-action.unban{
-    background: var(--success);
-    color: white;
-  }
+  .btn-action.process{ background: var(--admin-purple); color: white; }
+  .btn-action.reject{ background: var(--paper-warm); color: var(--ink-soft); border: 1.5px solid var(--line); }
+  .btn-action.warn{ background: var(--knu-orange); color: white; }
+  .btn-action.ban{ background: var(--error); color: white; }
+  .btn-action.unban{ background: var(--success); color: white; }
+  .btn-action.reply{ background: var(--knu-blue); color: white; }
 
-  /* ========== 사용자 검색 ========== */
+  /* ========== 검색 바 ========== */
   .search-bar{
     background: var(--paper);
     border: 1.5px solid var(--line);
     border-radius: var(--radius-m);
-    padding: 12px 16px;
+    padding: 12px 14px;
     margin-bottom: 14px;
     display: flex;
     align-items: center;
     gap: 8px;
   }
   .search-bar:focus-within{ border-color: var(--admin-purple); }
-  .search-bar input{
-    flex: 1;
-    font-size: 14px;
-  }
+  .search-bar input{ flex: 1; font-size: 14px; }
 
+  /* ========== 사용자 카드 ========== */
   .user-card{
     background: var(--paper);
     border: 1px solid var(--line);
@@ -356,44 +315,100 @@
     padding: 14px 16px;
     margin-bottom: 10px;
   }
-  .user-card .head{
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 8px;
-  }
-  .user-card .nick{
-    font-size: 15px;
-    font-weight: 700;
-  }
-  .user-card .info{
-    font-size: 12px;
-    color: var(--ink-mute);
-    line-height: 1.5;
-    margin-bottom: 10px;
-  }
+  .user-card .head{ display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+  .user-card .nick{ font-size: 15px; font-weight: 700; }
+  .user-card .info{ font-size: 12px; color: var(--ink-mute); line-height: 1.5; margin-bottom: 10px; }
   .user-card .info b{ color: var(--ink-soft); font-weight: 600; }
 
-  /* ========== 게시글 미리보기 ========== */
-  .post-preview{
-    background: var(--paper-warm);
-    border-radius: var(--radius-s);
-    padding: 12px 14px;
-    margin-bottom: 10px;
+  /* ========== 폼 ========== */
+  .form-block{ margin-bottom: 16px; }
+  .form-label{
+    display: block;
     font-size: 13px;
+    font-weight: 600;
     color: var(--ink-soft);
-    line-height: 1.55;
-    max-height: 100px;
-    overflow: hidden;
-    position: relative;
+    margin-bottom: 6px;
   }
-  .post-preview::after{
-    content: '';
-    position: absolute;
-    bottom: 0; left: 0; right: 0;
-    height: 30px;
-    background: linear-gradient(transparent, var(--paper-warm));
+  .input-wrap{
+    background: var(--paper);
+    border: 1.5px solid var(--line);
+    border-radius: var(--radius-m);
+    transition: border-color 0.2s;
   }
+  .input-wrap:focus-within{ border-color: var(--admin-purple); }
+  .input-wrap input{ width: 100%; padding: 12px 14px; font-size: 14px; font-weight: 500; }
+  .input-wrap textarea{ width: 100%; padding: 12px 14px; font-size: 14px; resize: vertical; min-height: 100px; line-height: 1.5; font-weight: 500; }
+  .input-hint{ font-size: 11px; color: var(--ink-mute); margin-top: 6px; padding: 0 4px; }
+
+  .btn-primary{
+    width: 100%;
+    background: var(--admin-purple);
+    color: white;
+    padding: 14px;
+    border-radius: var(--radius-m);
+    font-size: 15px;
+    font-weight: 700;
+    transition: all 0.2s;
+  }
+  .btn-primary:active{ transform: scale(0.98); background: var(--admin-purple-deep); }
+  .btn-primary:disabled{ background: var(--line); color: var(--ink-mute); }
+  .btn-secondary{
+    width: 100%;
+    background: var(--paper);
+    border: 1.5px solid var(--line);
+    color: var(--ink);
+    padding: 12px;
+    border-radius: var(--radius-m);
+    font-size: 14px;
+    font-weight: 600;
+    margin-top: 8px;
+  }
+
+  /* PIN 셀 (2차 비밀번호) */
+  .pin-grid{
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 6px;
+  }
+  .pin-cell{
+    width: 100%;
+    height: 48px;
+    background: var(--paper);
+    border: 1.5px solid var(--line);
+    border-radius: var(--radius-s);
+    text-align: center;
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--ink);
+  }
+  .pin-cell:focus{ border-color: var(--admin-purple); }
+  .pin-cell.filled{ background: var(--admin-purple-soft); border-color: var(--admin-purple); }
+
+  /* ========== 공지 / 게시글 ========== */
+  .post-card{
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-m);
+    padding: 14px 16px;
+    margin-bottom: 10px;
+  }
+  .post-card .head{ display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+  .post-card .title{ font-size: 14px; font-weight: 700; flex: 1; min-width: 0; }
+  .post-card .body{ font-size: 13px; color: var(--ink-soft); line-height: 1.55; margin-bottom: 10px; }
+  .post-card .info{ font-size: 11px; color: var(--ink-mute); display: flex; gap: 10px; }
+
+  /* ========== 로그 ========== */
+  .log-item{
+    display: flex;
+    gap: 10px;
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--line-soft);
+    font-size: 12px;
+  }
+  .log-item:last-child{ border-bottom: 0; }
+  .log-item .time{ color: var(--ink-mute); font-family: var(--font-mono); white-space: nowrap; }
+  .log-item .actor{ color: var(--admin-purple); font-weight: 600; }
+  .log-item .action{ color: var(--ink-soft); flex: 1; }
 
   /* ========== 빈 상태 ========== */
   .empty-state{
@@ -402,12 +417,10 @@
     color: var(--ink-mute);
     font-size: 13px;
   }
-  .empty-state .ico{
-    font-size: 40px;
-    margin-bottom: 12px;
-  }
+  .empty-state .ico{ font-size: 40px; margin-bottom: 12px; }
 
   /* ========== 하단 탭바 ========== */
+  .app{ padding-bottom: 72px; }
   .tab-bar{
     position: fixed;
     bottom: 0;
@@ -417,6 +430,8 @@
     max-width: 480px;
     background: var(--paper);
     border-top: 1px solid var(--line);
+    border-left: 4px solid var(--admin-stripe);
+    border-right: 4px solid var(--admin-stripe);
     display: grid;
     grid-template-columns: repeat(4, 1fr);
     z-index: 50;
@@ -431,7 +446,6 @@
     font-size: 11px;
     font-weight: 600;
     position: relative;
-    transition: color 0.15s;
   }
   .tab-bar button.active{ color: var(--admin-purple); }
   .tab-bar button .ico{ font-size: 20px; line-height: 1; }
@@ -448,23 +462,66 @@
     font-family: var(--font-mono);
   }
 
-  /* ========== 권한 부족 화면 ========== */
-  .no-access{
-    text-align: center;
-    padding: 80px 24px 40px;
+  /* ========== 햄버거 사이드 메뉴 ========== */
+  .sidemenu-overlay{
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.5);
+    z-index: 100;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s;
   }
-  .no-access .ico{ font-size: 64px; margin-bottom: 20px; }
-  .no-access h2{ font-size: 20px; font-weight: 800; margin-bottom: 8px; }
-  .no-access p{ font-size: 14px; color: var(--ink-soft); line-height: 1.6; margin-bottom: 24px; }
-  .no-access .btn{
-    display: inline-block;
-    background: var(--knu-blue);
+  .sidemenu-overlay.open{ opacity: 1; pointer-events: auto; }
+  .sidemenu{
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: 80%;
+    max-width: 320px;
+    background: var(--paper);
+    z-index: 101;
+    transform: translateX(100%);
+    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    display: flex;
+    flex-direction: column;
+    border-left: 4px solid var(--admin-stripe);
+  }
+  .sidemenu.open{ transform: translateX(0); }
+  .sidemenu .head{
+    background: var(--admin-purple);
     color: white;
-    padding: 14px 28px;
-    border-radius: var(--radius-m);
-    font-size: 14px;
-    font-weight: 700;
+    padding: 20px;
   }
+  .sidemenu .head .name{ font-size: 17px; font-weight: 800; }
+  .sidemenu .head .meta{ font-size: 12px; opacity: 0.9; margin-top: 4px; font-family: var(--font-mono); }
+  .sidemenu .body{ flex: 1; overflow-y: auto; padding: 12px 0; }
+  .sidemenu .group-title{
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--ink-mute);
+    padding: 14px 18px 6px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+  .side-item{
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 18px;
+    text-align: left;
+    background: none;
+    font-size: 14px;
+    color: var(--ink);
+    transition: background 0.15s;
+  }
+  .side-item:active{ background: var(--line-soft); }
+  .side-item .ico{ font-size: 18px; width: 24px; text-align: center; }
+  .side-item.danger{ color: var(--error); }
+  .side-item.disabled{ color: var(--ink-mute); cursor: not-allowed; }
+  .side-item.disabled .lock{ font-size: 11px; margin-left: auto; }
 
   /* ========== 토스트 ========== */
   .toast{
@@ -481,71 +538,170 @@
     opacity: 0;
     pointer-events: none;
     transition: all 0.3s;
-    z-index: 100;
+    z-index: 200;
     white-space: nowrap;
+    max-width: 90%;
   }
-  .toast.show{
-    opacity: 1;
-    transform: translateX(-50%) translateY(0);
+  .toast.show{ opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  /* ========== 로그인 화면 ========== */
+  #login-screen{
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    padding: 24px;
+    padding-bottom: 32px;
+    background: var(--paper-warm);
+  }
+  #login-screen.hidden{ display: none; }
+  .login-head{
+    text-align: center;
+    margin: 60px 0 40px;
+  }
+  .login-head .ico{ font-size: 64px; margin-bottom: 20px; }
+  .login-head h1{ font-size: 24px; font-weight: 800; letter-spacing: -0.025em; margin-bottom: 8px; }
+  .login-head p{ font-size: 13px; color: var(--ink-soft); line-height: 1.55; }
+
+  .login-warning{
+    background: var(--admin-purple-soft);
+    color: var(--admin-purple-deep);
+    border-radius: var(--radius-m);
+    padding: 14px 16px;
+    font-size: 12px;
+    line-height: 1.6;
+    margin-bottom: 24px;
+    text-align: left;
+  }
+
+  .login-bottom{
+    margin-top: auto;
+    padding-top: 20px;
+  }
+
+  /* 권한 없음/세션 만료 화면 */
+  .session-out{
+    text-align: center;
+    padding: 80px 24px 40px;
+  }
+  .session-out .ico{ font-size: 56px; margin-bottom: 16px; }
+  .session-out h2{ font-size: 20px; font-weight: 800; margin-bottom: 8px; }
+  .session-out p{ font-size: 13px; color: var(--ink-soft); line-height: 1.6; margin-bottom: 20px; }
+
+  /* 글 작성 카드 */
+  .write-form{
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-m);
+    padding: 16px;
+    margin-bottom: 16px;
   }
 </style>
 </head>
 <body>
 
+<!-- ============================================================
+     운영자 사이트 표식 띠 (좌우 검은 띠 + 상단 띠)
+     ============================================================ -->
+
 <div class="app">
 
-  <!-- ========== 권한 부족 화면 (기본 숨김) ========== -->
-  <div id="no-access-view" style="display: none;">
-    <div class="no-access">
-      <div class="ico">🔒</div>
-      <h2>운영자 전용 페이지예요</h2>
-      <p>이 페이지는 운영자/관리자만 접근할 수 있어요.<br>잘못 들어오셨다면 홈으로 돌아가주세요.</p>
-      <a href="dashboard.html" class="btn">홈으로 돌아가기</a>
+  <!-- ========== 로그인 화면 ========== -->
+  <section id="login-screen">
+    <div class="login-head">
+      <div class="ico">🔐</div>
+      <h1>운영자 콘솔</h1>
+      <p>일반 사용자 로그인과 분리된 별도 인증입니다.<br>운영자 ID와 비밀번호, 2차 PIN을 입력해주세요.</p>
     </div>
-  </div>
 
-  <!-- ========== 운영자 메인 (인증 + 권한 확인 후 표시) ========== -->
-  <div id="admin-view" style="display: none;">
+    <div class="login-warning">
+      ⚠️ <strong>이 페이지는 일반 사용자 페이지와 별개의 계정입니다.</strong><br>
+      회원가입한 강원대 메일 계정과는 다른 운영자 전용 ID로 로그인해주세요. 운영자 ID는 본인 admin 계정에서 발급받을 수 있습니다.
+    </div>
+
+    <div class="form-block">
+      <label class="form-label">운영자 ID</label>
+      <div class="input-wrap">
+        <input type="text" id="login-id" placeholder="예: jaea_admin" autocomplete="username">
+      </div>
+    </div>
+
+    <div class="form-block">
+      <label class="form-label">비밀번호</label>
+      <div class="input-wrap">
+        <input type="password" id="login-pw" placeholder="영문+숫자 8자 이상" autocomplete="current-password">
+      </div>
+    </div>
+
+    <div class="form-block">
+      <label class="form-label">2차 PIN (6자리)</label>
+      <div class="pin-grid" id="login-pin">
+        <input class="pin-cell" type="text" inputmode="numeric" maxlength="1" pattern="\d*" />
+        <input class="pin-cell" type="text" inputmode="numeric" maxlength="1" pattern="\d*" />
+        <input class="pin-cell" type="text" inputmode="numeric" maxlength="1" pattern="\d*" />
+        <input class="pin-cell" type="text" inputmode="numeric" maxlength="1" pattern="\d*" />
+        <input class="pin-cell" type="text" inputmode="numeric" maxlength="1" pattern="\d*" />
+        <input class="pin-cell" type="text" inputmode="numeric" maxlength="1" pattern="\d*" />
+      </div>
+      <div class="input-hint">2차 PIN은 본인만 알고 있어야 해요. 노출 시 즉시 변경하세요.</div>
+    </div>
+
+    <div class="login-bottom">
+      <button class="btn-primary" onclick="adminLogin()">로그인</button>
+      <button class="btn-secondary" onclick="location.href='dashboard.html'">일반 사용자 페이지로 돌아가기</button>
+      <div style="text-align:center; font-size:11px; color: var(--ink-mute); margin-top: 16px; line-height:1.5;">
+        🔒 30분 동안 활동이 없으면 자동 로그아웃됩니다.<br>
+        탭을 닫으면 즉시 로그아웃됩니다.
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== 메인 (로그인 후) ========== -->
+  <div id="main-app" style="display: none;">
+
+    <!-- 운영자 사이트 표식 -->
+    <div class="admin-stripe">⚙ ADMIN CONSOLE · 운영자 전용 영역</div>
 
     <!-- 헤더 -->
     <div class="admin-header">
-      <div class="title">
-        🥔 운영자
-        <span class="badge" id="role-badge">ADMIN</span>
+      <div class="left">
+        <button class="menu-btn" onclick="openSidemenu()">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+        </button>
+        <div class="title">
+          🛠️ 운영자 콘솔
+          <span class="role-badge" id="role-badge">ADMIN</span>
+        </div>
       </div>
-      <div class="who">
-        <span id="my-nick">—</span>
-        <a href="dashboard.html" class="back-link">홈으로</a>
-      </div>
+      <div class="who" id="header-who">—</div>
     </div>
 
     <!-- ========== 탭 1: 대시보드 ========== -->
     <div class="tab-content active" id="tab-dashboard">
       <div class="section-head">
-        <h2>📊 오늘의 운영 현황</h2>
-        <div class="desc">2026.05.15 기준 · 모든 수치는 더미예요</div>
+        <h2>📊 운영 현황</h2>
+        <div class="desc">2026.05.15 13:42 기준 · 모든 수치는 더미예요</div>
       </div>
 
       <div class="stat-grid">
-        <div class="stat-card">
-          <div class="k">오늘 신규 가입</div>
-          <div class="v">12</div>
-          <div class="delta">+5 어제대비</div>
-        </div>
         <div class="stat-card alert">
           <div class="k">미처리 신고</div>
           <div class="v">3</div>
           <div class="delta minus">+1 어제대비</div>
         </div>
+        <div class="stat-card alert">
+          <div class="k">미답변 문의</div>
+          <div class="v">5</div>
+          <div class="delta minus">+2 어제대비</div>
+        </div>
+        <div class="stat-card">
+          <div class="k">오늘 신규 가입</div>
+          <div class="v">12</div>
+          <div class="delta">+5 어제대비</div>
+        </div>
         <div class="stat-card">
           <div class="k">활성 사용자 (7일)</div>
           <div class="v">142</div>
           <div class="delta">+18%</div>
-        </div>
-        <div class="stat-card">
-          <div class="k">신규 게시글 (7일)</div>
-          <div class="v">28</div>
-          <div class="delta">+9%</div>
         </div>
         <div class="stat-card">
           <div class="k">진행 중 매칭</div>
@@ -555,31 +711,67 @@
           <div class="k">총 가입자</div>
           <div class="v">156</div>
         </div>
+        <div class="stat-card purple">
+          <div class="k">매칭 성공률 (7일)</div>
+          <div class="v">68%</div>
+          <div class="delta">+4%</div>
+        </div>
+        <div class="stat-card purple">
+          <div class="k">No-Show율 (7일)</div>
+          <div class="v">3.2%</div>
+          <div class="delta">-0.8%</div>
+        </div>
       </div>
 
-      <div class="section-head">
-        <h2 style="font-size: 16px;">⚡ 빠른 액션</h2>
-      </div>
-      <div class="quick-actions">
-        <div class="quick-action-row" onclick="switchTab('reports')">
+      <div class="sub-head">⚡ 빠른 액션</div>
+      <div class="menu-list">
+        <button class="menu-item" onclick="switchTab('reports')">
           <div class="ico">🚨</div>
-          <div class="label">미처리 신고 보기 (3건)</div>
-          <div class="arrow">→</div>
+          <div class="body">
+            <div class="label">신고 처리</div>
+            <div class="sub">미처리 3건이 기다리고 있어요</div>
+          </div>
+          <span class="right-tag">3</span>
+        </button>
+        <button class="menu-item" onclick="switchTab('cs')">
+          <div class="ico">💬</div>
+          <div class="body">
+            <div class="label">고객 문의 답변</div>
+            <div class="sub">미답변 5건</div>
+          </div>
+          <span class="right-tag">5</span>
+        </button>
+        <button class="menu-item" onclick="openSidemenu(); setTimeout(()=>switchTab('announcements'),300)">
+          <div class="ico">📢</div>
+          <div class="body">
+            <div class="label">공지사항 작성</div>
+            <div class="sub">최근 공지 3일 전</div>
+          </div>
+          <span class="arrow">→</span>
+        </button>
+      </div>
+
+      <div class="sub-head">📈 최근 활동</div>
+      <div class="menu-list" style="padding: 0;">
+        <div class="log-item">
+          <span class="time">13:38</span>
+          <span class="actor">씩씩한감자</span>
+          <span class="action">새 가입</span>
         </div>
-        <div class="quick-action-row" onclick="switchTab('users')">
-          <div class="ico">👥</div>
-          <div class="label">사용자 검색·관리</div>
-          <div class="arrow">→</div>
+        <div class="log-item">
+          <span class="time">13:24</span>
+          <span class="actor">고구마123</span>
+          <span class="action">No-Show 신고 접수</span>
         </div>
-        <div class="quick-action-row" onclick="switchTab('posts')">
-          <div class="ico">📝</div>
-          <div class="label">신고된 게시글 검토</div>
-          <div class="arrow">→</div>
+        <div class="log-item">
+          <span class="time">12:51</span>
+          <span class="actor">대파마스터</span>
+          <span class="action">팀 만들기 (시험공부 모임)</span>
         </div>
-        <div class="quick-action-row" onclick="showToast('운영진 추가 기능은 admin만 가능해요')">
-          <div class="ico">⚙️</div>
-          <div class="label">운영진 임명 (admin만)</div>
-          <div class="arrow">→</div>
+        <div class="log-item">
+          <span class="time">12:18</span>
+          <span class="actor">졸린대파</span>
+          <span class="action">커뮤니티 글 작성 (질문)</span>
         </div>
       </div>
     </div>
@@ -592,68 +784,62 @@
       </div>
 
       <div class="filter-bar">
-        <button class="filter-chip active" onclick="filterReports(this, 'all')">전체</button>
-        <button class="filter-chip" onclick="filterReports(this, 'pending')">미처리</button>
-        <button class="filter-chip" onclick="filterReports(this, 'processed')">처리완료</button>
-        <button class="filter-chip" onclick="filterReports(this, 'rejected')">반려</button>
+        <button class="filter-chip active" onclick="filterChip(this)">전체</button>
+        <button class="filter-chip" onclick="filterChip(this)">미처리</button>
+        <button class="filter-chip" onclick="filterChip(this)">처리완료</button>
+        <button class="filter-chip" onclick="filterChip(this)">반려</button>
       </div>
 
-      <div id="reports-list">
-        <div class="item-card">
-          <div class="meta">
-            <span>🚨 No-Show 신고 · 03/15 14:23</span>
-            <span class="badge pending">미처리</span>
-          </div>
-          <div class="target">신고 대상: <strong>고구마123</strong> (1학년 · 사범대학)</div>
-          <div class="reason">"약속 시간에 나타나지 않고 연락도 안 됐어요. 단톡방에서 일주일째 답이 없습니다."</div>
-          <div class="meta" style="margin-bottom: 10px;">
-            <span>신고자: 씩씩한감자</span>
-          </div>
-          <div class="actions">
-            <button class="btn-action reject" onclick="showToast('신고가 반려됐어요')">반려</button>
-            <button class="btn-action process" onclick="showToast('처리 완료. 대상자에게 경고가 전송됐어요')">경고 처리</button>
-          </div>
+      <div class="item-card">
+        <div class="meta">
+          <span>🚨 No-Show 신고 · 03/15 14:23</span>
+          <span class="badge pending">미처리</span>
         </div>
+        <div class="target">신고 대상: <strong>고구마123</strong> (1학년 · 사범대학)</div>
+        <div class="reason">"약속 시간에 나타나지 않고 연락도 안 됐어요. 단톡방에서 일주일째 답이 없습니다."</div>
+        <div class="meta" style="margin-bottom: 10px;"><span>신고자: 씩씩한감자</span></div>
+        <div class="actions">
+          <button class="btn-action reject" onclick="showToast('신고가 반려됐어요')">반려</button>
+          <button class="btn-action process" onclick="showToast('처리 완료. 대상자에게 경고가 전송됐어요')">경고 처리</button>
+        </div>
+      </div>
 
-        <div class="item-card">
-          <div class="meta">
-            <span>📝 부적절 게시글 신고 · 03/15 11:08</span>
-            <span class="badge pending">미처리</span>
-          </div>
-          <div class="target">신고 대상 게시글: <strong>"이 교수님 진짜 ..."</strong></div>
-          <div class="reason">"교수님 실명 거론 + 비방 표현 있음"</div>
-          <div class="post-preview">"수업 중에 ㅇㅇㅇ교수님이 학생들한테 그런 말을 하시면 안 되는 거 아닌가요? 진짜 ..."</div>
-          <div class="actions">
-            <button class="btn-action reject" onclick="showToast('신고가 반려됐어요')">반려</button>
-            <button class="btn-action process" onclick="showToast('게시글이 삭제됐어요')">게시글 삭제</button>
-          </div>
+      <div class="item-card">
+        <div class="meta">
+          <span>📝 부적절 게시글 신고 · 03/15 11:08</span>
+          <span class="badge pending">미처리</span>
         </div>
+        <div class="target">신고 대상 게시글: <strong>"이 교수님 진짜 ..."</strong></div>
+        <div class="reason">"교수님 실명 거론 + 비방 표현 있음"</div>
+        <div class="preview">"수업 중에 ㅇㅇㅇ교수님이 학생들한테 그런 말을 하시면 안 되는 거 아닌가요? ..."</div>
+        <div class="actions">
+          <button class="btn-action reject" onclick="showToast('신고가 반려됐어요')">반려</button>
+          <button class="btn-action process" onclick="showToast('게시글이 삭제됐어요')">게시글 삭제</button>
+        </div>
+      </div>
 
-        <div class="item-card">
-          <div class="meta">
-            <span>🚨 욕설 신고 · 03/15 09:42</span>
-            <span class="badge pending">미처리</span>
-          </div>
-          <div class="target">신고 대상: <strong>익명 졸린대파</strong> (커뮤니티 댓글)</div>
-          <div class="reason">"댓글에서 욕설을 사용했어요"</div>
-          <div class="post-preview">"아니 그게 ㅅㅂ ..." (전체 댓글은 클릭하여 확인)</div>
-          <div class="actions">
-            <button class="btn-action reject" onclick="showToast('신고가 반려됐어요')">반려</button>
-            <button class="btn-action process" onclick="showToast('댓글 삭제 + 작성자 경고 처리됨')">댓글 삭제 + 경고</button>
-          </div>
+      <div class="item-card">
+        <div class="meta">
+          <span>🚨 욕설 신고 · 03/15 09:42</span>
+          <span class="badge pending">미처리</span>
         </div>
+        <div class="target">신고 대상: <strong>익명 졸린대파</strong> (커뮤니티 댓글)</div>
+        <div class="reason">"댓글에서 욕설을 사용했어요"</div>
+        <div class="preview">"아니 그게 ㅅㅂ ..."</div>
+        <div class="actions">
+          <button class="btn-action reject" onclick="showToast('신고가 반려됐어요')">반려</button>
+          <button class="btn-action process" onclick="showToast('댓글 삭제 + 작성자 경고 처리됨')">댓글 삭제 + 경고</button>
+        </div>
+      </div>
 
-        <div class="item-card" style="opacity: 0.7;">
-          <div class="meta">
-            <span>📝 광고 신고 · 03/14 18:05</span>
-            <span class="badge processed">처리완료</span>
-          </div>
-          <div class="target">신고 대상 게시글: <strong>"과외 구합니다"</strong></div>
-          <div class="reason">"외부 서비스 광고"</div>
-          <div class="meta" style="margin-bottom: 0;">
-            <span>처리: 게시글 삭제 + 작성자 경고 (03/14 18:30)</span>
-          </div>
+      <div class="item-card" style="opacity: 0.7;">
+        <div class="meta">
+          <span>📝 광고 신고 · 03/14 18:05</span>
+          <span class="badge processed">처리완료</span>
         </div>
+        <div class="target">"과외 구합니다"</div>
+        <div class="reason">"외부 서비스 광고"</div>
+        <div class="meta" style="margin-bottom: 0;"><span>처리: 게시글 삭제 + 경고 (03/14 18:30)</span></div>
       </div>
     </div>
 
@@ -666,121 +852,569 @@
 
       <div class="search-bar">
         <span style="color: var(--ink-mute);">🔍</span>
-        <input type="text" placeholder="닉네임/이메일 검색" id="user-search-input" oninput="searchUsers(this.value)">
+        <input type="text" placeholder="닉네임/이메일 검색">
       </div>
 
-      <div id="users-list">
-        <div class="user-card">
-          <div class="head">
-            <div class="nick">씩씩한감자</div>
-            <span class="badge active">활성</span>
-          </div>
-          <div class="info">
-            <b>가입일:</b> 2026.04.20<br>
-            <b>학년:</b> 2학년 · 컴퓨터공학과<br>
-            <b>최근 활동:</b> 3분 전<br>
-            <b>누적 신고:</b> 0건
-          </div>
-          <div class="actions">
-            <button class="btn-action reject" onclick="showToast('상세 화면은 추후 구현')">상세</button>
-            <button class="btn-action warn" onclick="showToast('경고가 전송됐어요')">경고</button>
-            <button class="btn-action ban" onclick="if(confirm('정말 정지하시겠어요?')) showToast('정지 처리됐어요')">정지</button>
-          </div>
+      <div class="user-card">
+        <div class="head">
+          <div class="nick">씩씩한감자</div>
+          <span class="badge active">활성</span>
         </div>
-
-        <div class="user-card">
-          <div class="head">
-            <div class="nick">고구마123</div>
-            <span class="badge warned">경고 1회</span>
-          </div>
-          <div class="info">
-            <b>가입일:</b> 2026.05.01<br>
-            <b>학년:</b> 1학년 · 사범대학<br>
-            <b>최근 활동:</b> 2시간 전<br>
-            <b>누적 신고:</b> 1건 (No-Show)
-          </div>
-          <div class="actions">
-            <button class="btn-action reject" onclick="showToast('상세 화면은 추후 구현')">상세</button>
-            <button class="btn-action warn" onclick="showToast('경고가 전송됐어요')">경고</button>
-            <button class="btn-action ban" onclick="if(confirm('정말 정지하시겠어요?')) showToast('정지 처리됐어요')">정지</button>
-          </div>
+        <div class="info">
+          <b>가입일:</b> 2026.04.20 · <b>학년:</b> 2학년 · 컴공<br>
+          <b>최근 활동:</b> 3분 전 · <b>누적 신고:</b> 0건
         </div>
+        <div class="actions">
+          <button class="btn-action reject" onclick="showToast('상세는 추후 구현')">상세</button>
+          <button class="btn-action warn" onclick="showToast('경고 전송됨')">경고</button>
+          <button class="btn-action ban" onclick="if(confirm('정지하시겠어요?')) showToast('정지됨')">정지</button>
+        </div>
+      </div>
 
-        <div class="user-card">
-          <div class="head">
-            <div class="nick">대파마스터</div>
-            <span class="badge banned">정지</span>
-          </div>
-          <div class="info">
-            <b>가입일:</b> 2026.03.12<br>
-            <b>학년:</b> 3학년 · 경영대학<br>
-            <b>정지 사유:</b> 반복적인 No-Show (3회)<br>
-            <b>정지 기간:</b> 2026.05.10 ~ 2026.05.17
-          </div>
-          <div class="actions">
-            <button class="btn-action reject" onclick="showToast('상세 화면은 추후 구현')">상세</button>
-            <button class="btn-action unban" onclick="if(confirm('정지를 해제하시겠어요?')) showToast('정지가 해제됐어요')">정지 해제</button>
-          </div>
+      <div class="user-card">
+        <div class="head">
+          <div class="nick">고구마123</div>
+          <span class="badge warned">경고 1회</span>
+        </div>
+        <div class="info">
+          <b>가입일:</b> 2026.05.01 · <b>학년:</b> 1학년 · 사범대<br>
+          <b>최근 활동:</b> 2시간 전 · <b>누적 신고:</b> 1건
+        </div>
+        <div class="actions">
+          <button class="btn-action reject" onclick="showToast('상세는 추후 구현')">상세</button>
+          <button class="btn-action warn" onclick="showToast('경고 전송됨')">경고</button>
+          <button class="btn-action ban" onclick="if(confirm('정지하시겠어요?')) showToast('정지됨')">정지</button>
+        </div>
+      </div>
+
+      <div class="user-card">
+        <div class="head">
+          <div class="nick">대파마스터</div>
+          <span class="badge banned">정지</span>
+        </div>
+        <div class="info">
+          <b>가입일:</b> 2026.03.12 · <b>학년:</b> 3학년 · 경영<br>
+          <b>정지 사유:</b> 반복 No-Show (3회) · <b>해제일:</b> 05.17
+        </div>
+        <div class="actions">
+          <button class="btn-action reject" onclick="showToast('상세는 추후 구현')">상세</button>
+          <button class="btn-action unban" onclick="if(confirm('정지를 해제하시겠어요?')) showToast('정지 해제됨')">정지 해제</button>
         </div>
       </div>
     </div>
 
-    <!-- ========== 탭 4: 게시글 ========== -->
-    <div class="tab-content" id="tab-posts">
+    <!-- ========== 탭 4: 고객의 소리 (CS) ========== -->
+    <div class="tab-content" id="tab-cs">
       <div class="section-head">
-        <h2>📝 신고된 게시글</h2>
-        <div class="desc">신고가 1건 이상 들어온 게시글이 표시돼요</div>
+        <h2>💬 고객의 소리</h2>
+        <div class="desc">사용자가 보낸 문의/신고/제안에 답변해주세요</div>
       </div>
 
-      <div id="posts-list">
-        <div class="item-card">
-          <div class="meta">
-            <span>커뮤니티 · 03/15 11:08 · 신고 2건</span>
-            <span class="badge pending">검토 필요</span>
-          </div>
-          <div class="target">"이 교수님 진짜 ..."</div>
-          <div class="meta" style="margin-bottom: 10px;">
-            <span>작성자: <strong>익명 귀여운고구마</strong> (실제: 닉네임은 신고 처리 시 확인 가능)</span>
-          </div>
-          <div class="post-preview">"수업 중에 ㅇㅇㅇ교수님이 학생들한테 그런 말을 하시면 안 되는 거 아닌가요? 진짜 너무하신 거 같아서 글 올려요. 다른 분들도 비슷한 경험 있으신지..."</div>
-          <div class="actions">
-            <button class="btn-action reject" onclick="showToast('유지 처리됐어요')">유지</button>
-            <button class="btn-action process" onclick="showToast('게시글이 삭제됐어요')">삭제</button>
-          </div>
-        </div>
+      <div class="filter-bar">
+        <button class="filter-chip active" onclick="filterChip(this)">전체</button>
+        <button class="filter-chip" onclick="filterChip(this)">미답변</button>
+        <button class="filter-chip" onclick="filterChip(this)">답변완료</button>
+        <button class="filter-chip" onclick="filterChip(this)">문의</button>
+        <button class="filter-chip" onclick="filterChip(this)">신고</button>
+        <button class="filter-chip" onclick="filterChip(this)">제안</button>
+      </div>
 
-        <div class="item-card">
-          <div class="meta">
-            <span>커뮤니티 댓글 · 03/15 09:42 · 신고 1건</span>
-            <span class="badge pending">검토 필요</span>
-          </div>
-          <div class="target">댓글: "아니 그게 ㅅㅂ..."</div>
-          <div class="meta" style="margin-bottom: 10px;">
-            <span>작성자: <strong>익명 졸린대파</strong></span>
-          </div>
-          <div class="post-preview">"아니 그게 ㅅㅂ 말이 되냐고 어떻게 그렇게 생각하지"</div>
-          <div class="actions">
-            <button class="btn-action reject" onclick="showToast('유지 처리됐어요')">유지</button>
-            <button class="btn-action process" onclick="showToast('댓글이 삭제됐어요')">삭제</button>
-          </div>
+      <div class="item-card">
+        <div class="meta">
+          <span>💡 제안 · 03/15 12:18 · 씩씩한감자</span>
+          <span class="badge pending">미답변</span>
         </div>
+        <div class="target">팀 카드에 분야별 색상 구분이 있으면 좋겠어요</div>
+        <div class="reason">"지금은 다 같은 색이라서 어떤 분야인지 한눈에 안 들어와요. 시각화가 더 잘 되면 매칭도 잘 될 것 같아요."</div>
+        <div class="actions">
+          <button class="btn-action reject" onclick="showToast('보류 처리')">보류</button>
+          <button class="btn-action reply" onclick="showToast('답변 작성 화면 (추후 구현)')">답변 쓰기</button>
+        </div>
+      </div>
 
-        <div class="item-card" style="opacity: 0.7;">
-          <div class="meta">
-            <span>커뮤니티 · 03/14 18:05 · 신고 3건</span>
-            <span class="badge processed">삭제됨</span>
-          </div>
-          <div class="target">"과외 구합니다 (시간당 3만원)"</div>
-          <div class="meta" style="margin-bottom: 0;">
-            <span>처리: 03/14 18:30 · 외부 광고 사유</span>
-          </div>
+      <div class="item-card">
+        <div class="meta">
+          <span>💬 문의 · 03/15 10:05 · 졸린대파</span>
+          <span class="badge pending">미답변</span>
+        </div>
+        <div class="target">팀 만들 때 인원 수정이 안 돼요</div>
+        <div class="reason">"3명으로 만들었다가 4명으로 바꾸려고 했는데 수정 버튼이 없습니다. 한 번 만든 팀은 인원 수정 못 하나요?"</div>
+        <div class="actions">
+          <button class="btn-action reject" onclick="showToast('보류 처리')">보류</button>
+          <button class="btn-action reply" onclick="showToast('답변 작성 화면 (추후 구현)')">답변 쓰기</button>
+        </div>
+      </div>
+
+      <div class="item-card">
+        <div class="meta">
+          <span>🚨 신고 · 03/15 09:42 · 익명</span>
+          <span class="badge pending">미답변</span>
+        </div>
+        <div class="target">커뮤니티에서 누가 욕했어요</div>
+        <div class="reason">"오늘 자유게시판에 올라온 댓글에 욕설이 있어요. 처리 부탁드려요."</div>
+        <div class="actions">
+          <button class="btn-action reject" onclick="showToast('보류 처리')">보류</button>
+          <button class="btn-action reply" onclick="showToast('답변 작성 화면 (추후 구현)')">답변 쓰기</button>
+        </div>
+      </div>
+
+      <div class="item-card" style="opacity: 0.7;">
+        <div class="meta">
+          <span>💬 문의 · 03/14 16:22 · 귀여운고구마</span>
+          <span class="badge processed">답변완료</span>
+        </div>
+        <div class="target">출생연도 수정이 안 돼요</div>
+        <div class="meta" style="margin-bottom: 0;">
+          <span>답변: 03/14 18:00 · "출생연도는 가입 후 수정 불가 정책입니다"</span>
         </div>
       </div>
     </div>
 
   </div>
 
-  <!-- ========== 하단 탭바 (admin-view 안에 있음 - 권한 있을 때만 보임) ========== -->
+  <!-- ========== 햄버거 사이드 메뉴 (더보기) ========== -->
+  <div class="sidemenu-overlay" id="sidemenu-overlay" onclick="closeSidemenu()"></div>
+  <div class="sidemenu" id="sidemenu">
+    <div class="head">
+      <div class="name" id="side-name">—</div>
+      <div class="meta" id="side-meta">—</div>
+    </div>
+    <div class="body">
+      <div class="group-title">콘텐츠</div>
+      <button class="side-item" onclick="closeSidemenu(); switchTab('announcements')">
+        <span class="ico">📢</span> 공지사항 관리
+      </button>
+      <button class="side-item" onclick="closeSidemenu(); switchTab('mod-board')">
+        <span class="ico">🗨️</span> 운영자 게시판
+      </button>
+
+      <div class="group-title">관리 (admin 전용)</div>
+      <button class="side-item" id="nav-mods" onclick="closeSidemenu(); switchTab('mods')">
+        <span class="ico">👮</span> 운영자 관리
+      </button>
+      <button class="side-item" id="nav-logs" onclick="closeSidemenu(); switchTab('logs')">
+        <span class="ico">📜</span> 활동 로그
+      </button>
+      <button class="side-item" id="nav-settings" onclick="closeSidemenu(); switchTab('settings')">
+        <span class="ico">⚙️</span> 시스템 설정
+      </button>
+
+      <div class="group-title">계정</div>
+      <button class="side-item" onclick="closeSidemenu(); switchTab('me')">
+        <span class="ico">🙂</span> 내 정보 / 닉네임 변경
+      </button>
+      <button class="side-item danger" onclick="closeSidemenu(); adminLogout()">
+        <span class="ico">🚪</span> 로그아웃
+      </button>
+
+      <div style="padding: 16px 18px; font-size: 11px; color: var(--ink-mute); line-height: 1.6;">
+        <strong>30분 미사용 시 자동 로그아웃</strong><br>
+        탭을 닫으면 즉시 로그아웃됩니다.
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== 더보기 탭들 (사이드 메뉴에서 접근) ========== -->
+
+  <!-- 📢 공지사항 관리 -->
+  <div class="tab-content" id="tab-announcements">
+    <div class="section-head">
+      <h2>📢 공지사항 관리</h2>
+      <div class="desc">사용자에게 발송할 공지를 작성하고 관리해요</div>
+    </div>
+
+    <div class="write-form">
+      <div class="form-block">
+        <label class="form-label">공지 제목</label>
+        <div class="input-wrap"><input type="text" placeholder="예: [점검] 5/20 새벽 1~3시 서비스 점검 안내"></div>
+      </div>
+      <div class="form-block">
+        <label class="form-label">내용</label>
+        <div class="input-wrap"><textarea placeholder="공지 본문을 작성해주세요. 사용자에게 메일로도 발송할지 선택할 수 있어요."></textarea></div>
+      </div>
+      <div class="form-block">
+        <label class="form-label">대상 / 발송 옵션</label>
+        <div style="display:flex; gap: 6px; flex-wrap: wrap;">
+          <button class="filter-chip active" onclick="filterChip(this)">전체 사용자</button>
+          <button class="filter-chip" onclick="filterChip(this)">최근 가입자만</button>
+          <button class="filter-chip" onclick="filterChip(this)">활성 사용자만</button>
+        </div>
+        <div style="display:flex; gap: 6px; flex-wrap: wrap; margin-top: 8px;">
+          <button class="filter-chip active" onclick="filterChip(this)">📱 인앱 알림</button>
+          <button class="filter-chip" onclick="filterChip(this)">📧 메일 동시 발송</button>
+        </div>
+      </div>
+      <button class="btn-primary" onclick="showToast('공지가 발송됐어요 (더미)')">공지 발송</button>
+    </div>
+
+    <div class="sub-head">최근 공지</div>
+    <div class="post-card">
+      <div class="head">
+        <div class="title">[업데이트] 매칭 알고리즘 개선 안내</div>
+        <span class="badge published">발송됨</span>
+      </div>
+      <div class="body">시간대 매칭 정확도가 개선됐어요. 이제 ±30분 이내로 더 정확하게 매칭됩니다.</div>
+      <div class="info">
+        <span>2026.05.12</span>
+        <span>👁 142명 열람</span>
+        <span>운영자: 이재아</span>
+      </div>
+    </div>
+    <div class="post-card">
+      <div class="head">
+        <div class="title">[안내] 서비스 정식 오픈 🎉</div>
+        <span class="badge published">발송됨</span>
+      </div>
+      <div class="body">100명의 사전신청자분들 덕분에 서비스가 정식 오픈했습니다! 모두 환영합니다.</div>
+      <div class="info">
+        <span>2026.05.05</span>
+        <span>👁 98명 열람</span>
+        <span>운영자: 이재아</span>
+      </div>
+    </div>
+    <div class="post-card">
+      <div class="head">
+        <div class="title">[준비중] 운영 정책 변경 예정</div>
+        <span class="badge draft">초안</span>
+      </div>
+      <div class="body">No-Show 페널티 정책 일부가 다음 주에 변경될 예정입니다. 검토 중...</div>
+      <div class="info">
+        <span>2026.05.14 (저장됨)</span>
+        <span>운영자: 이재아</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 🗨️ 운영자 게시판 -->
+  <div class="tab-content" id="tab-mod-board">
+    <div class="section-head">
+      <h2>🗨️ 운영자 게시판</h2>
+      <div class="desc">운영진끼리만 보는 내부 공지·소통 공간</div>
+    </div>
+
+    <div class="filter-bar">
+      <button class="filter-chip active" onclick="filterChip(this)">전체</button>
+      <button class="filter-chip" onclick="filterChip(this)">📌 공지</button>
+      <button class="filter-chip" onclick="filterChip(this)">자유</button>
+    </div>
+
+    <button class="btn-primary" style="margin-bottom: 16px;" onclick="showToast('글 작성 화면 (추후 구현)')">+ 글 쓰기</button>
+
+    <div class="post-card">
+      <div class="head">
+        <div class="title">📌 [공지] 무분별한 경고는 자제해주세요</div>
+        <span class="badge published">고정</span>
+      </div>
+      <div class="body">신고가 들어왔다고 즉시 경고를 주지 마시고, 반드시 게시글/대화 전후 맥락을 확인한 후 판단해주세요. 경고 1회는 사용자에게 큰 부담이 됩니다.</div>
+      <div class="info">
+        <span>이재아 (admin)</span>
+        <span>2026.05.10</span>
+        <span>💬 3</span>
+      </div>
+    </div>
+
+    <div class="post-card">
+      <div class="head">
+        <div class="title">[알림] 오늘 저녁 7시 공지 발송 예정</div>
+      </div>
+      <div class="body">매칭 알고리즘 개선 안내 공지 오늘 저녁 7시쯤 발송할 예정입니다. 미리 참고하세요.</div>
+      <div class="info">
+        <span>이재아 (admin)</span>
+        <span>2026.05.15 11:30</span>
+        <span>💬 0</span>
+      </div>
+    </div>
+
+    <div class="post-card">
+      <div class="head">
+        <div class="title">신고 처리 가이드라인 정리해봤습니다</div>
+      </div>
+      <div class="body">No-Show / 욕설 / 광고 신고에 대한 처리 기준을 정리해봤습니다. 다들 한 번 읽어보고 의견 주세요.</div>
+      <div class="info">
+        <span>김운영 (moderator)</span>
+        <span>2026.05.12</span>
+        <span>💬 5</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 👮 운영자 관리 (admin만) -->
+  <div class="tab-content" id="tab-mods">
+    <div class="section-head">
+      <h2>👮 운영자 관리</h2>
+      <div class="desc">운영자를 임명하고 관리해요 · admin 전용 기능</div>
+    </div>
+
+    <div class="write-form">
+      <div class="sub-head" style="margin-top:0;">+ 새 운영자 추가</div>
+      <div class="form-block">
+        <label class="form-label">본명</label>
+        <div class="input-wrap"><input type="text" placeholder="예: 김운영"></div>
+      </div>
+      <div class="form-block">
+        <label class="form-label">운영자 ID</label>
+        <div class="input-wrap"><input type="text" placeholder="예: kim_mod (영문/숫자만)"></div>
+      </div>
+      <div class="form-block">
+        <label class="form-label">초기 비밀번호</label>
+        <div class="input-wrap"><input type="text" placeholder="발급할 임시 비번 (영문+숫자 8자 이상)"></div>
+        <div class="input-hint">발급 후 운영자가 첫 로그인 시 변경하도록 안내해주세요.</div>
+      </div>
+      <div class="form-block">
+        <label class="form-label">권한</label>
+        <div style="display:flex; gap: 6px;">
+          <button class="filter-chip active" onclick="filterChip(this)">moderator</button>
+          <button class="filter-chip" onclick="filterChip(this)">admin (모든 권한)</button>
+        </div>
+      </div>
+      <button class="btn-primary" onclick="showToast('운영자가 추가됐어요 (더미)')">운영자 추가</button>
+    </div>
+
+    <div class="sub-head">현재 운영자 목록</div>
+
+    <div class="user-card">
+      <div class="head">
+        <div class="nick">이재아 <span style="font-size:11px; color:var(--ink-mute); font-weight:500;">@jaea_admin</span></div>
+        <span class="badge purple" style="background: var(--admin-purple-soft); color: var(--admin-purple);">ADMIN</span>
+      </div>
+      <div class="info">
+        <b>본명:</b> 이재아 · <b>가입:</b> 2026.04.01<br>
+        <b>최근 로그인:</b> 13:42 · <b>처리 건수 (7일):</b> 12건
+      </div>
+      <div class="info" style="color: var(--ink-mute); font-size:11px;">본인 계정 (수정 불가)</div>
+    </div>
+
+    <div class="user-card">
+      <div class="head">
+        <div class="nick">김운영 <span style="font-size:11px; color:var(--ink-mute); font-weight:500;">@kim_mod</span></div>
+        <span class="badge active">moderator</span>
+      </div>
+      <div class="info">
+        <b>본명:</b> 김운영 · <b>가입:</b> 2026.05.01<br>
+        <b>최근 로그인:</b> 어제 18:20 · <b>처리 건수 (7일):</b> 8건
+      </div>
+      <div class="actions">
+        <button class="btn-action reject" onclick="showToast('비번 초기화 (추후 구현)')">비번 초기화</button>
+        <button class="btn-action warn" onclick="showToast('정지 (추후 구현)')">정지</button>
+        <button class="btn-action ban" onclick="if(confirm('정말 해임하시겠어요?')) showToast('해임됨')">해임</button>
+      </div>
+    </div>
+
+    <div class="user-card">
+      <div class="head">
+        <div class="nick">박감자 <span style="font-size:11px; color:var(--ink-mute); font-weight:500;">@park_mod</span></div>
+        <span class="badge warned">정지</span>
+      </div>
+      <div class="info">
+        <b>본명:</b> 박감자 · <b>가입:</b> 2026.04.15<br>
+        <b>정지 사유:</b> 부적절한 신고 처리 (3회) · <b>해제일:</b> 05.20
+      </div>
+      <div class="actions">
+        <button class="btn-action unban" onclick="if(confirm('정지를 해제하시겠어요?')) showToast('해제됨')">정지 해제</button>
+        <button class="btn-action ban" onclick="if(confirm('해임하시겠어요?')) showToast('해임됨')">해임</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 📜 활동 로그 (admin만) -->
+  <div class="tab-content" id="tab-logs">
+    <div class="section-head">
+      <h2>📜 활동 로그</h2>
+      <div class="desc">운영자 활동 기록 · admin 전용 · 최대 90일 보관</div>
+    </div>
+
+    <div class="filter-bar">
+      <button class="filter-chip active" onclick="filterChip(this)">전체</button>
+      <button class="filter-chip" onclick="filterChip(this)">신고처리</button>
+      <button class="filter-chip" onclick="filterChip(this)">사용자정지</button>
+      <button class="filter-chip" onclick="filterChip(this)">게시글삭제</button>
+      <button class="filter-chip" onclick="filterChip(this)">공지발송</button>
+      <button class="filter-chip" onclick="filterChip(this)">운영자관리</button>
+    </div>
+
+    <div class="search-bar">
+      <span style="color: var(--ink-mute);">🔍</span>
+      <input type="text" placeholder="운영자 ID 또는 대상 검색">
+    </div>
+
+    <div class="menu-list" style="padding: 0;">
+      <div class="log-item">
+        <span class="time">13:42</span>
+        <span><span class="actor">@jaea_admin</span> <span class="action">[로그인] 운영자 콘솔 접속 (IP: 211.40.x.x)</span></span>
+      </div>
+      <div class="log-item">
+        <span class="time">12:18</span>
+        <span><span class="actor">@kim_mod</span> <span class="action">[게시글삭제] "이 교수님 진짜..." (사유: 명예훼손)</span></span>
+      </div>
+      <div class="log-item">
+        <span class="time">11:30</span>
+        <span><span class="actor">@jaea_admin</span> <span class="action">[공지작성] "오늘 저녁 7시 공지 발송 예정" (운영자게시판)</span></span>
+      </div>
+      <div class="log-item">
+        <span class="time">10:15</span>
+        <span><span class="actor">@kim_mod</span> <span class="action">[사용자경고] 고구마123 (사유: No-Show 신고)</span></span>
+      </div>
+      <div class="log-item">
+        <span class="time">09:42</span>
+        <span><span class="actor">@kim_mod</span> <span class="action">[댓글삭제] 익명 졸린대파 (사유: 욕설)</span></span>
+      </div>
+      <div class="log-item">
+        <span class="time">어제 18:20</span>
+        <span><span class="actor">@kim_mod</span> <span class="action">[로그인] 운영자 콘솔 접속</span></span>
+      </div>
+      <div class="log-item">
+        <span class="time">어제 16:30</span>
+        <span><span class="actor">@jaea_admin</span> <span class="action">[운영자관리] 박감자 정지 (사유: 부적절 신고처리)</span></span>
+      </div>
+      <div class="log-item">
+        <span class="time">2일전</span>
+        <span><span class="actor">@jaea_admin</span> <span class="action">[운영자관리] 김운영 임명 (moderator)</span></span>
+      </div>
+    </div>
+
+    <div style="text-align:center; margin-top: 16px;">
+      <button class="btn-secondary" onclick="showToast('CSV 내보내기 (추후 구현)')">📥 CSV로 내보내기</button>
+    </div>
+  </div>
+
+  <!-- ⚙️ 시스템 설정 (admin만) -->
+  <div class="tab-content" id="tab-settings">
+    <div class="section-head">
+      <h2>⚙️ 시스템 설정</h2>
+      <div class="desc">서비스 운영 정책 · admin 전용</div>
+    </div>
+
+    <div class="sub-head">매칭 정책</div>
+    <div class="write-form">
+      <div class="form-block">
+        <label class="form-label">최대 카드 보유 수 (사용자당)</label>
+        <div class="input-wrap"><input type="number" value="1"></div>
+      </div>
+      <div class="form-block">
+        <label class="form-label">매칭 실행 주기</label>
+        <div style="display:flex; gap:6px;">
+          <button class="filter-chip" onclick="filterChip(this)">실시간</button>
+          <button class="filter-chip active" onclick="filterChip(this)">하루 2회</button>
+          <button class="filter-chip" onclick="filterChip(this)">하루 1회</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="sub-head">페널티 정책</div>
+    <div class="write-form">
+      <div class="form-block">
+        <label class="form-label">No-Show 1회 페널티</label>
+        <div style="display:flex; gap:6px;">
+          <button class="filter-chip" onclick="filterChip(this)">없음</button>
+          <button class="filter-chip active" onclick="filterChip(this)">3일 매칭 정지</button>
+          <button class="filter-chip" onclick="filterChip(this)">7일 매칭 정지</button>
+        </div>
+      </div>
+      <div class="form-block">
+        <label class="form-label">반복 No-Show (3회 누적) 시</label>
+        <div style="display:flex; gap:6px;">
+          <button class="filter-chip" onclick="filterChip(this)">7일 정지</button>
+          <button class="filter-chip active" onclick="filterChip(this)">14일 정지</button>
+          <button class="filter-chip" onclick="filterChip(this)">영구 정지</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="sub-head">시스템 헬스</div>
+    <div class="menu-list">
+      <button class="menu-item" onclick="showToast('정상 동작 중')">
+        <div class="ico">🟢</div>
+        <div class="body">
+          <div class="label">DB 연결</div>
+          <div class="sub">평균 응답 78ms · 정상</div>
+        </div>
+      </button>
+      <button class="menu-item" onclick="showToast('정상 동작 중')">
+        <div class="ico">🟢</div>
+        <div class="body">
+          <div class="label">메일 발송 (Resend)</div>
+          <div class="sub">오늘 발송 42건 · 실패 0건</div>
+        </div>
+      </button>
+      <button class="menu-item" onclick="showToast('정상 동작 중')">
+        <div class="ico">🟡</div>
+        <div class="body">
+          <div class="label">미인증 user 정리 (cron)</div>
+          <div class="sub">미설정 · 수동 실행 권장</div>
+        </div>
+      </button>
+    </div>
+
+    <button class="btn-primary" onclick="showToast('설정이 저장됐어요 (더미)')">설정 저장</button>
+  </div>
+
+  <!-- 🙂 내 정보 -->
+  <div class="tab-content" id="tab-me">
+    <div class="section-head">
+      <h2>🙂 내 정보</h2>
+      <div class="desc">운영자 본인 계정 설정</div>
+    </div>
+
+    <div class="user-card">
+      <div class="head">
+        <div class="nick">이재아</div>
+        <span class="badge purple" style="background: var(--admin-purple-soft); color: var(--admin-purple);">ADMIN</span>
+      </div>
+      <div class="info">
+        <b>운영자 ID:</b> @jaea_admin<br>
+        <b>본명:</b> 이재아<br>
+        <b>가입:</b> 2026.04.01<br>
+        <b>최근 로그인:</b> 13:42 (현재 세션)
+      </div>
+    </div>
+
+    <div class="sub-head">공개 닉네임</div>
+    <div class="write-form">
+      <div class="form-block">
+        <label class="form-label">공지/댓글 작성 시 보여질 이름</label>
+        <div class="input-wrap"><input type="text" value="감자운영자" placeholder="공지 작성 시 사용할 닉네임"></div>
+        <div class="input-hint">사용자에게는 본명 대신 이 닉네임이 표시됩니다.</div>
+      </div>
+      <button class="btn-primary" onclick="showToast('닉네임이 변경됐어요')">변경</button>
+    </div>
+
+    <div class="sub-head">비밀번호 변경</div>
+    <div class="write-form">
+      <div class="form-block">
+        <label class="form-label">현재 비밀번호</label>
+        <div class="input-wrap"><input type="password"></div>
+      </div>
+      <div class="form-block">
+        <label class="form-label">새 비밀번호</label>
+        <div class="input-wrap"><input type="password" placeholder="영문+숫자 8자 이상"></div>
+      </div>
+      <div class="form-block">
+        <label class="form-label">새 비밀번호 확인</label>
+        <div class="input-wrap"><input type="password"></div>
+      </div>
+      <button class="btn-primary" onclick="showToast('비번 변경됨')">비밀번호 변경</button>
+    </div>
+
+    <div class="sub-head">2차 PIN 변경</div>
+    <div class="write-form">
+      <div class="form-block">
+        <label class="form-label">새 2차 PIN (6자리)</label>
+        <div class="pin-grid">
+          <input class="pin-cell" type="text" inputmode="numeric" maxlength="1" />
+          <input class="pin-cell" type="text" inputmode="numeric" maxlength="1" />
+          <input class="pin-cell" type="text" inputmode="numeric" maxlength="1" />
+          <input class="pin-cell" type="text" inputmode="numeric" maxlength="1" />
+          <input class="pin-cell" type="text" inputmode="numeric" maxlength="1" />
+          <input class="pin-cell" type="text" inputmode="numeric" maxlength="1" />
+        </div>
+      </div>
+      <button class="btn-primary" onclick="showToast('2차 PIN 변경됨')">PIN 변경</button>
+    </div>
+
+    <button class="btn-secondary" onclick="adminLogout()" style="margin-top: 16px; color: var(--error); border-color: var(--error);">🚪 로그아웃</button>
+  </div>
+
+  <!-- ========== 하단 탭바 ========== -->
   <nav class="tab-bar" id="tab-bar" style="display: none;">
     <button class="tab-btn active" data-tab="dashboard" onclick="switchTab('dashboard')">
       <span class="ico">📊</span>
@@ -795,9 +1429,10 @@
       <span class="ico">👥</span>
       <span>사용자</span>
     </button>
-    <button class="tab-btn" data-tab="posts" onclick="switchTab('posts')">
-      <span class="ico">📝</span>
-      <span>게시글</span>
+    <button class="tab-btn" data-tab="cs" onclick="switchTab('cs')">
+      <span class="ico">💬</span>
+      <span>CS</span>
+      <span class="badge-count">5</span>
     </button>
   </nav>
 
@@ -807,100 +1442,185 @@
 
 <script>
   /* ============================================================
-     Supabase 초기화 + 인증/권한 가드
+     운영자 콘솔 — 별도 인증 + 자동 로그아웃 + 더미 동작
      ============================================================ */
-  let supabaseClient = null;
-  const SUPABASE_URL = 'https://mleypjquzggtyouepfha.supabase.co';
-  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1sZXlwanF1emdndHlvdWVwZmhhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg4MTAzMDIsImV4cCI6MjA5NDM4NjMwMn0.eM4nh50tC-ZxVRoIA1NZit4JtMJqPlUBZ5LEnTrRB5Q';
 
-  try {
-    if (window.supabase && typeof window.supabase.createClient === 'function') {
-      supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-    } else {
-      console.error('❌ Supabase SDK 로드 실패');
-    }
-  } catch (err) {
-    console.error('❌ Supabase 초기화 실패:', err);
+  // 더미 운영자 계정 (실제는 DB에서 검증)
+  const DUMMY_ADMINS = {
+    'jaea_admin': { pw: 'jaea1234', pin: '123456', role: 'admin', realName: '이재아', nickname: '감자운영자' },
+    'kim_mod':    { pw: 'kim12345', pin: '111111', role: 'moderator', realName: '김운영', nickname: '운영자' }
+  };
+
+  let currentAdmin = null;
+  let idleTimer = null;
+  const IDLE_TIMEOUT_MS = 30 * 60 * 1000;  // 30분
+
+  // sessionStorage에 인증 토큰 저장 (탭 닫으면 사라짐)
+  const SESSION_KEY = 'admin_session';
+
+  function loadSession(){
+    try {
+      const raw = sessionStorage.getItem(SESSION_KEY);
+      if(!raw) return null;
+      return JSON.parse(raw);
+    } catch { return null; }
+  }
+  function saveSession(admin){
+    sessionStorage.setItem(SESSION_KEY, JSON.stringify({
+      id: admin.id, role: admin.role,
+      realName: admin.realName, nickname: admin.nickname,
+      loggedInAt: Date.now()
+    }));
+  }
+  function clearSession(){
+    sessionStorage.removeItem(SESSION_KEY);
   }
 
-  // 권한 가드: 로그인 + role IN ('admin', 'moderator')만 통과
-  async function bootAdmin(){
-    if(!supabaseClient){
-      // SDK 실패 시 — 데모용으로 admin 가정 (개발 편의)
-      showAdminView('admin', '개발자감자');
+  /* ========== 로그인 / 로그아웃 ========== */
+  function adminLogin(){
+    const id = document.getElementById('login-id').value.trim();
+    const pw = document.getElementById('login-pw').value;
+    const pinCells = document.querySelectorAll('#login-pin .pin-cell');
+    const pin = Array.from(pinCells).map(c => c.value).join('');
+
+    if(!id || !pw){ showToast('ID와 비밀번호를 입력해주세요'); return; }
+    if(pin.length !== 6){ showToast('2차 PIN 6자리를 입력해주세요'); return; }
+
+    // 더미 검증 (실제는 서버 RPC 호출)
+    const admin = DUMMY_ADMINS[id];
+    if(!admin || admin.pw !== pw || admin.pin !== pin){
+      showToast('ID, 비밀번호 또는 PIN이 일치하지 않아요');
+      // PIN 클리어
+      pinCells.forEach(c => { c.value = ''; c.classList.remove('filled'); });
       return;
     }
 
-    const { data: { session } } = await supabaseClient.auth.getSession();
-    if(!session){
-      // 비로그인 → auth로
-      location.replace('auth.html');
-      return;
-    }
-
-    // my_role RPC 호출
-    const { data: role, error } = await supabaseClient.rpc('my_role');
-    if(error){
-      console.error('role 조회 실패:', error);
-      showNoAccess();
-      return;
-    }
-
-    if(role !== 'admin' && role !== 'moderator'){
-      // 권한 없음 → no-access 화면
-      showNoAccess();
-      return;
-    }
-
-    // 닉네임 조회
-    const { data: profile } = await supabaseClient
-      .from('profiles')
-      .select('nickname')
-      .eq('id', session.user.id)
-      .maybeSingle();
-
-    showAdminView(role, profile?.nickname || '운영자');
+    // 로그인 성공
+    currentAdmin = { id, ...admin };
+    saveSession(currentAdmin);
+    showApp();
+    showToast(`${admin.realName} 님 환영합니다 (데모)`);
   }
 
-  function showAdminView(role, nickname){
-    document.getElementById('admin-view').style.display = 'block';
+  function adminLogout(){
+    if(!confirm('로그아웃 하시겠어요?')) return;
+    clearSession();
+    currentAdmin = null;
+    if(idleTimer) clearTimeout(idleTimer);
+    showLogin();
+  }
+
+  /* ========== 화면 전환 ========== */
+  function showLogin(){
+    document.getElementById('login-screen').classList.remove('hidden');
+    document.getElementById('main-app').style.display = 'none';
+    document.getElementById('tab-bar').style.display = 'none';
+  }
+
+  function showApp(){
+    document.getElementById('login-screen').classList.add('hidden');
+    document.getElementById('main-app').style.display = 'block';
     document.getElementById('tab-bar').style.display = 'grid';
-    document.getElementById('role-badge').textContent = role.toUpperCase();
-    document.getElementById('my-nick').textContent = nickname;
-    document.body.classList.add('ready');
-  }
 
-  function showNoAccess(){
-    document.getElementById('no-access-view').style.display = 'block';
-    document.body.classList.add('ready');
-  }
+    // 헤더/사이드 정보 채우기
+    document.getElementById('role-badge').textContent = currentAdmin.role.toUpperCase();
+    document.getElementById('header-who').textContent = `${currentAdmin.realName} (@${currentAdmin.id})`;
+    document.getElementById('side-name').textContent = `${currentAdmin.realName} (${currentAdmin.nickname})`;
+    document.getElementById('side-meta').textContent = `@${currentAdmin.id} · ${currentAdmin.role.toUpperCase()}`;
 
-  bootAdmin();
+    // moderator는 admin 전용 메뉴 잠금 표시
+    if(currentAdmin.role !== 'admin'){
+      ['nav-mods', 'nav-logs', 'nav-settings'].forEach(id => {
+        const el = document.getElementById(id);
+        if(el){
+          el.classList.add('disabled');
+          el.onclick = () => { closeSidemenu(); showToast('admin 권한이 필요한 기능이에요'); };
+          if(!el.querySelector('.lock')){
+            const lock = document.createElement('span');
+            lock.className = 'lock';
+            lock.textContent = '🔒 admin 전용';
+            el.appendChild(lock);
+          }
+        }
+      });
+    }
+
+    resetIdleTimer();
+  }
 
   /* ========== 탭 전환 ========== */
   function switchTab(name){
     document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
-    document.getElementById('tab-' + name).classList.add('active');
+    const target = document.getElementById('tab-' + name);
+    if(target) target.classList.add('active');
 
     document.querySelectorAll('.tab-bar .tab-btn').forEach(b => b.classList.remove('active'));
-    document.querySelector(`.tab-bar [data-tab="${name}"]`).classList.add('active');
+    const btn = document.querySelector(`.tab-bar [data-tab="${name}"]`);
+    if(btn) btn.classList.add('active');
 
     window.scrollTo(0, 0);
+    resetIdleTimer();
   }
 
-  /* ========== 신고 필터 (더미 — 실제 데이터 연동 후 동작) ========== */
-  function filterReports(btn, type){
-    document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
-    btn.classList.add('active');
-    showToast(`'${btn.textContent}' 필터 (실데이터 연동 후 동작)`);
+  /* ========== 사이드 메뉴 ========== */
+  function openSidemenu(){
+    document.getElementById('sidemenu').classList.add('open');
+    document.getElementById('sidemenu-overlay').classList.add('open');
+  }
+  function closeSidemenu(){
+    document.getElementById('sidemenu').classList.remove('open');
+    document.getElementById('sidemenu-overlay').classList.remove('open');
   }
 
-  /* ========== 사용자 검색 (더미) ========== */
-  function searchUsers(q){
-    // 실제 구현 시 supabaseClient.from('profiles')... .ilike('nickname', `%${q}%`)
-    if(q.length > 0){
-      console.log('검색:', q);
+  /* ========== 30분 idle 자동 로그아웃 ========== */
+  function resetIdleTimer(){
+    if(idleTimer) clearTimeout(idleTimer);
+    if(!currentAdmin) return;
+    idleTimer = setTimeout(() => {
+      alert('30분 동안 활동이 없어 자동 로그아웃됩니다.');
+      clearSession();
+      currentAdmin = null;
+      showLogin();
+    }, IDLE_TIMEOUT_MS);
+  }
+
+  // 사용자 활동 감지 (마우스, 키보드, 터치)
+  ['click', 'keydown', 'touchstart', 'scroll'].forEach(ev => {
+    document.addEventListener(ev, () => {
+      if(currentAdmin) resetIdleTimer();
+    }, { passive: true });
+  });
+
+  /* ========== PIN 셀 자동 이동 + 숫자만 ========== */
+  document.addEventListener('input', e => {
+    if(e.target.classList.contains('pin-cell')){
+      const cell = e.target;
+      cell.value = cell.value.replace(/[^0-9]/g, '');
+      if(cell.value){
+        cell.classList.add('filled');
+        const next = cell.nextElementSibling;
+        if(next && next.classList.contains('pin-cell')) next.focus();
+      } else {
+        cell.classList.remove('filled');
+      }
     }
+  });
+  document.addEventListener('keydown', e => {
+    if(e.target.classList.contains('pin-cell') && e.key === 'Backspace' && !e.target.value){
+      const prev = e.target.previousElementSibling;
+      if(prev && prev.classList.contains('pin-cell')){
+        prev.focus();
+        prev.value = '';
+        prev.classList.remove('filled');
+      }
+    }
+  });
+
+  /* ========== 필터 칩 ========== */
+  function filterChip(btn){
+    const parent = btn.parentElement;
+    parent.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+    btn.classList.add('active');
   }
 
   /* ========== 토스트 ========== */
@@ -912,6 +1632,18 @@
     clearTimeout(toastTimeout);
     toastTimeout = setTimeout(() => toast.classList.remove('show'), 2400);
   }
+
+  /* ========== 초기 부팅 ========== */
+  // 페이지 로드 시 sessionStorage에 세션 있으면 메인으로, 없으면 로그인
+  (function boot(){
+    const session = loadSession();
+    if(session){
+      currentAdmin = { ...session };
+      showApp();
+    } else {
+      showLogin();
+    }
+  })();
 </script>
 </body>
 </html>
