@@ -14,6 +14,13 @@
 <!-- Supabase JS SDK (UMD 빌드) -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
 
+<!-- 인증 확인 전까지 콘텐츠 숨김 (FOUC 방지 + 보안)
+     bootAuth 성공 시 body.ready 클래스가 붙어 visibility 복원됨 -->
+<style>
+  body { visibility: hidden; }
+  body.ready { visibility: visible; }
+</style>
+
 <style>
   :root{
     --knu-blue: #0047BB;
@@ -2534,12 +2541,18 @@
   }
 
   // 인증 가드: 페이지 로드 즉시 세션 확인 → 없으면 auth.html로 이동
+  // 인증+profile 모두 OK일 때만 body.ready 추가 → 콘텐츠 표시
   async function bootAuth(){
-    if(!supabaseClient) return;  // SDK 로드 실패 시에는 더미로 둠
+    if(!supabaseClient){
+      // SDK 로드 실패 시 — 개발/데모 환경 보호 위해 일단 보이게
+      document.body.classList.add('ready');
+      return;
+    }
     const { data: { session }, error } = await supabaseClient.auth.getSession();
     if(error || !session){
+      // 비로그인 → 콘텐츠 보여주지 않고 즉시 auth로 이동
       console.warn('비로그인 상태. 로그인 화면으로 이동합니다.');
-      location.href = 'auth.html';
+      location.replace('auth.html');  // replace로 history에 dashboard 안 남김
       return;
     }
     currentUser = session.user;
@@ -2553,17 +2566,21 @@
 
     if(profErr){
       console.error('프로필 조회 실패:', profErr);
+      // 프로필 조회 실패는 일단 보여주되 사용자에게 알림 (네트워크 일시 오류 가능)
+      document.body.classList.add('ready');
       return;
     }
     if(!profile){
       // 인증은 됐지만 profiles row 없음 → 가입 미완성
       alert('가입이 완료되지 않은 계정이에요. 가입을 마저 진행해주세요.');
-      location.href = 'auth.html';
+      location.replace('auth.html');
       return;
     }
 
     currentProfile = profile;
     fillUserInfo();
+    // 인증+프로필 모두 통과 → 콘텐츠 표시
+    document.body.classList.add('ready');
   }
 
   // 화면 곳곳에 본인 정보 채우기

@@ -68,6 +68,16 @@
   - 로그인 화면: suffix 제거, 자유 입력 (웹메일/알림 메일 둘 다 OK)
   - 알림 메일 입력 화면에 "로그인 가능, 신중히 입력" 안내
   - 보안: 비밀번호 재설정 등 민감 작업은 웹메일 OTP만 사용 (예정)
+- ✅ dashboard 인증 확인 전 콘텐츠 숨김 (visibility:hidden → 인증 OK 시 ready 클래스로 표시)
+  - 비로그인 시 dashboard 내용 노출 차단
+  - location.replace로 history 정리 (뒤로가기로 돌아갈 수 없게)
+- ✅ 로그인 유지 (Supabase 기본 동작) + 공용 기기 주의 안내 박스
+- ✅ OTP 미인증 user 정리 함수 (`cleanup_unverified_users`)
+  - profiles 없는 auth.users + 24시간 경과 → 삭제
+  - 보안: 타인 메일 임의 입력 시 그 사람 가입 차단되는 문제 방지
+  - 자동화는 추후 (pg_cron extension 활성화 + 매일 1회 실행)
+- ✅ 커뮤니티 규칙 명문화 (rules.html + community-write 가이드)
+  - 성적/정치/혐오/비방/개인정보/광고/도배/명예훼손 금지
 - ✅ 100명 사전신청 카피 변경 ("3일 후 정식 오픈" + 100명 도달해도 가입 계속 받음)
 - ✅ 닉네임 금칙어 검증
   - 클라이언트 사전 검사 (`isNicknameForbidden`) — 즉시 피드백
@@ -164,6 +174,20 @@ Authentication → Providers → Email 에서 두 값 모두 변경
 
 ### 그 이후
 - 다른 이메일 템플릿 한글화 (Reset Password, Change Email)
+
+### 🤖 자동화 (시간 될 때)
+- [ ] pg_cron extension 활성화 → `cleanup_unverified_users()` 매일 자동 실행
+- [ ] 사전신청 100명 도달 시 운영자(나)에게 알림 메일 자동 발송
+- [ ] 신고 접수 시 운영자에게 알림 메일
+
+### 🔒 보안 보강 (정식 출시 전)
+- [ ] **자동 로그아웃** — 일정 시간 비활성 시 강제 logout (예: 30분~1시간)
+  - 또는 "이 기기는 다른 사람도 사용해요" 체크박스 → sessionStorage 사용
+- [ ] **다른 보호 화면들에도 인증 가드 + visibility 처리 일괄 적용**
+  - 대상: profile-edit, password-change, notification-settings, feedback,
+    team-detail, matchcard, groupcreate, matchresponse, teamresponse,
+    teamconfirm-leader/member, notifications, community-write/detail
+  - dashboard와 같은 패턴 (head visibility hidden + bootAuth 후 ready 클래스)
 
 ### 🚀 정식 출시 전환 작업
 - studypotato.com 루트(`index.html`)를 사전신청 페이지 → auth.html로 교체
