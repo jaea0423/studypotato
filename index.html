@@ -639,8 +639,8 @@
     margin-bottom: 24px;
   }
 </style>
-<!-- Supabase JS SDK -->
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<!-- Supabase JS SDK (UMD 빌드: window.supabase 자동 노출) -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
 </head>
 <body>
 <div class="app">
@@ -876,10 +876,10 @@
 
   /* ========== Supabase 호출 함수들 ========== */
   async function registerPreApplicant(email) {
-    if (!supabase) {
+    if (!supabaseClient) {
       throw new Error('서버 연결을 준비 중이에요. 잠시 후 다시 시도해주세요.');
     }
-    const { error } = await supabase
+    const { error } = await supabaseClient
       .from('pre_register')
       .insert({ email });
     if (error) {
@@ -892,8 +892,8 @@
   }
 
   async function fetchPreRegisterCount() {
-    if (!supabase) return 0;
-    const { data, error } = await supabase.rpc('get_pre_register_count');
+    if (!supabaseClient) return 0;
+    const { data, error } = await supabaseClient.rpc('get_pre_register_count');
     if (error) {
       console.error('카운트 가져오기 실패:', error);
       return 0;
@@ -902,7 +902,7 @@
   }
 
   async function refreshProgress() {
-    if (!supabase) return;
+    if (!supabaseClient) return;
     const count = await fetchPreRegisterCount();
     const total = 100;
     const remaining = Math.max(0, total - count);
@@ -965,20 +965,27 @@
   // ============================================================
   // 2. Supabase 초기화 (실패해도 onclick은 동작함)
   // ============================================================
-  let supabase = null;
+  let supabaseClient = null;
   const SUPABASE_URL = 'https://mleypjquzggtyouepfha.supabase.co';
   const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1sZXlwanF1emdndHlvdWVwZmhhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg4MTAzMDIsImV4cCI6MjA5NDM4NjMwMn0.eM4nh50tC-ZxVRoIA1NZit4JtMJqPlUBZ5LEnTrRB5Q';
 
   try {
-    if (window.supabase && window.supabase.createClient) {
-      supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    if (window.supabase && typeof window.supabase.createClient === 'function') {
+      supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
       console.log('✓ Supabase 연결 성공');
     } else {
-      console.error('Supabase SDK가 로드되지 않았어요. CDN 차단 또는 인터넷 연결 확인.');
+      console.error('❌ Supabase SDK 로드 실패. window.supabase =', window.supabase);
     }
   } catch (err) {
-    console.error('Supabase 초기화 실패:', err);
+    console.error('❌ Supabase 초기화 실패:', err);
   }
+
+  // 디버그: 페이지 로드 완료 확인
+  console.log('✓ 페이지 스크립트 로드 완료. 함수 정의:', {
+    openApplyModal: typeof openApplyModal,
+    shareLink: typeof shareLink,
+    submitApply: typeof submitApply
+  });
 
   // ============================================================
   // 3. 이벤트 리스너 등록 (DOM은 이미 로드된 상태)
