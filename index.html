@@ -875,13 +875,22 @@
   }
 
   /* ========== Supabase 호출 함수들 ========== */
+  // 동의 기록 보관 — 법적 의무 (개인정보보호법, 정보통신망법)
+  const CONSENT_VERSION = 'pre-v1';  // 동의 문구 변경 시 버전 올리기
+
   async function registerPreApplicant(email) {
     if (!supabaseClient) {
       throw new Error('서버 연결을 준비 중이에요. 잠시 후 다시 시도해주세요.');
     }
     const { error } = await supabaseClient
       .from('pre_register')
-      .insert({ email });
+      .insert({
+        email,
+        consent_marketing: true,           // 사용자가 체크박스 동의함
+        consent_at: new Date().toISOString(),  // 동의 시점
+        consent_version: CONSENT_VERSION,  // 어떤 문구에 동의했는지
+        user_agent: navigator.userAgent.slice(0, 500)  // 브라우저 정보 (분쟁 보조)
+      });
     if (error) {
       if (error.code === '23505') {
         throw new Error('이미 사전신청한 메일이에요. 알림이 갈 때까지 기다려주세요!');
