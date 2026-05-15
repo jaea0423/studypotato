@@ -48,6 +48,14 @@
 - ✅ PIN 셀 영문/한글 입력 차단 + iOS 숫자 키패드 보장
 - ✅ 인증 화면에 메일 도착 지연 안내
 - ✅ 비밀번호 PIN 즉시 마스킹 (type=text + ● 직접 치환, 실제 값은 dataset.actualValue)
+- ✅ 5-6-A: 로그인 화면 Supabase 연결 (signInWithPassword)
+  - 에러 메시지를 alert이 아닌 hint 영역에 표시 (에러 색상)
+  - 실패 시 PIN 자동 클리어 + 첫 셀 focus
+  - 세션은 supabase가 localStorage에 자동 저장
+- ✅ 중복 가입/같은 비번 에러 처리 보강
+  - RPC에 `profile_exists` 분기 추가 (이미 가입된 계정 vs 닉네임 중복 구분)
+  - OTP 인증 직후 profiles 체크 → 이미 가입이면 로그인 화면으로 자동 이동
+  - `updateUser`의 'same password' 에러는 무시하고 RPC 진행 (자연 복구)
 
 ---
 

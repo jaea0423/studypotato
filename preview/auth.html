@@ -564,14 +564,14 @@
     <div class="form-block">
       <label class="form-label">강원대학교 웹메일</label>
       <div class="input-wrap">
-        <input type="text" placeholder="아이디 입력" inputmode="email" autocomplete="username">
+        <input type="text" id="input-login-email" placeholder="아이디 입력" inputmode="email" autocomplete="username">
         <span class="suffix">@kangwon.ac.kr</span>
       </div>
     </div>
 
     <div class="form-block">
       <label class="form-label">비밀번호</label>
-      <div class="pin-grid">
+      <div class="pin-grid" id="pin-login">
         <input class="pin-cell pin-pwd" type="text" inputmode="numeric" maxlength="1" />
         <input class="pin-cell pin-pwd" type="text" inputmode="numeric" maxlength="1" />
         <input class="pin-cell pin-pwd" type="text" inputmode="numeric" maxlength="1" />
@@ -579,11 +579,11 @@
         <input class="pin-cell pin-pwd" type="text" inputmode="numeric" maxlength="1" />
         <input class="pin-cell pin-pwd" type="text" inputmode="numeric" maxlength="1" />
       </div>
-      <div class="input-hint">5회 틀리면 메일 인증으로 잠금을 풀 수 있어요.</div>
+      <div class="input-hint" id="login-hint">5회 틀리면 메일 인증으로 잠금을 풀 수 있어요.</div>
     </div>
 
     <div class="bottom-area">
-      <button class="btn-primary" onclick="location.href='dashboard.html'">로그인</button>
+      <button class="btn-primary" onclick="login()">로그인</button>
       <button class="btn-text">비밀번호를 잊으셨나요? <strong>재설정 →</strong></button>
     </div>
   </section>
@@ -963,6 +963,83 @@
     }
   }
 
+  /* ========== 로그인 (signInWithPassword) ========== */
+  async function login(){
+    if(!supabaseClient){
+      alert('서버 연결을 준비 중이에요.');
+      return;
+    }
+
+    const emailPrefix = document.getElementById('input-login-email').value.trim();
+    const pinCells = document.querySelectorAll('#pin-login .pin-cell');
+    // 마스킹된 셀이라 readPinValue로 실제 값 추출
+    const password = Array.from(pinCells).map(readPinValue).join('');
+    const hint = document.getElementById('login-hint');
+
+    // 입력 검증
+    if(!emailPrefix){
+      alert('웹메일 아이디를 입력해주세요.');
+      return;
+    }
+    if(password.length !== 6 || !/^\d{6}$/.test(password)){
+      alert('비밀번호 6자리를 입력해주세요.');
+      return;
+    }
+
+    const fullEmail = emailPrefix + '@kangwon.ac.kr';
+
+    // 버튼 잠금
+    const btn = document.querySelector('#screen-login .btn-primary');
+    const originalText = btn.textContent;
+    btn.disabled = true;
+    btn.textContent = '로그인 중...';
+    hint.classList.remove('error');
+
+    try {
+      const { data, error } = await supabaseClient.auth.signInWithPassword({
+        email: fullEmail,
+        password: password
+      });
+
+      if(error){
+        console.error('로그인 실패:', error);
+        const msg = (error.message || '').toLowerCase();
+        if(msg.includes('invalid login credentials') || msg.includes('invalid')){
+          hint.textContent = '웹메일 또는 비밀번호가 일치하지 않아요.';
+          hint.classList.add('error');
+        } else if(msg.includes('email not confirmed')){
+          hint.textContent = '이메일 인증이 완료되지 않은 계정이에요.';
+          hint.classList.add('error');
+        } else if(msg.includes('rate')){
+          hint.textContent = '너무 자주 시도했어요. 잠시 후 다시 시도해주세요.';
+          hint.classList.add('error');
+        } else {
+          hint.textContent = '로그인에 실패했어요. 잠시 후 다시 시도해주세요.';
+          hint.classList.add('error');
+        }
+        // 비밀번호 입력 칸 초기화
+        pinCells.forEach(c => {
+          c.value = '';
+          delete c.dataset.actualValue;
+          c.classList.remove('filled');
+        });
+        pinCells[0].focus();
+        return;
+      }
+
+      console.log('✓ 로그인 성공:', data.user?.email);
+      // dashboard로 이동 (세션은 supabase가 localStorage에 자동 저장)
+      location.href = 'dashboard.html';
+    } catch(err){
+      console.error(err);
+      hint.textContent = '네트워크 오류가 발생했어요.';
+      hint.classList.add('error');
+    } finally {
+      btn.disabled = false;
+      btn.textContent = originalText;
+    }
+  }
+
   /* ========== 이메일 입력 → OTP 발송 (Supabase) ========== */
   async function submitEmail(){
     const input = document.getElementById('input-email').value.trim();
@@ -1256,9 +1333,20 @@
         password: state.password
       });
       if(pwError){
-        console.error('비밀번호 설정 실패:', pwError);
-        alert('비밀번호 설정에 실패했어요. 처음부터 다시 시도해주세요.');
-        return;
+        const pwMsg = (pwError.message || '').toLowerCase();
+        // "New password should be different from the old password"
+        // → 이전 시도에서 같은 비번이 이미 설정됨. 비번은 그대로니 무시하고 RPC 진행
+        if(pwMsg.includes('different from the old')){
+          console.warn('비밀번호가 이미 같은 값으로 설정됨. 무시하고 진행.');
+        } else if(pwMsg.includes('weak') || pwMsg.includes('should be at least')){
+          console.error('비밀번호 정책 위반:', pwError);
+          alert('비밀번호 정책에 맞지 않아요. 관리자에게 문의해주세요.');
+          return;
+        } else {
+          console.error('비밀번호 설정 실패:', pwError);
+          alert('비밀번호 설정에 실패했어요. 처음부터 다시 시도해주세요.');
+          return;
+        }
       }
 
       // 4. profiles + consents를 RPC 함수로 한 번에 저장 (트랜잭션)
@@ -1282,6 +1370,12 @@
         if(msg.includes('nickname_taken')){
           alert('이미 사용 중인 닉네임이에요. 닉네임 단계로 돌아갈게요.');
           go('signup-profile');
+        } else if(msg.includes('profile_exists')){
+          alert('이미 가입이 완료된 계정이에요. 로그인 화면으로 이동할게요.');
+          // 로그인 화면 메일 input 미리 채우기
+          const loginEmailInput = document.getElementById('input-login-email');
+          if(loginEmailInput) loginEmailInput.value = state.email.replace('@kangwon.ac.kr', '');
+          go('login');
         } else if(msg.includes('not_authenticated')){
           alert('인증 세션이 만료됐어요. 처음부터 다시 시도해주세요.');
           go('signup-email');
@@ -1546,8 +1640,28 @@
       }
 
       // 인증 성공 — auth.users에 row 생성됨, session 받음
-      // data.user / data.session 사용 가능
       console.log('✓ OTP 인증 성공:', data.user?.email);
+
+      // 이미 가입이 완료된 계정인지 체크 (profiles에 row가 있으면 가입 완료)
+      // → 가입 흐름 진입 전에 차단, 로그인 화면으로 안내
+      const { data: existing, error: chkError } = await supabaseClient
+        .from('profiles')
+        .select('id')
+        .eq('id', data.user.id)
+        .maybeSingle();
+
+      if(chkError){
+        console.warn('가입 여부 확인 실패(무시하고 진행):', chkError);
+      }
+      if(existing){
+        alert('이미 가입이 완료된 계정이에요. 로그인 화면으로 이동할게요.');
+        stopTimer();
+        // 로그인 화면 메일 input 미리 채워두기
+        const loginEmailInput = document.getElementById('input-login-email');
+        if(loginEmailInput) loginEmailInput.value = state.email.replace('@kangwon.ac.kr', '');
+        go('login');
+        return;
+      }
 
       // 타이머 정지 + 다음 화면 (닉네임 + 비밀번호)
       stopTimer();
