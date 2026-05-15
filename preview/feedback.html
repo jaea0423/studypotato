@@ -258,6 +258,12 @@
     cursor: not-allowed;
   }
 </style>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<style>
+  body { visibility: hidden; }
+  body.ready { visibility: visible; }
+</style>
 </head>
 <body>
 
@@ -406,6 +412,19 @@
     contentCount.textContent = '0 / 1000';
     history.back();
   }
+</script>
+<script>
+  /* 인증 가드 — 비로그인 시 auth.html로 즉시 이동 */
+  (function(){
+    const SUPABASE_URL = 'https://mleypjquzggtyouepfha.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1sZXlwanF1emdndHlvdWVwZmhhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg4MTAzMDIsImV4cCI6MjA5NDM4NjMwMn0.eM4nh50tC-ZxVRoIA1NZit4JtMJqPlUBZ5LEnTrRB5Q';
+    if(!window.supabase){ document.body.classList.add('ready'); return; }
+    const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    sb.auth.getSession().then(({ data: { session } }) => {
+      if(!session){ location.replace('auth.html'); return; }
+      document.body.classList.add('ready');
+    }).catch(() => document.body.classList.add('ready'));
+  })();
 </script>
 </body>
 </html>

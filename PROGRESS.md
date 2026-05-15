@@ -68,6 +68,34 @@
   - 로그인 화면: suffix 제거, 자유 입력 (웹메일/알림 메일 둘 다 OK)
   - 알림 메일 입력 화면에 "로그인 가능, 신중히 입력" 안내
   - 보안: 비밀번호 재설정 등 민감 작업은 웹메일 OTP만 사용 (예정)
+- ✅ 5-6-B 5회 실패 잠금 + 메일 인증으로 해제
+  - localStorage 카운터 (`login_attempts`) — 메일별 실패 횟수
+  - 실패 시 "남은 시도 N회" 표시 + PIN 자동 클리어
+  - 5회 도달 → `screen-login-locked` 화면으로 이동
+  - 잠금 해제 흐름: 메일 OTP → verifyOtp 성공 → 카운터 리셋
+  - "비밀번호 재설정"으로 분기 가능
+- ✅ 5-6-C 비밀번호 재설정 흐름 (3단계)
+  - 1/3: 강원대 웹메일 입력 → `signInWithOtp({ shouldCreateUser: false })`
+  - 2/3: OTP 6자리 검증 + 5분 타이머 + 재전송
+  - 3/3: 새 비번 6자리 + 확인 → `updateUser({ password })`
+  - 변경 후 자동 signOut → 로그인 화면 (새 비번으로 다시 로그인)
+  - 같은 비번 재설정 시 친절한 에러 ("이전과 같은 비번")
+  - 로그인 화면 "비밀번호를 잊으셨나요? 재설정 →" 활성화
+- ✅ 13개 보호 화면 인증 가드 일괄 적용
+  - SDK + visibility:hidden + bootAuth (비로그인 → auth.html 즉시 이동)
+  - 대상: password-change, notification-settings, feedback, team-detail,
+    matchcard, groupcreate, matchresponse, teamresponse,
+    teamconfirm-leader/member, notifications, community-write, community-detail
+- ✅ profile-edit Supabase 연동 + UI 정리
+  - SDK + 인증 가드 + visibility:hidden (인증 전 노출 차단)
+  - 본인 데이터 자동 채움 (닉네임/알림메일/학년/재학상태/학과/출생연도/웹메일)
+  - "수정 불가" 배지 제거 → 자연스러운 hint로 대체
+  - 학과 입력 필드 추가 + **180일 변경 잠금** (DB 트리거와 일치)
+  - 닉네임 중복확인 RPC 호출 (`is_nickname_available`)
+  - 닉네임 형식/금칙어 사전 검사 (auth.html과 동일 규칙)
+  - 저장 시 `profiles.update()` 실제 호출 + 변경된 필드만 payload
+  - 에러 분기 (unique nickname/notify_email/check constraint)
+  - 더미 데이터 전부 제거
 - ✅ admin.html 피드백 반영
   - 로그인 placeholder: "identification" / "password"
   - "2차 PIN" → "2차 비밀번호" 명칭 통일, 안내문 삭제
@@ -234,11 +262,46 @@ Authentication → Providers → Email 에서 두 값 모두 변경
 ### 🔒 보안 보강 (정식 출시 전)
 - [ ] **자동 로그아웃** — 일정 시간 비활성 시 강제 logout (예: 30분~1시간)
   - 또는 "이 기기는 다른 사람도 사용해요" 체크박스 → sessionStorage 사용
-- [ ] **다른 보호 화면들에도 인증 가드 + visibility 처리 일괄 적용**
+- [ ] **로그인 5회 실패 잠금 DB 강화** — 현재는 localStorage라 우회 가능
+  - profiles에 failed_login_attempts, locked_until 컬럼 또는 별도 테이블
+  - DB 트리거로 신뢰성 보장
+- [x] **다른 보호 화면들에도 인증 가드 + visibility 처리 일괄 적용** (완료)
   - 대상: profile-edit, password-change, notification-settings, feedback,
     team-detail, matchcard, groupcreate, matchresponse, teamresponse,
     teamconfirm-leader/member, notifications, community-write/detail
   - dashboard와 같은 패턴 (head visibility hidden + bootAuth 후 ready 클래스)
+
+### 🤝 매칭 시스템 백엔드 (가장 큰 작업)
+
+**DB 테이블**:
+- [ ] `match_cards` (사용자당 최대 3개, active 1개)
+  - id, user_id, title, description, category, schedule, location, level, max_size, min_size, anonymous, status
+- [ ] `teams` (직접 모집)
+  - id, leader_id, title, ..., status (recruiting/full/active/ended)
+- [ ] `team_applications`
+  - id, team_id, applicant_id, message, status (pending/accepted/rejected)
+- [ ] `team_members`
+  - id, team_id, user_id, joined_at, role (leader/member)
+- [ ] `matches` (자동 매칭 결과)
+  - id, card_ids[], created_at, status (proposed/confirmed/cancelled)
+- [ ] `penalties` (페널티)
+  - id, user_id, type (no_show/spam/...), reason, expires_at
+
+**알고리즘 (점수 기반)**:
+- [ ] 시간대 일치도 (가중치 ★★★)
+- [ ] 카테고리 일치 (★★)
+- [ ] 학년 ±1 (★)
+- [ ] 모임 방식 (대면/비대면) (★)
+- [ ] 임계치 이상 → 매칭
+
+**매칭 실행**:
+- [ ] pg_cron 또는 Edge Function + 외부 스케줄러
+- [ ] 정해진 시간만 (월/목 20시 등) — 한철 장사 대응
+- [ ] 결과 → 메일 + 인앱 알림
+
+**매칭 → 팀 형성**:
+- [ ] "확인" 버튼 시점에 닉네임 공개 (이미 정책 정의됨)
+- [ ] 4명 중 2명 이상 No-Show → 자동 취소
 
 ### 🛠️ 운영자 콘솔 백엔드 (정식 출시 전 필수)
 - [ ] `admin_users` 테이블 (별도 인증, profiles와 분리)
@@ -250,6 +313,47 @@ Authentication → Providers → Email 에서 두 값 모두 변경
 - [ ] Supabase Auth와는 분리된 별도 인증 (RPC 함수로 처리)
 - [ ] admin.html에서 더미 → 실제 RPC 호출로 전환
 - [ ] 본인 admin 계정 생성 SQL (1회성)
+
+### 🃏 매칭 카드 정책 (백엔드 구현 시 반영)
+- [ ] 카드 보관: **최대 3개** (영어/전공/취업 등 다양한 니즈)
+- [ ] 자동매칭 active: **1개만** (확정 풀에는 한 번에 한 카드)
+- [ ] 카드 상태: `draft` / `active`
+- [ ] active 변경 시 confirm: "현재 활성 카드는 자동 등록 해제됩니다"
+- [ ] 비활성 카드도 직접 모집(팀 만들기)에는 사용 가능
+- [ ] **벼락 모드** (시험기간 단기 옵션):
+  - 카드 옵션: "단기 매칭 (1주)" + "벼락 감자" 배지
+  - 활성 기간 동안 매칭 빈도 ↑ (예: 매일)
+  - 시험 전 1~2주 자동 종료
+
+### 🚫 만들지 말 것 (검토 결과)
+- ❌ **공부 타이머** — 열품타 압도적. 만들 이유 없음
+- ❌ **공부 인증 (인스타 스토리식)** — 차별점 부족 (하루 25 등) + 운영 부담 (부적절 사진 신고) + 본질에서 벗어남
+- ⏸ **교과목별 채팅방** — 매력적이지만 거대 작업. **매칭 안정 후 (1년 뒤)** 검토. 우선순위 낮음
+- ✅ **벼락 모드** — 별도 메뉴 X, 매칭 카드의 옵션으로 통합
+
+### 🌱 활성화 전략 (한철 장사 / 네트워크 효과 대응)
+
+**문제**:
+- 네트워크 효과 — 사람이 적으면 이탈 → 더 적어짐 (악순환)
+- 계절성 — 개강 초 폭증, 시험기간 단기 폭증, 방학 거의 없음
+
+**전략 (정식 출시 시점에 결정)**:
+- [ ] **자동매칭 시기 한정** — 매주 정해진 요일/시간에만 매칭 실행
+  - 개강 전 1주: 매일 20시 (신학기 폭증)
+  - 개강 후~시험 전: 매주 월/목 20시
+  - 방학: 매주 월요일만
+  - "다음 매칭: D-2 (월) 20:00" 카운트다운 표시
+  - 의도 명시: "한꺼번에 모여야 매칭 풀이 커지고 정확도 ↑"
+- [x] 직접 모집(팀 만들기) 우선 (이미 구현됨, 1명만 있어도 동작)
+- [ ] 베타 기간 명시 — "정식 오픈 X월 X일" 카피
+- [x] 타깃 좁힘 — 강원대 춘천캠퍼스 (이미 구현)
+- [ ] 방학 콘텐츠 — 토익/자격증/취업스터디 카테고리 추가
+
+**개강 전 마케팅 캘린더**:
+- D-30, D-14, D-3 인스타 광고
+- 학과 단톡방 홍보
+- 수강신청 시즌 (2/말~3/초) 집중
+- 학기 말 "다음 학기에 다시 봐요" 메일
 
 ### 🚀 정식 출시 전환 작업
 - studypotato.com 루트(`index.html`)를 사전신청 페이지 → auth.html로 교체

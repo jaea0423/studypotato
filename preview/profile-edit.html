@@ -9,6 +9,16 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/variable/pretendardvariable.css" />
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<!-- Supabase JS SDK -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+
+<!-- 인증 확인 전 콘텐츠 숨김 -->
+<style>
+  body { visibility: hidden; }
+  body.ready { visibility: visible; }
+</style>
+
 <style>
   :root{
     --knu-blue: #0047BB; --knu-blue-deep: #00347E; --knu-blue-soft: #E5ECF8;
@@ -287,14 +297,13 @@
     <div class="sub">언제든 다시 바꿀 수 있어요.</div>
   </div>
 
-  <!-- 강대 웹메일 (수정 불가) -->
+  <!-- 강대 웹메일 (본인 인증 메일) -->
   <div class="form-block">
     <div class="form-label-row">
       <span class="form-label">강원대 웹메일</span>
-      <span class="badge locked">수정 불가</span>
     </div>
-    <div class="form-sub">본인 인증에 사용된 메일이라 변경할 수 없어요.</div>
-    <input class="form-input locked" type="email" value="202313564@kangwon.ac.kr" readonly>
+    <input class="form-input locked" type="email" id="email-display" readonly>
+    <div class="input-hint">본인 인증에 사용된 메일이에요.</div>
   </div>
 
   <!-- 닉네임 -->
@@ -306,7 +315,7 @@
     <div class="form-sub">2~10자, 다른 이용자와 겹치지 않게. <strong>한 번 변경하면 30일 동안 다시 변경할 수 없어요.</strong></div>
     <div class="input-wrap">
       <input class="form-input" id="nick-input" type="text"
-             value="감자대장" maxlength="10"
+             maxlength="10"
              oninput="onNickChange()" />
       <button class="check-btn disabled" id="check-btn" onclick="checkNick()">중복확인</button>
     </div>
@@ -323,7 +332,6 @@
     </div>
     <div class="form-sub">매칭/팀 활동 알림을 받을 메일이에요. 강대 메일이 아니어도 돼요.</div>
     <input class="form-input" id="notify-input" type="email"
-           value="jaea0423@gmail.com"
            placeholder="example@gmail.com" />
   </div>
 
@@ -334,7 +342,7 @@
     </div>
     <div class="chip-group" id="grade-chips">
       <button class="chip" onclick="selectChip(this, 'grade', '1학년')">1학년</button>
-      <button class="chip active" onclick="selectChip(this, 'grade', '2학년')">2학년</button>
+      <button class="chip" onclick="selectChip(this, 'grade', '2학년')">2학년</button>
       <button class="chip" onclick="selectChip(this, 'grade', '3학년')">3학년</button>
       <button class="chip" onclick="selectChip(this, 'grade', '4학년 이상')">4학년 이상</button>
       <button class="chip" onclick="selectChip(this, 'grade', '대학원')">대학원</button>
@@ -347,19 +355,29 @@
       <span class="form-label">재학 상태</span>
     </div>
     <div class="chip-group" id="status-chips">
-      <button class="chip active" onclick="selectChip(this, 'status', '재학 중')">재학 중</button>
+      <button class="chip" onclick="selectChip(this, 'status', '재학 중')">재학 중</button>
       <button class="chip" onclick="selectChip(this, 'status', '휴학 중')">휴학 중</button>
     </div>
   </div>
 
-  <!-- 출생연도 (수정 불가) -->
+  <!-- 학과 -->
+  <div class="form-block">
+    <div class="form-label-row">
+      <span class="form-label">학과</span>
+      <span class="badge" id="major-lock-badge" style="display:none">변경 잠금</span>
+    </div>
+    <div class="form-sub"><strong>한 번 변경하면 180일 동안 다시 변경할 수 없어요.</strong></div>
+    <input class="form-input" id="major-input" type="text" maxlength="30" oninput="onMajorChange()">
+    <div class="major-meta" id="major-meta" style="margin-top:8px; padding:10px 12px; background:var(--paper-warm); border-radius:var(--radius-s); font-family:var(--font-mono); font-size:11px; color:var(--ink-soft); line-height:1.65; display:none;"></div>
+  </div>
+
+  <!-- 출생연도 (본인 인증 후 변경 불가) -->
   <div class="form-block">
     <div class="form-label-row">
       <span class="form-label">출생연도</span>
-      <span class="badge locked">수정 불가</span>
     </div>
-    <div class="form-sub">가입 시 한 번만 입력하고 변경할 수 없어요.</div>
-    <input class="form-input locked" type="text" id="birth-display" value="2005년" readonly>
+    <input class="form-input locked" type="text" id="birth-display" readonly>
+    <div class="input-hint">가입 시 입력한 정보예요.</div>
   </div>
 
   <!-- 변경 안내 -->
@@ -380,29 +398,86 @@
 
 <script>
   /* ============================================================
-     원본 데이터 (실제는 서버에서 받아옴 — 데모 더미)
+     Supabase 초기화 + 인증 가드 + 본인 데이터 로드
      ============================================================ */
-  const ORIGINAL = {
-    nick: '감자대장',
-    notifyEmail: 'jaea0423@gmail.com',
-    grade: '2학년',
-    status: '재학 중',
-    birthYear: 2005,
-    // 닉네임 마지막 변경일 (데모 — 실제는 서버에서 받아옴)
-    // 아래 날짜를 오늘 기준 30일 안으로 두면 잠금 상태 시뮬레이션 가능
-    nickChangedAt: '2026-05-01'   // 13일 전 (= 17일 후 변경 가능)
+  let supabaseClient = null;
+  const SUPABASE_URL = 'https://mleypjquzggtyouepfha.supabase.co';
+  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1sZXlwanF1emdndHlvdWVwZmhhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg4MTAzMDIsImV4cCI6MjA5NDM4NjMwMn0.eM4nh50tC-ZxVRoIA1NZit4JtMJqPlUBZ5LEnTrRB5Q';
+
+  try {
+    if(window.supabase) supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  } catch(e){ console.error(e); }
+
+  // 원본 데이터 (서버에서 채움)
+  let ORIGINAL = {
+    nick: '', notifyEmail: '', grade: '', status: '', major: '',
+    birthYear: 0, nickChangedAt: null, majorChangedAt: null
   };
-
-  // 현재 폼 상태
+  let currentUser = null;
   const form = { ...ORIGINAL };
-  let nickChecked = true;  // 기존 닉네임은 이미 확인된 상태
-  let nickLocked = false;  // 30일 미경과 시 true
+  let nickChecked = true;
+  let nickLocked = false;
+  let majorLocked = false;
 
-  /* 출생연도는 가입 시 입력 후 수정 불가 — 단순 표시만 */
-  function showBirthYear(){
-    const display = document.getElementById('birth-display');
-    if(display) display.value = ORIGINAL.birthYear + '년';
+  /* 인증 가드 + 데이터 로드 */
+  async function bootProfile(){
+    if(!supabaseClient){
+      document.body.classList.add('ready');
+      return;
+    }
+    const { data: { session } } = await supabaseClient.auth.getSession();
+    if(!session){
+      location.replace('auth.html');
+      return;
+    }
+    currentUser = session.user;
+
+    const { data: profile, error } = await supabaseClient
+      .from('profiles').select('*').eq('id', currentUser.id).maybeSingle();
+    if(error || !profile){
+      alert('프로필 정보를 불러올 수 없어요.');
+      location.replace('dashboard.html');
+      return;
+    }
+
+    // 원본 채움
+    ORIGINAL = {
+      nick: profile.nickname,
+      notifyEmail: profile.notify_email,
+      grade: profile.grade,
+      status: profile.enrollment_status,
+      major: profile.major,
+      birthYear: profile.birth_year,
+      nickChangedAt: profile.nickname_changed_at,
+      majorChangedAt: profile.major_changed_at
+    };
+    Object.assign(form, ORIGINAL);
+
+    fillForm();
+    checkNickLock();
+    checkMajorLock();
+    document.body.classList.add('ready');
   }
+
+  /* 화면에 본인 데이터 채움 */
+  function fillForm(){
+    document.getElementById('email-display').value = currentUser.email;
+    document.getElementById('nick-input').value = ORIGINAL.nick;
+    document.getElementById('notify-input').value = ORIGINAL.notifyEmail;
+    document.getElementById('major-input').value = ORIGINAL.major || '';
+    document.getElementById('birth-display').value = ORIGINAL.birthYear ? ORIGINAL.birthYear + '년' : '—';
+
+    // 학년 chip active
+    document.querySelectorAll('#grade-chips .chip').forEach(c => {
+      if(c.textContent.trim() === ORIGINAL.grade) c.classList.add('active');
+    });
+    // 재학상태 chip active
+    document.querySelectorAll('#status-chips .chip').forEach(c => {
+      if(c.textContent.trim() === ORIGINAL.status) c.classList.add('active');
+    });
+  }
+
+  bootProfile();
 
   /* ============================================================
      닉네임 30일 변경 제한 체크
@@ -417,7 +492,8 @@
   }
 
   function checkNickLock(){
-    const last = new Date(ORIGINAL.nickChangedAt + 'T00:00:00');
+    if(!ORIGINAL.nickChangedAt) return;
+    const last = new Date(ORIGINAL.nickChangedAt);
     const next = new Date(last);
     next.setDate(next.getDate() + NICK_LOCK_DAYS);
     const now = new Date();
@@ -433,7 +509,6 @@
     meta.classList.add('show');
 
     if(nickLocked){
-      // 잠금 — 입력 자체를 막음
       input.disabled = true;
       input.classList.add('locked');
       checkBtn.classList.add('disabled');
@@ -450,6 +525,46 @@
         <div class="row"><span class="k">▸ 상태</span><span class="v" style="color:var(--success)">변경 가능</span></div>
       `;
     }
+  }
+
+  /* 학과 180일 잠금 체크 */
+  const MAJOR_LOCK_DAYS = 180;
+  function checkMajorLock(){
+    if(!ORIGINAL.majorChangedAt) return;
+    const last = new Date(ORIGINAL.majorChangedAt);
+    const next = new Date(last);
+    next.setDate(next.getDate() + MAJOR_LOCK_DAYS);
+    const now = new Date();
+    const daysLeft = Math.ceil((next - now) / (24 * 3600 * 1000));
+
+    majorLocked = daysLeft > 0;
+    const meta = document.getElementById('major-meta');
+    const lockBadge = document.getElementById('major-lock-badge');
+    const input = document.getElementById('major-input');
+
+    meta.style.display = 'block';
+    if(majorLocked){
+      input.disabled = true;
+      input.classList.add('locked');
+      lockBadge.style.display = 'inline-block';
+      meta.style.background = '#FEEAEA';
+      meta.style.color = 'var(--error)';
+      meta.innerHTML = `
+        <div class="row" style="display:flex;justify-content:space-between;"><span>▸ 마지막 변경</span><span style="font-weight:600;">${fmtDate(last)}</span></div>
+        <div class="row" style="display:flex;justify-content:space-between;"><span>▸ 다음 변경 가능</span><span style="font-weight:600;">${fmtDate(next)} (${daysLeft}일 남음)</span></div>
+      `;
+    } else {
+      meta.innerHTML = `
+        <div class="row" style="display:flex;justify-content:space-between;"><span>▸ 마지막 변경</span><span style="font-weight:600;color:var(--ink);">${fmtDate(last)}</span></div>
+        <div class="row" style="display:flex;justify-content:space-between;"><span>▸ 상태</span><span style="font-weight:600;color:var(--success);">변경 가능</span></div>
+      `;
+    }
+  }
+
+  function onMajorChange(){
+    if(majorLocked) return;
+    form.major = document.getElementById('major-input').value.trim();
+    updateChangesUI();
   }
 
   /* ============================================================
@@ -499,29 +614,69 @@
     updateChangesUI();
   }
 
-  function checkNick(){
+  // 닉네임 형식/금칙어 사전 검사 (auth.html와 동일 패턴)
+  function isNicknameForbidden(nickname){
+    const trimmed = nickname.trim();
+    if(!/^[가-힣a-zA-Z0-9]+$/.test(trimmed)) return true;
+    const normalized = trimmed.toLowerCase();
+    const patterns = [
+      /운영|관리자|admin|staff|official|공식|매니저|manager|공지|notice/,
+      /공부하는감자|studypotato|감자운영|감자공식|감자관리/,
+      /씨발|시발|ㅅㅂ|존나|ㅈㄴ|좆|닥쳐|개새|병신|fuck|shit|asshole/,
+      /섹스|야동|자위|강간|porn|sex/
+    ];
+    return patterns.some(p => p.test(normalized));
+  }
+
+  async function checkNick(){
     if(nickLocked) return;
     const v = document.getElementById('nick-input').value.trim();
     if(v.length < 2 || v === ORIGINAL.nick) return;
 
-    // 데모: '감자', '호빵맨' 등은 사용 중이라고 가정
-    const taken = ['감자', '호빵맨', '감자소녀', '코드몬스터', '수학천재'];
     const hint = document.getElementById('nick-hint');
     const checkBtn = document.getElementById('check-btn');
 
-    if(taken.includes(v)){
+    // 형식 + 금칙어 검사
+    if(isNicknameForbidden(v)){
       nickChecked = false;
-      hint.textContent = '이미 사용 중인 닉네임이에요.';
+      hint.textContent = '이 닉네임은 사용할 수 없습니다.';
       hint.className = 'input-hint error';
       checkBtn.classList.remove('success');
-    } else {
-      nickChecked = true;
-      hint.textContent = '사용할 수 있는 닉네임이에요.';
-      hint.className = 'input-hint success';
-      checkBtn.classList.add('success');
-      checkBtn.textContent = '확인됨';
+      updateChangesUI();
+      return;
     }
-    updateChangesUI();
+    if(!supabaseClient){ alert('서버 연결 중'); return; }
+
+    checkBtn.disabled = true;
+    checkBtn.textContent = '확인 중...';
+
+    try {
+      const { data: available, error } = await supabaseClient.rpc(
+        'is_nickname_available', { check_nickname: v }
+      );
+      if(error){
+        console.error(error);
+        alert('확인 중 오류가 발생했어요.');
+        checkBtn.textContent = '중복확인';
+        return;
+      }
+      if(available === true){
+        nickChecked = true;
+        hint.textContent = '사용할 수 있는 닉네임이에요.';
+        hint.className = 'input-hint success';
+        checkBtn.classList.add('success');
+        checkBtn.textContent = '확인됨';
+      } else {
+        nickChecked = false;
+        hint.textContent = '이미 사용 중인 닉네임이에요.';
+        hint.className = 'input-hint error';
+        checkBtn.classList.remove('success');
+        checkBtn.textContent = '중복확인';
+      }
+    } finally {
+      checkBtn.disabled = false;
+      updateChangesUI();
+    }
   }
 
   /* ============================================================
@@ -535,15 +690,6 @@
   /* ============================================================
      변경 사항 감지 + 저장 버튼 활성화
      ============================================================ */
-  function getChangedFields(){
-    const changed = [];
-    if(form.nick !== ORIGINAL.nick) changed.push('닉네임');
-    if(form.notifyEmail !== ORIGINAL.notifyEmail) changed.push('알림 메일');
-    if(form.grade !== ORIGINAL.grade) changed.push('학년');
-    if(form.status !== ORIGINAL.status) changed.push('재학 상태');
-    return changed;
-  }
-
   function updateChangesUI(){
     const changed = getChangedFields();
     const note = document.getElementById('changes-note');
@@ -573,12 +719,57 @@
   }
 
   /* ============================================================
-     저장 / 뒤로가기
+     저장 — Supabase profiles UPDATE
      ============================================================ */
-  function saveProfile(){
-    showToast('프로필이 저장됐어요');
-    // 실제: 서버 API 호출 후 이전 화면으로
-    setTimeout(() => { window.location.href = 'dashboard.html'; }, 1200);
+  async function saveProfile(){
+    if(!supabaseClient || !currentUser){ alert('서버 연결 중'); return; }
+
+    const saveBtn = document.getElementById('save-btn');
+    saveBtn.disabled = true;
+    saveBtn.textContent = '저장 중...';
+
+    // 변경된 필드만 update payload에 담기
+    // (변경 안 된 필드는 보내지 않음 → DB 트리거의 nickname_changed_at 갱신 방지)
+    const payload = {};
+    if(form.nick !== ORIGINAL.nick) payload.nickname = form.nick;
+    if(form.notifyEmail !== ORIGINAL.notifyEmail) payload.notify_email = form.notifyEmail;
+    if(form.grade !== ORIGINAL.grade) payload.grade = form.grade;
+    if(form.status !== ORIGINAL.status) payload.enrollment_status = form.status;
+    if(form.major !== ORIGINAL.major) payload.major = form.major;
+
+    if(Object.keys(payload).length === 0){
+      saveBtn.textContent = '변경 사항 저장';
+      return;
+    }
+
+    try {
+      const { error } = await supabaseClient
+        .from('profiles').update(payload).eq('id', currentUser.id);
+
+      if(error){
+        console.error('저장 실패:', error);
+        const msg = (error.message || '').toLowerCase();
+        if(msg.includes('unique') && msg.includes('nickname')){
+          alert('이미 사용 중인 닉네임이에요.');
+        } else if(msg.includes('unique') && msg.includes('notify_email')){
+          alert('이미 다른 계정에서 사용 중인 알림 메일이에요.');
+        } else if(msg.includes('check constraint')){
+          alert('입력 형식이 올바르지 않아요.');
+        } else {
+          alert('저장에 실패했어요. 잠시 후 다시 시도해주세요.');
+        }
+        saveBtn.disabled = false;
+        saveBtn.textContent = '변경 사항 저장';
+        return;
+      }
+      showToast('프로필이 저장됐어요');
+      setTimeout(() => { window.location.href = 'dashboard.html'; }, 1000);
+    } catch(err){
+      console.error(err);
+      alert('네트워크 오류가 발생했어요.');
+      saveBtn.disabled = false;
+      saveBtn.textContent = '변경 사항 저장';
+    }
   }
 
   function confirmLeave(){

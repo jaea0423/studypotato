@@ -592,7 +592,7 @@
 
     <div class="bottom-area">
       <button class="btn-primary" onclick="login()">로그인</button>
-      <button class="btn-text">비밀번호를 잊으셨나요? <strong>재설정 →</strong></button>
+      <button class="btn-text" onclick="go('reset-email')">비밀번호를 잊으셨나요? <strong>재설정 →</strong></button>
     </div>
   </section>
 
@@ -875,6 +875,137 @@
     </div>
   </section>
 
+  <!-- ========== 5-6-B: 로그인 잠금 화면 ========== -->
+  <section class="screen" id="screen-login-locked">
+    <div class="topbar">
+      <button class="back-btn" onclick="go('login')">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+      </button>
+    </div>
+
+    <div style="text-align: center; padding-top: 32px; flex: 1;">
+      <div style="font-size: 72px; margin-bottom: 20px;">🔒</div>
+      <h1 class="page-title" style="text-align: center;">계정이 잠겼어요</h1>
+      <p class="page-desc" style="text-align: center;"><strong id="lock-email" style="color:var(--ink);">—</strong>의<br>비밀번호를 5회 이상 잘못 입력했어요.</p>
+
+      <div style="background: var(--knu-orange-soft); color: #8B4500; border-radius: var(--radius-m); padding: 14px 16px; font-size: 13px; line-height: 1.6; text-align: left; margin-bottom: 16px;">
+        보안을 위해 비밀번호 입력이 일시 차단됐어요.<br>강원대 웹메일로 인증해서 잠금을 해제할 수 있어요.
+      </div>
+    </div>
+
+    <div class="bottom-area">
+      <button class="btn-primary" onclick="startUnlock()">메일로 잠금 해제</button>
+      <button class="btn-text" onclick="go('reset-email')">비밀번호 재설정 →</button>
+    </div>
+  </section>
+
+  <!-- ========== 5-6-C: 비밀번호 재설정 1/3 — 메일 입력 ========== -->
+  <section class="screen" id="screen-reset-email">
+    <div class="topbar">
+      <button class="back-btn" onclick="go('login')">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+      </button>
+      <div class="progress-track"><div class="progress-fill" style="width: 33.33%;"></div></div>
+      <div class="step-text">1 / 3</div>
+    </div>
+
+    <h1 class="page-title">비밀번호 재설정</h1>
+    <p class="page-desc">강원대학교 웹메일로 인증코드를 보내드릴게요.<br>알림 메일이 아닌 <strong>강원대 웹메일</strong>이어야 해요.</p>
+
+    <div class="form-block">
+      <label class="form-label">강원대학교 웹메일 주소</label>
+      <div class="input-wrap">
+        <input type="text" id="reset-email-input" placeholder="예: hong123" inputmode="email">
+        <span class="suffix">@kangwon.ac.kr</span>
+      </div>
+      <div class="input-hint">메일 앞부분만 입력해주세요.</div>
+    </div>
+
+    <div class="bottom-area">
+      <button class="btn-primary" onclick="submitResetEmail()">인증코드 받기</button>
+    </div>
+  </section>
+
+  <!-- ========== 5-6-C: 비밀번호 재설정 2/3 — OTP 인증 ========== -->
+  <section class="screen" id="screen-reset-verify">
+    <div class="topbar">
+      <button class="back-btn" onclick="go('reset-email')">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+      </button>
+      <div class="progress-track"><div class="progress-fill" style="width: 66.67%;"></div></div>
+      <div class="step-text">2 / 3</div>
+    </div>
+
+    <h1 class="page-title">메일함을 확인해주세요</h1>
+    <p class="page-desc"><strong id="reset-email-display" style="color:var(--ink);">—</strong>로<br>6자리 인증코드를 보냈어요.</p>
+
+    <div class="info-box" style="margin-bottom: 24px;">
+      <span class="ico">⏱️</span>
+      <span>강원대학교 웹메일은 도착까지 <strong>1~2분</strong> 걸릴 수 있어요.<br>스팸함도 함께 확인해주세요.</span>
+    </div>
+
+    <div class="form-block">
+      <label class="form-label">인증코드</label>
+      <div class="pin-grid" id="reset-otp-grid">
+        <input class="pin-cell" type="text" inputmode="numeric" maxlength="1" />
+        <input class="pin-cell" type="text" inputmode="numeric" maxlength="1" />
+        <input class="pin-cell" type="text" inputmode="numeric" maxlength="1" />
+        <input class="pin-cell" type="text" inputmode="numeric" maxlength="1" />
+        <input class="pin-cell" type="text" inputmode="numeric" maxlength="1" />
+        <input class="pin-cell" type="text" inputmode="numeric" maxlength="1" />
+      </div>
+      <div class="resend-row">
+        <span class="timer" id="reset-timer">05 : 00</span>
+        <button class="resend-btn" onclick="resendResetOtp()">코드 재전송</button>
+      </div>
+    </div>
+
+    <div class="bottom-area">
+      <button class="btn-primary" onclick="verifyResetOtp()">인증 완료</button>
+    </div>
+  </section>
+
+  <!-- ========== 5-6-C: 비밀번호 재설정 3/3 — 새 비번 ========== -->
+  <section class="screen" id="screen-reset-newpw">
+    <div class="topbar">
+      <div style="width:36px;"></div>
+      <div class="progress-track"><div class="progress-fill" style="width: 100%;"></div></div>
+      <div class="step-text">3 / 3</div>
+    </div>
+
+    <h1 class="page-title">새 비밀번호를 정해주세요</h1>
+    <p class="page-desc">숫자 6자리. 다른 사람이 추측하기 어려운 번호로 정해주세요.</p>
+
+    <div class="form-block">
+      <label class="form-label">새 비밀번호</label>
+      <div class="pin-grid" id="reset-pin-1">
+        <input class="pin-cell pin-pwd" type="text" inputmode="numeric" maxlength="1" />
+        <input class="pin-cell pin-pwd" type="text" inputmode="numeric" maxlength="1" />
+        <input class="pin-cell pin-pwd" type="text" inputmode="numeric" maxlength="1" />
+        <input class="pin-cell pin-pwd" type="text" inputmode="numeric" maxlength="1" />
+        <input class="pin-cell pin-pwd" type="text" inputmode="numeric" maxlength="1" />
+        <input class="pin-cell pin-pwd" type="text" inputmode="numeric" maxlength="1" />
+      </div>
+    </div>
+
+    <div class="form-block">
+      <label class="form-label">새 비밀번호 확인</label>
+      <div class="pin-grid" id="reset-pin-2">
+        <input class="pin-cell pin-pwd" type="text" inputmode="numeric" maxlength="1" />
+        <input class="pin-cell pin-pwd" type="text" inputmode="numeric" maxlength="1" />
+        <input class="pin-cell pin-pwd" type="text" inputmode="numeric" maxlength="1" />
+        <input class="pin-cell pin-pwd" type="text" inputmode="numeric" maxlength="1" />
+        <input class="pin-cell pin-pwd" type="text" inputmode="numeric" maxlength="1" />
+        <input class="pin-cell pin-pwd" type="text" inputmode="numeric" maxlength="1" />
+      </div>
+      <div class="input-hint" id="reset-pin-hint">위에서 입력한 비밀번호와 같게 입력해주세요.</div>
+    </div>
+
+    <div class="bottom-area">
+      <button class="btn-primary" onclick="submitNewPassword()">비밀번호 변경</button>
+    </div>
+  </section>
+
   <!-- ========== 이미 가입된 메일 안내 (가입 흐름 도중 차단) ========== -->
   <section class="screen" id="screen-already-registered">
     <div class="topbar">
@@ -1016,6 +1147,29 @@
     }
   }
 
+  /* ========== 로그인 실패 카운터 (5-6-B) ==========
+     localStorage에 메일별로 시도 횟수 저장. 5회 도달 시 잠금.
+     보안 강화는 추후 DB로 (지금은 클라이언트 수준 보호)
+     ========================================*/
+  const MAX_LOGIN_ATTEMPTS = 5;
+
+  function getAttempts(email){
+    try {
+      const raw = localStorage.getItem('login_attempts');
+      const map = raw ? JSON.parse(raw) : {};
+      return map[email] || 0;
+    } catch { return 0; }
+  }
+  function setAttempts(email, n){
+    try {
+      const raw = localStorage.getItem('login_attempts');
+      const map = raw ? JSON.parse(raw) : {};
+      if(n === 0) delete map[email];
+      else map[email] = n;
+      localStorage.setItem('login_attempts', JSON.stringify(map));
+    } catch {}
+  }
+
   /* ========== 로그인 (signInWithPassword) ========== */
   async function login(){
     if(!supabaseClient){
@@ -1092,6 +1246,16 @@
         return;
       }
 
+      // 잠금 검사 — 이 메일로 5회 이상 실패한 적 있는지
+      const attempts = getAttempts(resolvedEmail);
+      if(attempts >= MAX_LOGIN_ATTEMPTS){
+        // 잠금 화면으로 이동 (메일 인증으로 해제)
+        state.email = resolvedEmail;
+        document.getElementById('lock-email').textContent = resolvedEmail;
+        go('login-locked');
+        return;
+      }
+
       const { data, error } = await supabaseClient.auth.signInWithPassword({
         email: resolvedEmail,
         password: password
@@ -1100,8 +1264,25 @@
       if(error){
         console.error('로그인 실패:', error);
         const msg = (error.message || '').toLowerCase();
-        if(msg.includes('invalid login credentials') || msg.includes('invalid')){
-          hint.textContent = '웹메일 또는 비밀번호가 일치하지 않아요.';
+        const isCredentialError = msg.includes('invalid login credentials') || msg.includes('invalid');
+
+        // 비번 오류일 때만 카운터 증가 (rate limit 등은 제외)
+        let remaining = MAX_LOGIN_ATTEMPTS;
+        if(isCredentialError){
+          const newCount = getAttempts(resolvedEmail) + 1;
+          setAttempts(resolvedEmail, newCount);
+          remaining = MAX_LOGIN_ATTEMPTS - newCount;
+        }
+
+        if(isCredentialError){
+          if(remaining <= 0){
+            // 잠금 화면으로
+            state.email = resolvedEmail;
+            document.getElementById('lock-email').textContent = resolvedEmail;
+            go('login-locked');
+            return;
+          }
+          hint.textContent = `웹메일 또는 비밀번호가 일치하지 않아요. (남은 시도 ${remaining}회)`;
           hint.classList.add('error');
         } else if(msg.includes('email not confirmed')){
           hint.textContent = '이메일 인증이 완료되지 않은 계정이에요.';
@@ -1124,6 +1305,8 @@
       }
 
       console.log('✓ 로그인 성공:', data.user?.email);
+      // 카운터 리셋
+      setAttempts(resolvedEmail, 0);
       // dashboard로 이동 (세션은 supabase가 localStorage에 자동 저장)
       location.href = 'dashboard.html';
     } catch(err){
@@ -1615,6 +1798,203 @@
     } finally {
       btn.disabled = false;
       btn.textContent = originalText;
+    }
+  }
+
+  /* ============================================================
+     5-6-B: 메일 인증으로 잠금 해제
+     5-6-C: 비밀번호 재설정 흐름
+     두 흐름 모두 OTP 인증 → 카운터 리셋 또는 새 비번 설정
+     ============================================================ */
+
+  // 잠금 해제 — 비번 재설정과 동일한 흐름이지만 마지막에 카운터만 리셋
+  // (사용자가 "잠금 해제"를 누른 경우 → 비번은 그대로 두고 카운터만 0으로)
+  let unlockMode = false;  // true면 OTP 후 카운터 리셋만, false면 새 비번 설정
+
+  function startUnlock(){
+    unlockMode = true;
+    // 잠긴 메일을 미리 채워서 reset-email 화면으로
+    const emailEl = document.getElementById('reset-email-input');
+    if(emailEl && state.email){
+      emailEl.value = state.email.replace('@kangwon.ac.kr', '');
+    }
+    go('reset-email');
+  }
+
+  // 5-6-C 1/3: 메일 입력 → OTP 발송
+  async function submitResetEmail(){
+    if(!supabaseClient){ alert('서버 연결 중'); return; }
+    const input = document.getElementById('reset-email-input').value.trim();
+    if(!input){ alert('메일 아이디를 입력해주세요.'); return; }
+
+    const fullEmail = input + '@kangwon.ac.kr';
+    state.email = fullEmail;
+
+    const btn = document.querySelector('#screen-reset-email .btn-primary');
+    const origText = btn.textContent;
+    btn.disabled = true;
+    btn.textContent = '코드 발송 중...';
+
+    try {
+      // 가입된 사용자만 재설정 가능 — shouldCreateUser: false
+      const { error } = await supabaseClient.auth.signInWithOtp({
+        email: fullEmail,
+        options: { shouldCreateUser: false, emailRedirectTo: undefined }
+      });
+      if(error){
+        console.error('재설정 OTP 실패:', error);
+        const msg = (error.message || '').toLowerCase();
+        if(msg.includes('signup') || msg.includes('not found')){
+          alert('가입되지 않은 메일이에요. 가입을 먼저 해주세요.');
+        } else if(msg.includes('rate')){
+          alert('너무 자주 시도하셨어요. 잠시 후 다시 시도해주세요.');
+        } else {
+          alert('인증 코드 발송에 실패했어요.');
+        }
+        return;
+      }
+      document.getElementById('reset-email-display').textContent = fullEmail;
+      go('reset-verify');
+      startResetTimer();
+    } finally {
+      btn.disabled = false;
+      btn.textContent = origText;
+    }
+  }
+
+  // 재설정 화면 타이머 (가입과 별개)
+  let resetTimerInterval = null;
+  let resetTimerSeconds = 300;
+  function startResetTimer(){
+    stopResetTimer();
+    resetTimerSeconds = 300;
+    updateResetTimer();
+    resetTimerInterval = setInterval(() => {
+      resetTimerSeconds--;
+      updateResetTimer();
+      if(resetTimerSeconds <= 0){
+        stopResetTimer();
+        const el = document.getElementById('reset-timer');
+        if(el){ el.textContent = '시간 만료'; el.classList.add('expired'); }
+      }
+    }, 1000);
+  }
+  function stopResetTimer(){
+    if(resetTimerInterval){ clearInterval(resetTimerInterval); resetTimerInterval = null; }
+  }
+  function updateResetTimer(){
+    const el = document.getElementById('reset-timer');
+    if(!el) return;
+    el.classList.remove('expired');
+    const m = String(Math.floor(resetTimerSeconds / 60)).padStart(2, '0');
+    const s = String(resetTimerSeconds % 60).padStart(2, '0');
+    el.textContent = `${m} : ${s}`;
+  }
+
+  // 재전송
+  async function resendResetOtp(){
+    if(!supabaseClient || !state.email) return;
+    const btn = document.querySelector('#screen-reset-verify .resend-btn');
+    btn.disabled = true; btn.textContent = '재전송 중...';
+    try {
+      const { error } = await supabaseClient.auth.signInWithOtp({
+        email: state.email,
+        options: { shouldCreateUser: false }
+      });
+      if(error){
+        alert('재전송 실패. 잠시 후 다시 시도해주세요.');
+        return;
+      }
+      startResetTimer();
+      document.querySelectorAll('#reset-otp-grid .pin-cell').forEach(c => {
+        c.value = ''; c.classList.remove('filled');
+      });
+      alert('새 인증코드를 보냈어요.');
+    } finally {
+      btn.disabled = false; btn.textContent = '코드 재전송';
+    }
+  }
+
+  // 5-6-C 2/3: OTP 검증
+  async function verifyResetOtp(){
+    if(!supabaseClient){ alert('서버 연결 중'); return; }
+    const cells = document.querySelectorAll('#reset-otp-grid .pin-cell');
+    const code = Array.from(cells).map(c => c.value).join('');
+    if(code.length !== 6){ alert('6자리 인증코드를 모두 입력해주세요.'); return; }
+
+    const btn = document.querySelector('#screen-reset-verify .btn-primary');
+    const origText = btn.textContent;
+    btn.disabled = true; btn.textContent = '확인 중...';
+
+    try {
+      const { data, error } = await supabaseClient.auth.verifyOtp({
+        email: state.email, token: code, type: 'email'
+      });
+      if(error){
+        console.error(error);
+        alert('인증코드가 일치하지 않거나 만료됐어요.');
+        cells.forEach(c => { c.value = ''; c.classList.remove('filled'); });
+        cells[0].focus();
+        return;
+      }
+      stopResetTimer();
+      // 잠금 해제 모드 vs 새 비번 모드 분기
+      if(unlockMode){
+        setAttempts(state.email, 0);
+        unlockMode = false;
+        alert('잠금이 해제됐어요. 다시 로그인해주세요.');
+        go('login');
+      } else {
+        // 새 비번 입력으로
+        go('reset-newpw');
+      }
+    } finally {
+      btn.disabled = false; btn.textContent = origText;
+    }
+  }
+
+  // 5-6-C 3/3: 새 비번 설정 + updateUser
+  async function submitNewPassword(){
+    if(!supabaseClient){ alert('서버 연결 중'); return; }
+    const pin1 = Array.from(document.querySelectorAll('#reset-pin-1 .pin-cell')).map(readPinValue).join('');
+    const pin2 = Array.from(document.querySelectorAll('#reset-pin-2 .pin-cell')).map(readPinValue).join('');
+    const hint = document.getElementById('reset-pin-hint');
+
+    if(pin1.length !== 6 || !/^\d{6}$/.test(pin1)){
+      hint.textContent = '비밀번호는 숫자 6자리로 입력해주세요.';
+      hint.classList.add('error');
+      return;
+    }
+    if(pin1 !== pin2){
+      hint.textContent = '비밀번호가 일치하지 않아요.';
+      hint.classList.add('error');
+      return;
+    }
+
+    const btn = document.querySelector('#screen-reset-newpw .btn-primary');
+    btn.disabled = true; btn.textContent = '변경 중...';
+
+    try {
+      const { error } = await supabaseClient.auth.updateUser({ password: pin1 });
+      if(error){
+        const msg = (error.message || '').toLowerCase();
+        if(msg.includes('different from the old')){
+          hint.textContent = '이전과 같은 비밀번호예요. 다른 번호로 정해주세요.';
+          hint.classList.add('error');
+          return;
+        }
+        console.error(error);
+        alert('비밀번호 변경에 실패했어요.');
+        return;
+      }
+      // 카운터 리셋
+      setAttempts(state.email, 0);
+      // 자동 로그아웃 (사용자가 새 비번으로 다시 로그인하도록)
+      await supabaseClient.auth.signOut();
+      alert('비밀번호가 변경됐어요. 새 비밀번호로 로그인해주세요.');
+      go('login');
+    } finally {
+      btn.disabled = false; btn.textContent = '비밀번호 변경';
     }
   }
 
