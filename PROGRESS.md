@@ -44,6 +44,10 @@
 - ✅ 5-2: OTP 검증 (verifyOtp)
 - ✅ 5-3: 닉네임 중복확인 (RPC) + 비밀번호(PIN 6자리)
 - ✅ 5-4: 학년/재학상태/출생연도 + **학과 입력 필드 추가** (Option A)
+- ✅ OTP 6자리 / 5분 만료 설정
+- ✅ RPC `create_user_profile` (profiles + consents 트랜잭션 묶음)
+- ✅ 5-5: `finishSignup()` 실제 Supabase 저장 — updateUser(password) + RPC 호출 + 에러 분기
+- ✅ 약관 화면 6개 항목 (필수 5 + 선택 1) + data-consent-type 식별자
 
 ---
 

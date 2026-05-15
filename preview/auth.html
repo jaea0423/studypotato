@@ -515,6 +515,7 @@
     min-width: 0;
   }
   .terms-text .req{color: var(--knu-orange); font-weight: 600;}
+  .terms-text .opt{color: var(--ink-mute); font-weight: 600;}
   .terms-link{
     color: var(--ink-mute);
     font-size: 12px;
@@ -805,7 +806,7 @@
       </div>
 
       <!-- 춘천캠퍼스 재학생 확인 (최상단 강조) -->
-      <div class="terms-row" onclick="toggleOne(this)">
+      <div class="terms-row" data-consent-type="campus" data-consent-required="true" onclick="toggleOne(this)">
         <div class="checkbox"></div>
         <div class="terms-text">
           <span class="req">[필수]</span> 강원대학교 춘천캠퍼스 재학생 확인
@@ -813,7 +814,7 @@
         </div>
       </div>
 
-      <div class="terms-row" onclick="toggleOne(this)">
+      <div class="terms-row" data-consent-type="terms" data-consent-required="true" onclick="toggleOne(this)">
         <div class="checkbox"></div>
         <div class="terms-text">
           <span class="req">[필수]</span> 이용약관 동의
@@ -821,7 +822,7 @@
         <a href="#" class="terms-link" onclick="event.stopPropagation();">보기</a>
       </div>
 
-      <div class="terms-row" onclick="toggleOne(this)">
+      <div class="terms-row" data-consent-type="privacy" data-consent-required="true" onclick="toggleOne(this)">
         <div class="checkbox"></div>
         <div class="terms-text">
           <span class="req">[필수]</span> 개인정보 처리방침 동의
@@ -829,7 +830,7 @@
         <a href="#" class="terms-link" onclick="event.stopPropagation();">보기</a>
       </div>
 
-      <div class="terms-row" onclick="toggleOne(this)">
+      <div class="terms-row" data-consent-type="rules" data-consent-required="true" onclick="toggleOne(this)">
         <div class="checkbox"></div>
         <div class="terms-text">
           <span class="req">[필수]</span> 매칭 운영 규칙 동의
@@ -838,11 +839,19 @@
         <a href="#" class="terms-link" onclick="event.stopPropagation();">보기</a>
       </div>
 
-      <div class="terms-row" onclick="toggleOne(this)">
+      <div class="terms-row" data-consent-type="service_email" data-consent-required="true" onclick="toggleOne(this)">
         <div class="checkbox"></div>
         <div class="terms-text">
           <span class="req">[필수]</span> 매칭 알림 메일 수신
           <div style="font-size:11px; color: var(--ink-mute); margin-top: 3px; font-weight: 400;">매칭 결과를 받으려면 필요해요</div>
+        </div>
+      </div>
+
+      <div class="terms-row" data-consent-type="community_email" data-consent-required="false" onclick="toggleOne(this)">
+        <div class="checkbox"></div>
+        <div class="terms-text">
+          <span class="opt">[선택]</span> 커뮤니티/공지사항 알림 메일 수신
+          <div style="font-size:11px; color: var(--ink-mute); margin-top: 3px; font-weight: 400;">새 글, 이벤트, 공지를 알려드려요</div>
         </div>
       </div>
     </div>
@@ -1188,16 +1197,106 @@
     go('signup-terms');
   }
 
-  function finishSignup(){
-    document.getElementById('done-nickname').textContent = state.nickname || '감자';
-    document.getElementById('summary-email').textContent = state.email || '—';
-    document.getElementById('summary-nickname').textContent = state.nickname || '—';
-    document.getElementById('summary-grade').textContent = state.grade || '—';
-    document.getElementById('summary-status').textContent = state.enrollmentStatus || '—';
-    document.getElementById('summary-birth').textContent = state.birthYear ? state.birthYear + '년' : '—';
-    document.getElementById('summary-major').textContent = state.major || '—';
-    document.getElementById('summary-notify').textContent = state.notifyEmail || '—';
-    go('done');
+  // 약관 정책 버전 (운영정책 변경 시 이 값을 올림 → 재동의 받을 수 있음)
+  const CONSENT_VERSION = '2026-05-15';
+
+  async function finishSignup(){
+    if(!supabaseClient){
+      alert('서버 연결을 준비 중이에요.');
+      return;
+    }
+
+    // 1. 약관 동의 수집 + 필수 항목 검증
+    const rows = document.querySelectorAll('#screen-signup-terms .terms-row[data-consent-type]');
+    const consents = [];
+    let missingRequired = false;
+
+    rows.forEach(row => {
+      const type = row.dataset.consentType;
+      const required = row.dataset.consentRequired === 'true';
+      const checked = row.querySelector('.checkbox').classList.contains('checked');
+
+      if(required && !checked) missingRequired = true;
+
+      consents.push({
+        type: type,
+        version: CONSENT_VERSION,
+        consented: checked
+      });
+    });
+
+    if(missingRequired){
+      alert('필수 약관에 모두 동의해주세요.');
+      return;
+    }
+
+    // 2. 버튼 잠금 (중복 제출 방지)
+    const btn = document.querySelector('#screen-signup-terms .btn-primary');
+    const originalText = btn.textContent;
+    btn.disabled = true;
+    btn.textContent = '가입 처리 중...';
+
+    try {
+      // 3. 비밀번호 설정 — OTP로 만든 계정에 password 부여
+      //    (이 호출은 OTP 인증 직후 세션이 살아있을 때만 동작)
+      const { error: pwError } = await supabaseClient.auth.updateUser({
+        password: state.password
+      });
+      if(pwError){
+        console.error('비밀번호 설정 실패:', pwError);
+        alert('비밀번호 설정에 실패했어요. 처음부터 다시 시도해주세요.');
+        return;
+      }
+
+      // 4. profiles + consents를 RPC 함수로 한 번에 저장 (트랜잭션)
+      const { data: userId, error: rpcError } = await supabaseClient.rpc(
+        'create_user_profile',
+        {
+          p_nickname: state.nickname,
+          p_grade: state.grade,
+          p_enrollment_status: state.enrollmentStatus,
+          p_birth_year: parseInt(state.birthYear, 10),
+          p_major: state.major,
+          p_notify_email: state.notifyEmail,
+          p_consents: consents,
+          p_user_agent: navigator.userAgent
+        }
+      );
+
+      if(rpcError){
+        console.error('가입 저장 실패:', rpcError);
+        const msg = (rpcError.message || '').toLowerCase();
+        if(msg.includes('nickname_taken')){
+          alert('이미 사용 중인 닉네임이에요. 닉네임 단계로 돌아갈게요.');
+          go('signup-profile');
+        } else if(msg.includes('not_authenticated')){
+          alert('인증 세션이 만료됐어요. 처음부터 다시 시도해주세요.');
+          go('signup-email');
+        } else {
+          alert('가입 처리 중 문제가 생겼어요. 잠시 후 다시 시도해주세요.');
+        }
+        return;
+      }
+
+      console.log('✓ 가입 완료. user_id:', userId);
+
+      // 5. 완료 화면 채우기
+      document.getElementById('done-nickname').textContent = state.nickname || '감자';
+      document.getElementById('summary-email').textContent = state.email || '—';
+      document.getElementById('summary-nickname').textContent = state.nickname || '—';
+      document.getElementById('summary-grade').textContent = state.grade || '—';
+      document.getElementById('summary-status').textContent = state.enrollmentStatus || '—';
+      document.getElementById('summary-birth').textContent = state.birthYear ? state.birthYear + '년' : '—';
+      document.getElementById('summary-major').textContent = state.major || '—';
+      document.getElementById('summary-notify').textContent = state.notifyEmail || '—';
+      go('done');
+    } catch(err){
+      console.error(err);
+      alert('네트워크 오류가 발생했어요.');
+    } finally {
+      btn.disabled = false;
+      btn.textContent = originalText;
+    }
   }
 
   function resetAll(){
