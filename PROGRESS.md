@@ -56,11 +56,11 @@
 - 그런데 `{{ .Token }}` 자리에 6자리가 아닌 **8자리 숫자**가 옴
 - 클라이언트 PIN 셀은 6칸이라 입력 자체가 불가능
 
-**해결 방향:**
-1. Supabase 대시보드에서 OTP 길이를 6자리로 설정 (1순위)
-   - Authentication → Providers → Email
-   - 또는 Authentication → Settings
-2. Supabase가 길이를 강제로 8자리로 두면 → 클라이언트 PIN 셀 8칸으로 변경 (차선)
+**해결 방향 (확정):**
+Authentication → Providers → Email 에서 두 값 모두 변경
+- **Email OTP Length: 6** (현재 8 → 클라이언트 PIN 6칸과 일치)
+- **Email OTP Expiration: 300** (현재 3600 → 클라이언트 5분 타이머와 일치)
+  - 만료 시간을 클라이언트와 맞추지 않으면, "시간 만료" 표시 후에도 코드가 유효한 모순 발생
 
 ---
 
@@ -84,6 +84,9 @@
 
 ### 그 이후
 - 다른 이메일 템플릿 한글화 (Reset Password, Change Email)
+- **사전신청 완료 자동 메일** (studypotato.com 메인)
+  - 내용: "사전신청 완료 / 6개월간 보관 / 정식 출시 시 알림 / 감사합니다"
+  - 구현 옵션: Supabase Edge Function + Resend API, 또는 DB 트리거 + pg_net
 - 매칭 카드, 팀 관리, 커뮤니티 백엔드 연동
 
 ---
