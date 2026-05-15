@@ -34,7 +34,7 @@
     --admin-purple: #6B46C1;
     --admin-purple-deep: #4C2A99;
     --admin-purple-soft: #EDE7F6;
-    --admin-stripe: #1A1A1A;          /* 좌우 띠 */
+    --admin-stripe: #6B46C1;          /* 좌우 띠 (보라톤) */
 
     --font-kr: 'Pretendard Variable', Pretendard, -apple-system, sans-serif;
     --font-mono: 'JetBrains Mono', monospace;
@@ -68,7 +68,7 @@
     border-right: 4px solid var(--admin-stripe);
     box-shadow: 0 0 40px rgba(0,0,0,0.08);
   }
-  @media (min-width: 481px){ body{ background: #2A2A2A; } }
+  @media (min-width: 481px){ body{ background: #4C2A99; } }  /* 데스크톱 배경도 보라톤 */
 
   /* ========== 운영자 헤더 (보라톤) ========== */
   .admin-header{
@@ -118,9 +118,9 @@
     opacity: 0.95;
   }
 
-  /* 운영자 사이트 표식 띠 (헤더 위) */
+  /* 운영자 사이트 표식 띠 (헤더 위) — 좌우 띠보다 진하게 */
   .admin-stripe{
-    background: var(--admin-stripe);
+    background: var(--admin-purple-deep);
     color: white;
     text-align: center;
     font-size: 10px;
@@ -621,28 +621,27 @@
     <div class="form-block">
       <label class="form-label">운영자 ID</label>
       <div class="input-wrap">
-        <input type="text" id="login-id" placeholder="예: jaea_admin" autocomplete="username">
+        <input type="text" id="login-id" placeholder="identification" autocomplete="username">
       </div>
     </div>
 
     <div class="form-block">
       <label class="form-label">비밀번호</label>
       <div class="input-wrap">
-        <input type="password" id="login-pw" placeholder="영문+숫자 8자 이상" autocomplete="current-password">
+        <input type="password" id="login-pw" placeholder="password" autocomplete="current-password">
       </div>
     </div>
 
     <div class="form-block">
-      <label class="form-label">2차 PIN (6자리)</label>
+      <label class="form-label">2차 비밀번호</label>
       <div class="pin-grid" id="login-pin">
-        <input class="pin-cell" type="text" inputmode="numeric" maxlength="1" pattern="\d*" />
-        <input class="pin-cell" type="text" inputmode="numeric" maxlength="1" pattern="\d*" />
-        <input class="pin-cell" type="text" inputmode="numeric" maxlength="1" pattern="\d*" />
-        <input class="pin-cell" type="text" inputmode="numeric" maxlength="1" pattern="\d*" />
-        <input class="pin-cell" type="text" inputmode="numeric" maxlength="1" pattern="\d*" />
-        <input class="pin-cell" type="text" inputmode="numeric" maxlength="1" pattern="\d*" />
+        <input class="pin-cell pin-pwd" type="text" inputmode="numeric" maxlength="1" pattern="\d*" />
+        <input class="pin-cell pin-pwd" type="text" inputmode="numeric" maxlength="1" pattern="\d*" />
+        <input class="pin-cell pin-pwd" type="text" inputmode="numeric" maxlength="1" pattern="\d*" />
+        <input class="pin-cell pin-pwd" type="text" inputmode="numeric" maxlength="1" pattern="\d*" />
+        <input class="pin-cell pin-pwd" type="text" inputmode="numeric" maxlength="1" pattern="\d*" />
+        <input class="pin-cell pin-pwd" type="text" inputmode="numeric" maxlength="1" pattern="\d*" />
       </div>
-      <div class="input-hint">2차 PIN은 본인만 알고 있어야 해요. 노출 시 즉시 변경하세요.</div>
     </div>
 
     <div class="login-bottom">
@@ -981,6 +980,9 @@
     </div>
     <div class="body">
       <div class="group-title">콘텐츠</div>
+      <button class="side-item" onclick="closeSidemenu(); switchTab('community-monitor')">
+        <span class="ico">💬</span> 커뮤니티 모니터링
+      </button>
       <button class="side-item" onclick="closeSidemenu(); switchTab('announcements')">
         <span class="ico">📢</span> 공지사항 관리
       </button>
@@ -1015,6 +1017,100 @@
   </div>
 
   <!-- ========== 더보기 탭들 (사이드 메뉴에서 접근) ========== -->
+
+  <!-- 💬 커뮤니티 모니터링 -->
+  <div class="tab-content" id="tab-community-monitor">
+    <div class="section-head">
+      <h2>💬 커뮤니티 모니터링</h2>
+      <div class="desc">사용자 커뮤니티 글을 미리 확인하고 운영자 댓글을 달 수 있어요</div>
+    </div>
+
+    <div style="background: var(--admin-purple-soft); color: var(--admin-purple-deep); border-radius: var(--radius-m); padding: 12px 14px; font-size: 12px; line-height: 1.6; margin-bottom: 16px;">
+      ℹ️ 운영자 계정으로 댓글을 달면 <strong>[운영자]</strong> 배지가 자동으로 붙어요. 사용자 입장에서 운영진의 답변임이 명확히 보입니다. 일반 댓글은 본인 사용자 계정으로 달아주세요.
+    </div>
+
+    <div class="filter-bar">
+      <button class="filter-chip active" onclick="filterChip(this)">최신</button>
+      <button class="filter-chip" onclick="filterChip(this)">신고된 글</button>
+      <button class="filter-chip" onclick="filterChip(this)">자유</button>
+      <button class="filter-chip" onclick="filterChip(this)">질문</button>
+      <button class="filter-chip" onclick="filterChip(this)">정보공유</button>
+    </div>
+
+    <div class="search-bar">
+      <span style="color: var(--ink-mute);">🔍</span>
+      <input type="text" placeholder="제목/내용 검색">
+    </div>
+
+    <div class="post-card">
+      <div class="head">
+        <div class="title">📝 [질문] 컴공 자료구조 같이 공부할 사람 있나요</div>
+      </div>
+      <div class="body">"중간고사 끝나고 자료구조 복습하면서 같이 풀어볼 사람 찾아요. 일주일에 한두 번 카페에서..."</div>
+      <div class="info">
+        <span>씩씩한감자 · 2학년</span>
+        <span>03/15 12:18</span>
+        <span>💬 4</span>
+        <span>👁 28</span>
+      </div>
+      <div class="actions" style="margin-top:10px;">
+        <button class="btn-action reject" onclick="showToast('상세 화면 (추후 구현)')">상세보기</button>
+        <button class="btn-action process" onclick="showToast('댓글 입력 모달 (추후 구현)')">[운영자] 댓글 달기</button>
+      </div>
+    </div>
+
+    <div class="post-card">
+      <div class="head">
+        <div class="title">📝 [정보공유] 강원대 카페 추천 (춘천)</div>
+      </div>
+      <div class="body">"스터디하기 좋은 카페 모음입니다. 콘센트 + 와이파이 + 조용함 기준으로..."</div>
+      <div class="info">
+        <span>똘똘한고구마 · 3학년</span>
+        <span>03/15 09:30</span>
+        <span>💬 12</span>
+        <span>👁 84</span>
+      </div>
+      <div class="actions" style="margin-top:10px;">
+        <button class="btn-action reject" onclick="showToast('상세 화면 (추후 구현)')">상세보기</button>
+        <button class="btn-action process" onclick="showToast('댓글 입력 모달 (추후 구현)')">[운영자] 댓글 달기</button>
+      </div>
+    </div>
+
+    <div class="post-card" style="border-left: 3px solid var(--knu-orange);">
+      <div class="head">
+        <div class="title">📝 [자유] 이 교수님 진짜 ...</div>
+        <span class="badge pending">신고 2건</span>
+      </div>
+      <div class="body">"수업 중에 ㅇㅇㅇ교수님이 학생들한테 그런 말을 하시면 안 되는 거 아닌가요? ..."</div>
+      <div class="info">
+        <span>익명 귀여운고구마</span>
+        <span>03/15 11:08</span>
+        <span>💬 7</span>
+        <span>👁 152</span>
+      </div>
+      <div class="actions" style="margin-top:10px;">
+        <button class="btn-action reject" onclick="switchTab('reports')">신고 처리로 이동</button>
+        <button class="btn-action process" onclick="showToast('댓글 입력 모달 (추후 구현)')">[운영자] 댓글 달기</button>
+      </div>
+    </div>
+
+    <div class="post-card">
+      <div class="head">
+        <div class="title">📝 [자유] 강원대 도서관 24시간 개방됐으면 좋겠다</div>
+      </div>
+      <div class="body">"시험기간엔 자리도 없고 시간도 부족하고. 다른 학교들은 24시간이라고 하던데..."</div>
+      <div class="info">
+        <span>졸린대파 · 1학년</span>
+        <span>03/14 22:40</span>
+        <span>💬 18</span>
+        <span>👁 96</span>
+      </div>
+      <div class="actions" style="margin-top:10px;">
+        <button class="btn-action reject" onclick="showToast('상세 화면 (추후 구현)')">상세보기</button>
+        <button class="btn-action process" onclick="showToast('댓글 입력 모달 (추후 구현)')">[운영자] 댓글 달기</button>
+      </div>
+    </div>
+  </div>
 
   <!-- 📢 공지사항 관리 -->
   <div class="tab-content" id="tab-announcements">
@@ -1164,7 +1260,7 @@
         <label class="form-label">권한</label>
         <div style="display:flex; gap: 6px;">
           <button class="filter-chip active" onclick="filterChip(this)">moderator</button>
-          <button class="filter-chip" onclick="filterChip(this)">admin (모든 권한)</button>
+          <button class="filter-chip" onclick="confirmAdminGrant(this)">admin (모든 권한)</button>
         </div>
       </div>
       <button class="btn-primary" onclick="showToast('운영자가 추가됐어요 (더미)')">운영자 추가</button>
@@ -1284,6 +1380,10 @@
       <div class="desc">서비스 운영 정책 · admin 전용</div>
     </div>
 
+    <div class="callout-warn" style="background: #FFF4E5; border-left: 4px solid var(--warning); padding: 12px 14px; border-radius: var(--radius-s); font-size: 12px; color: #8B4500; line-height: 1.55; margin-bottom: 16px;">
+      ⚠️ <strong>여기서 변경하는 정책은 모든 사용자의 경험에 직접 영향을 줍니다.</strong> 신중하게 검토 후 변경해주세요.
+    </div>
+
     <div class="sub-head">매칭 정책</div>
     <div class="write-form">
       <div class="form-block">
@@ -1293,9 +1393,9 @@
       <div class="form-block">
         <label class="form-label">매칭 실행 주기</label>
         <div style="display:flex; gap:6px;">
-          <button class="filter-chip" onclick="filterChip(this)">실시간</button>
-          <button class="filter-chip active" onclick="filterChip(this)">하루 2회</button>
-          <button class="filter-chip" onclick="filterChip(this)">하루 1회</button>
+          <button class="filter-chip" onclick="confirmPolicyChange(this, '매칭 실행 주기를 \\'실시간\\'으로 변경')">실시간</button>
+          <button class="filter-chip active" onclick="confirmPolicyChange(this, '매칭 실행 주기를 \\'하루 2회\\'로 변경')">하루 2회</button>
+          <button class="filter-chip" onclick="confirmPolicyChange(this, '매칭 실행 주기를 \\'하루 1회\\'로 변경')">하루 1회</button>
         </div>
       </div>
     </div>
@@ -1305,17 +1405,17 @@
       <div class="form-block">
         <label class="form-label">No-Show 1회 페널티</label>
         <div style="display:flex; gap:6px;">
-          <button class="filter-chip" onclick="filterChip(this)">없음</button>
-          <button class="filter-chip active" onclick="filterChip(this)">3일 매칭 정지</button>
-          <button class="filter-chip" onclick="filterChip(this)">7일 매칭 정지</button>
+          <button class="filter-chip" onclick="confirmPolicyChange(this, 'No-Show 1회 페널티를 \\'없음\\'으로 변경')">없음</button>
+          <button class="filter-chip active" onclick="confirmPolicyChange(this, 'No-Show 1회 페널티를 \\'3일 매칭 정지\\'로 변경')">3일 매칭 정지</button>
+          <button class="filter-chip" onclick="confirmPolicyChange(this, 'No-Show 1회 페널티를 \\'7일 매칭 정지\\'로 변경')">7일 매칭 정지</button>
         </div>
       </div>
       <div class="form-block">
         <label class="form-label">반복 No-Show (3회 누적) 시</label>
         <div style="display:flex; gap:6px;">
-          <button class="filter-chip" onclick="filterChip(this)">7일 정지</button>
-          <button class="filter-chip active" onclick="filterChip(this)">14일 정지</button>
-          <button class="filter-chip" onclick="filterChip(this)">영구 정지</button>
+          <button class="filter-chip" onclick="confirmPolicyChange(this, '반복 No-Show 페널티를 \\'7일 정지\\'로 변경')">7일 정지</button>
+          <button class="filter-chip active" onclick="confirmPolicyChange(this, '반복 No-Show 페널티를 \\'14일 정지\\'로 변경')">14일 정지</button>
+          <button class="filter-chip" onclick="confirmPolicyChange(this, '반복 No-Show 페널티를 \\'영구 정지\\'로 변경')">영구 정지</button>
         </div>
       </div>
     </div>
@@ -1345,7 +1445,7 @@
       </button>
     </div>
 
-    <button class="btn-primary" onclick="showToast('설정이 저장됐어요 (더미)')">설정 저장</button>
+    <button class="btn-primary" onclick="confirmSettingsSave()">설정 저장</button>
   </div>
 
   <!-- 🙂 내 정보 -->
@@ -1395,20 +1495,20 @@
       <button class="btn-primary" onclick="showToast('비번 변경됨')">비밀번호 변경</button>
     </div>
 
-    <div class="sub-head">2차 PIN 변경</div>
+    <div class="sub-head">2차 비밀번호 변경</div>
     <div class="write-form">
       <div class="form-block">
-        <label class="form-label">새 2차 PIN (6자리)</label>
+        <label class="form-label">새 2차 비밀번호</label>
         <div class="pin-grid">
-          <input class="pin-cell" type="text" inputmode="numeric" maxlength="1" />
-          <input class="pin-cell" type="text" inputmode="numeric" maxlength="1" />
-          <input class="pin-cell" type="text" inputmode="numeric" maxlength="1" />
-          <input class="pin-cell" type="text" inputmode="numeric" maxlength="1" />
-          <input class="pin-cell" type="text" inputmode="numeric" maxlength="1" />
-          <input class="pin-cell" type="text" inputmode="numeric" maxlength="1" />
+          <input class="pin-cell pin-pwd" type="text" inputmode="numeric" maxlength="1" />
+          <input class="pin-cell pin-pwd" type="text" inputmode="numeric" maxlength="1" />
+          <input class="pin-cell pin-pwd" type="text" inputmode="numeric" maxlength="1" />
+          <input class="pin-cell pin-pwd" type="text" inputmode="numeric" maxlength="1" />
+          <input class="pin-cell pin-pwd" type="text" inputmode="numeric" maxlength="1" />
+          <input class="pin-cell pin-pwd" type="text" inputmode="numeric" maxlength="1" />
         </div>
       </div>
-      <button class="btn-primary" onclick="showToast('2차 PIN 변경됨')">PIN 변경</button>
+      <button class="btn-primary" onclick="showToast('2차 비밀번호 변경됨')">변경</button>
     </div>
 
     <button class="btn-secondary" onclick="adminLogout()" style="margin-top: 16px; color: var(--error); border-color: var(--error);">🚪 로그아웃</button>
@@ -1481,17 +1581,22 @@
     const id = document.getElementById('login-id').value.trim();
     const pw = document.getElementById('login-pw').value;
     const pinCells = document.querySelectorAll('#login-pin .pin-cell');
-    const pin = Array.from(pinCells).map(c => c.value).join('');
+    // 마스킹된 비밀번호 셀이라 readPinValue로 실제 값 추출
+    const pin = Array.from(pinCells).map(readPinValue).join('');
 
     if(!id || !pw){ showToast('ID와 비밀번호를 입력해주세요'); return; }
-    if(pin.length !== 6){ showToast('2차 PIN 6자리를 입력해주세요'); return; }
+    if(pin.length !== 6){ showToast('2차 비밀번호 6자리를 입력해주세요'); return; }
 
     // 더미 검증 (실제는 서버 RPC 호출)
     const admin = DUMMY_ADMINS[id];
     if(!admin || admin.pw !== pw || admin.pin !== pin){
-      showToast('ID, 비밀번호 또는 PIN이 일치하지 않아요');
+      showToast('ID, 비밀번호 또는 2차 비밀번호가 일치하지 않아요');
       // PIN 클리어
-      pinCells.forEach(c => { c.value = ''; c.classList.remove('filled'); });
+      pinCells.forEach(c => {
+        c.value = '';
+        delete c.dataset.actualValue;
+        c.classList.remove('filled');
+      });
       return;
     }
 
@@ -1591,36 +1696,110 @@
     }, { passive: true });
   });
 
-  /* ========== PIN 셀 자동 이동 + 숫자만 ========== */
+  /* ========== PIN 셀: 자동 이동 + 숫자만 + 비밀번호 즉시 마스킹 ========== */
+  // pin-pwd 클래스가 있으면 입력 즉시 ●로 마스킹 (실제 값은 dataset.actualValue)
   document.addEventListener('input', e => {
     if(e.target.classList.contains('pin-cell')){
       const cell = e.target;
-      cell.value = cell.value.replace(/[^0-9]/g, '');
+      const isPwd = cell.classList.contains('pin-pwd');
+
+      // 숫자 외 문자 제거
+      const cleaned = cell.value.replace(/[^0-9]/g, '');
+      if(cell.value !== cleaned) cell.value = cleaned;
+
       if(cell.value){
+        cell.dataset.actualValue = cell.value;
         cell.classList.add('filled');
+
         const next = cell.nextElementSibling;
-        if(next && next.classList.contains('pin-cell')) next.focus();
+        const hasNext = next && next.classList.contains('pin-cell');
+
+        if(isPwd){
+          // 비밀번호 셀은 즉시 ●로 마스킹
+          cell.value = '●';
+        }
+        if(hasNext) next.focus();
       } else {
+        cell.classList.remove('filled');
+        delete cell.dataset.actualValue;
+      }
+    }
+  });
+
+  document.addEventListener('keydown', e => {
+    if(e.target.classList.contains('pin-cell') && e.key === 'Backspace'){
+      const cell = e.target;
+      const isEmpty = cell.classList.contains('pin-pwd')
+        ? !cell.dataset.actualValue
+        : !cell.value;
+
+      if(isEmpty){
+        const prev = cell.previousElementSibling;
+        if(prev && prev.classList.contains('pin-cell')){
+          prev.focus();
+          prev.value = '';
+          delete prev.dataset.actualValue;
+          prev.classList.remove('filled');
+        }
+      } else if(cell.classList.contains('pin-pwd') && cell.value === '●'){
+        e.preventDefault();
+        cell.value = '';
+        delete cell.dataset.actualValue;
         cell.classList.remove('filled');
       }
     }
   });
-  document.addEventListener('keydown', e => {
-    if(e.target.classList.contains('pin-cell') && e.key === 'Backspace' && !e.target.value){
-      const prev = e.target.previousElementSibling;
-      if(prev && prev.classList.contains('pin-cell')){
-        prev.focus();
-        prev.value = '';
-        prev.classList.remove('filled');
-      }
-    }
-  });
+
+  // 마스킹된 비밀번호 셀에서 실제 값 읽기
+  function readPinValue(cell){
+    return cell.classList.contains('pin-pwd')
+      ? (cell.dataset.actualValue || '')
+      : (cell.value || '');
+  }
 
   /* ========== 필터 칩 ========== */
   function filterChip(btn){
     const parent = btn.parentElement;
     parent.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
     btn.classList.add('active');
+  }
+
+  /* ========== admin 권한 부여 confirm (운영자 추가 화면) ========== */
+  function confirmAdminGrant(btn){
+    const ok = confirm(
+      'admin은 모든 권한을 가져요.\n' +
+      '운영자 임명·해임, 시스템 설정 변경, 활동 로그 조회까지 모두 가능합니다.\n\n' +
+      '정말 이 운영자에게 admin 권한을 주시겠어요?\n' +
+      '(보통은 moderator로 충분해요)'
+    );
+    if(!ok) return;
+    filterChip(btn);
+    showToast('admin 권한으로 선택됐어요');
+  }
+
+  /* ========== 시스템 설정 변경 confirm (모든 정책 변경) ========== */
+  function confirmPolicyChange(btn, description){
+    if(btn.classList.contains('active')) return;  // 이미 활성이면 무시
+    const ok = confirm(
+      '⚠️ 운영 정책 변경\n\n' +
+      description + '\n\n' +
+      '이 변경은 모든 사용자에게 즉시 영향을 줘요.\n' +
+      '정말 변경하시겠어요?'
+    );
+    if(!ok) return;
+    filterChip(btn);
+    showToast('정책이 변경됐어요 (저장 버튼을 눌러야 최종 적용)');
+  }
+
+  /* ========== 시스템 설정 최종 저장 confirm ========== */
+  function confirmSettingsSave(){
+    const ok = confirm(
+      '⚠️ 정말로 설정을 저장하시겠어요?\n\n' +
+      '변경된 정책이 즉시 운영에 반영됩니다.\n' +
+      '신중하게 한 번 더 검토해주세요.'
+    );
+    if(!ok) return;
+    showToast('설정이 저장됐어요 (더미)');
   }
 
   /* ========== 토스트 ========== */
