@@ -1,0 +1,1187 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<title>공부하는 감자 — 가입 / 로그인</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/variable/pretendardvariable.css" />
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+  /* ========== 디자인 토큰 ========== */
+  :root{
+    --knu-blue: #0047BB;
+    --knu-blue-deep: #00347E;
+    --knu-blue-soft: #E5ECF8;
+    --knu-orange: #FE5000;
+    --knu-orange-soft: #FFE8DD;
+
+    --cream: #F7F3EC;
+    --paper: #FFFFFF;
+    --paper-warm: #FBF8F2;
+    --ink: #1A1A1A;
+    --ink-soft: #555E68;
+    --ink-mute: #8B95A4;
+    --line: #E8E2D4;
+    --line-soft: #F0EBDF;
+    --error: #DC3545;
+    --success: #2D7A3E;
+
+    --font-kr: 'Pretendard Variable', Pretendard, -apple-system, sans-serif;
+    --font-mono: 'JetBrains Mono', monospace;
+
+    --radius-s: 10px;
+    --radius-m: 16px;
+    --radius-l: 22px;
+  }
+
+  /* ========== 리셋 ========== */
+  *, *::before, *::after{
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+  }
+  html, body{
+    overflow-x: hidden;
+    max-width: 100%;
+    width: 100%;
+  }
+  html{
+    font-size: 16px;
+    -webkit-text-size-adjust: 100%;
+  }
+  body{
+    font-family: var(--font-kr);
+    background: var(--paper-warm);
+    color: var(--ink);
+    line-height: 1.5;
+    min-height: 100vh;
+    word-break: keep-all;
+    overflow-wrap: break-word;
+  }
+  button{
+    font-family: inherit;
+    cursor: pointer;
+    border: 0;
+    background: none;
+    color: inherit;
+  }
+  input{
+    font-family: inherit;
+    color: inherit;
+    border: 0;
+    outline: none;
+    background: none;
+  }
+  a{text-decoration: none; color: inherit;}
+
+  /* ========== 모바일 컨테이너 ========== */
+  .app{
+    max-width: 480px;
+    min-height: 100vh;
+    margin: 0 auto;
+    background: var(--cream);
+    position: relative;
+    box-shadow: 0 0 40px rgba(0,0,0,0.06);
+  }
+  @media (min-width: 481px){
+    body{background: #E8E2D4;}
+  }
+
+  /* ========== 화면 공통 ========== */
+  .screen{
+    display: none;
+    min-height: 100vh;
+    flex-direction: column;
+    padding: 24px 24px 32px;
+    animation: slideIn 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .screen.active{display: flex;}
+  @keyframes slideIn{
+    from{opacity: 0; transform: translateY(12px);}
+    to{opacity: 1; transform: translateY(0);}
+  }
+
+  /* 상단 바 */
+  .topbar{
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 32px;
+    min-height: 32px;
+  }
+  .back-btn{
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .back-btn:active{background: var(--line-soft);}
+  .progress-track{
+    flex: 1;
+    height: 4px;
+    background: var(--line-soft);
+    border-radius: 999px;
+    overflow: hidden;
+  }
+  .progress-fill{
+    height: 100%;
+    background: var(--knu-orange);
+    border-radius: 999px;
+    transition: width 0.4s ease;
+  }
+  .step-text{
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--ink-mute);
+    flex-shrink: 0;
+  }
+
+  /* 페이지 타이틀 */
+  .page-title{
+    font-size: 26px;
+    font-weight: 800;
+    letter-spacing: -0.025em;
+    line-height: 1.25;
+    margin-bottom: 10px;
+  }
+  .page-desc{
+    font-size: 15px;
+    color: var(--ink-soft);
+    line-height: 1.55;
+    margin-bottom: 36px;
+  }
+
+  /* ========== 폼 ========== */
+  .form-block{margin-bottom: 20px;}
+  .form-label{
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--ink-soft);
+    margin-bottom: 8px;
+  }
+  .input-wrap{
+    position: relative;
+    background: var(--paper);
+    border: 1.5px solid var(--line);
+    border-radius: var(--radius-m);
+    transition: border-color 0.2s, background 0.2s;
+    display: flex;
+    align-items: center;
+  }
+  .input-wrap:focus-within{
+    border-color: var(--knu-blue);
+  }
+  .input-wrap.error{border-color: var(--error);}
+  .input-wrap input{
+    width: 100%;
+    padding: 16px 18px;
+    font-size: 16px;
+    font-weight: 500;
+    background: transparent;
+    min-width: 0;
+  }
+  .input-wrap .suffix{
+    padding-right: 18px;
+    font-size: 14px;
+    color: var(--ink-mute);
+    font-weight: 500;
+    white-space: nowrap;
+  }
+  .input-hint{
+    font-size: 12px;
+    color: var(--ink-mute);
+    margin-top: 8px;
+    padding: 0 4px;
+  }
+  .input-hint.error{color: var(--error);}
+  .input-hint.success{color: var(--success);}
+
+  /* 인풋 안쪽 버튼 (중복확인 등) */
+  .check-btn{
+    background: var(--ink);
+    color: white;
+    padding: 9px 14px;
+    margin-right: 8px;
+    border-radius: var(--radius-s);
+    font-size: 13px;
+    font-weight: 600;
+    flex-shrink: 0;
+    white-space: nowrap;
+    transition: all 0.2s;
+  }
+  .check-btn:active{transform: scale(0.95);}
+  .check-btn.success{background: var(--success);}
+
+  /* PIN 입력 (직사각형으로 컴팩트하게) */
+  .pin-grid{
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 8px;
+  }
+  .pin-cell{
+    width: 100%;
+    height: 52px;
+    background: var(--paper);
+    border: 1.5px solid var(--line);
+    border-radius: var(--radius-s);
+    text-align: center;
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--ink);
+    transition: border-color 0.2s, background 0.2s;
+  }
+  .pin-cell:focus{border-color: var(--knu-blue);}
+  .pin-cell.filled{background: var(--knu-blue-soft); border-color: var(--knu-blue);}
+
+  /* ========== 칩 그룹 (학년 선택 등) ========== */
+  .chip-group{
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .chip{
+    background: var(--paper);
+    border: 1.5px solid var(--line);
+    padding: 10px 16px;
+    border-radius: 999px;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--ink);
+    transition: all 0.15s;
+  }
+  .chip:active{transform: scale(0.96);}
+  .chip.active{
+    background: var(--knu-blue);
+    color: white;
+    border-color: var(--knu-blue);
+  }
+
+  /* 출생연도 입력 (가운데 정렬, 큰 글씨) */
+  .year-input{
+    width: 100%;
+    padding: 16px 18px;
+    font-size: 22px;
+    font-weight: 700;
+    text-align: center;
+    letter-spacing: 0.15em;
+    font-family: var(--font-mono);
+  }
+
+  /* ========== 하단 고정 영역 ========== */
+  .bottom-area{
+    margin-top: auto;
+    padding-top: 20px;
+  }
+  .btn-primary{
+    width: 100%;
+    background: var(--knu-blue);
+    color: white;
+    padding: 17px;
+    border-radius: var(--radius-m);
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    transition: all 0.2s;
+  }
+  .btn-primary:active{transform: scale(0.98); background: var(--knu-blue-deep);}
+  .btn-primary:disabled{
+    background: var(--line);
+    color: var(--ink-mute);
+    cursor: not-allowed;
+  }
+  .btn-text{
+    width: 100%;
+    color: var(--ink-soft);
+    padding: 14px;
+    font-size: 14px;
+    font-weight: 500;
+    text-align: center;
+    margin-top: 4px;
+  }
+  .btn-text strong{color: var(--knu-blue); font-weight: 700;}
+
+  /* ========== 시작 화면 ========== */
+  #screen-landing{
+    padding-top: 60px;
+    background: linear-gradient(180deg, var(--cream) 0%, var(--paper-warm) 100%);
+  }
+  .landing-art{
+    text-align: center;
+    margin-bottom: 48px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  .landing-art .emoji{
+    font-size: 88px;
+    line-height: 1;
+    margin-bottom: 18px;
+    display: inline-block;
+    animation: bounce 2.4s ease-in-out infinite;
+  }
+  @keyframes bounce{
+    0%, 100%{transform: translateY(0) rotate(-4deg);}
+    50%{transform: translateY(-10px) rotate(4deg);}
+  }
+  .landing-badge{
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--knu-blue-soft);
+    color: var(--knu-blue);
+    padding: 7px 14px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 600;
+    font-family: var(--font-mono);
+    margin-bottom: 32px;
+  }
+  .landing-badge .dot{
+    width: 6px; height: 6px;
+    background: var(--knu-orange);
+    border-radius: 50%;
+    animation: pulse 2s infinite;
+  }
+  @keyframes pulse{
+    0%, 100%{opacity: 1;}
+    50%{opacity: 0.4;}
+  }
+  .landing-art h1{
+    font-size: 44px;
+    font-weight: 800;
+    letter-spacing: -0.035em;
+    line-height: 1.1;
+    margin-bottom: 16px;
+  }
+  .landing-art h1 .accent{color: var(--knu-orange);}
+  .landing-art p{
+    font-size: 15px;
+    color: var(--ink-soft);
+    line-height: 1.6;
+  }
+
+  /* ========== 인증코드 ========== */
+  .resend-row{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 14px;
+    padding: 0 4px;
+  }
+  .timer{
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: var(--knu-orange);
+    font-weight: 600;
+  }
+  .timer.expired{color: var(--error);}
+  .resend-btn{
+    font-size: 13px;
+    color: var(--ink-soft);
+    font-weight: 500;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  /* ========== 알림 메일 화면 ========== */
+  .info-box{
+    background: var(--knu-orange-soft);
+    border-radius: var(--radius-m);
+    padding: 14px 16px;
+    font-size: 13px;
+    color: #8B4500;
+    line-height: 1.55;
+    margin-bottom: 24px;
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+  }
+  .info-box .ico{flex-shrink: 0; font-size: 16px;}
+
+  /* ========== 완료 화면 ========== */
+  #screen-done{
+    padding-top: 80px;
+    text-align: center;
+  }
+  .done-emoji{
+    font-size: 80px;
+    margin-bottom: 24px;
+    display: inline-block;
+    animation: pop 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  @keyframes pop{
+    0%{transform: scale(0); opacity: 0;}
+    60%{transform: scale(1.2);}
+    100%{transform: scale(1); opacity: 1;}
+  }
+  .done-title{
+    font-size: 26px;
+    font-weight: 800;
+    letter-spacing: -0.025em;
+    margin-bottom: 12px;
+  }
+  .done-desc{
+    font-size: 15px;
+    color: var(--ink-soft);
+    line-height: 1.6;
+    margin-bottom: 36px;
+  }
+  .summary-card{
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-m);
+    padding: 20px;
+    text-align: left;
+    margin-bottom: 32px;
+  }
+  .summary-row{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px dashed var(--line-soft);
+    font-size: 14px;
+    gap: 12px;
+  }
+  .summary-row:last-child{border: 0;}
+  .summary-row .k{color: var(--ink-mute); flex-shrink: 0;}
+  .summary-row .v{
+    color: var(--ink);
+    font-weight: 600;
+    text-align: right;
+    word-break: break-all;
+  }
+
+  /* ========== 약관 동의 ========== */
+  .terms-block{
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-m);
+    padding: 6px 8px;
+    margin-bottom: 16px;
+  }
+  .terms-row{
+    display: flex;
+    align-items: center;
+    padding: 12px;
+    border-radius: var(--radius-s);
+    cursor: pointer;
+    gap: 12px;
+    transition: background 0.15s;
+  }
+  .terms-row:active{background: var(--line-soft);}
+  .terms-row.all{
+    border-bottom: 1px solid var(--line-soft);
+    font-weight: 700;
+    margin-bottom: 4px;
+  }
+  .checkbox{
+    width: 22px; height: 22px;
+    border: 1.8px solid var(--line);
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: all 0.2s;
+  }
+  .checkbox.checked{
+    background: var(--knu-blue);
+    border-color: var(--knu-blue);
+  }
+  .checkbox.checked::after{
+    content: '';
+    width: 5px; height: 10px;
+    border-right: 2px solid white;
+    border-bottom: 2px solid white;
+    transform: rotate(45deg) translate(-1px, -1px);
+  }
+  .terms-text{
+    flex: 1;
+    font-size: 14px;
+    color: var(--ink);
+    min-width: 0;
+  }
+  .terms-text .req{color: var(--knu-orange); font-weight: 600;}
+  .terms-link{
+    color: var(--ink-mute);
+    font-size: 12px;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+    flex-shrink: 0;
+  }
+</style>
+</head>
+<body>
+
+<div class="app">
+
+  <!-- ========== 1. 시작 화면 ========== -->
+  <section class="screen active" id="screen-landing">
+    <div style="flex: 1; display: flex; flex-direction: column; justify-content: center;">
+      <div class="landing-art">
+        <div class="emoji">🥔</div>
+        <!-- 감자 바로 아래 배지 -->
+        <span class="landing-badge">
+          <span class="dot"></span>
+          강원대학교 춘천캠퍼스 전용
+        </span>
+        <h1>공부하는<br><span class="accent">감자</span></h1>
+        <p>같이 공부할 감자를 찾아보세요!<br>저희가 도와드릴게요.</p>
+      </div>
+    </div>
+
+    <div class="bottom-area">
+      <button class="btn-primary" onclick="go('signup-email')">가입하고 시작하기</button>
+      <button class="btn-text" onclick="go('login')">이미 가입했어요. <strong>로그인 →</strong></button>
+    </div>
+  </section>
+
+  <!-- ========== 2. 로그인 ========== -->
+  <section class="screen" id="screen-login">
+    <div class="topbar">
+      <button class="back-btn" onclick="go('landing')">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+      </button>
+    </div>
+
+    <h1 class="page-title">다시 오셨군요 👋</h1>
+    <p class="page-desc">강원대학교 웹메일과 비밀번호로 들어가세요.</p>
+
+    <div class="form-block">
+      <label class="form-label">강원대학교 웹메일</label>
+      <div class="input-wrap">
+        <input type="text" placeholder="아이디 입력" inputmode="email" autocomplete="username">
+        <span class="suffix">@kangwon.ac.kr</span>
+      </div>
+    </div>
+
+    <div class="form-block">
+      <label class="form-label">비밀번호</label>
+      <div class="pin-grid">
+        <input class="pin-cell" type="password" inputmode="numeric" maxlength="1" />
+        <input class="pin-cell" type="password" inputmode="numeric" maxlength="1" />
+        <input class="pin-cell" type="password" inputmode="numeric" maxlength="1" />
+        <input class="pin-cell" type="password" inputmode="numeric" maxlength="1" />
+        <input class="pin-cell" type="password" inputmode="numeric" maxlength="1" />
+        <input class="pin-cell" type="password" inputmode="numeric" maxlength="1" />
+      </div>
+      <div class="input-hint">5회 틀리면 메일 인증으로 잠금을 풀 수 있어요.</div>
+    </div>
+
+    <div class="bottom-area">
+      <button class="btn-primary" onclick="location.href='dashboard.html'">로그인</button>
+      <button class="btn-text">비밀번호를 잊으셨나요? <strong>재설정 →</strong></button>
+    </div>
+  </section>
+
+  <!-- ========== 3. 가입 1/5: 강대메일 입력 ========== -->
+  <section class="screen" id="screen-signup-email">
+    <div class="topbar">
+      <button class="back-btn" onclick="go('landing')">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+      </button>
+      <div class="progress-track"><div class="progress-fill" style="width: 16.67%;"></div></div>
+      <div class="step-text">1 / 6</div>
+    </div>
+
+    <h1 class="page-title">강원대학교 웹메일로<br>본인 인증할게요</h1>
+    <p class="page-desc">강원대학교 춘천캠퍼스 학생만 가입할 수 있어요.<br>웹메일로 인증 코드를 보내드릴게요.</p>
+
+    <div class="form-block">
+      <label class="form-label">강원대학교 웹메일 주소</label>
+      <div class="input-wrap">
+        <input type="text" id="input-email" placeholder="예: hong123" inputmode="email">
+        <span class="suffix">@kangwon.ac.kr</span>
+      </div>
+      <div class="input-hint">메일 앞부분만 입력해주세요.</div>
+    </div>
+
+    <div class="bottom-area">
+      <button class="btn-primary" onclick="submitEmail()">인증코드 받기</button>
+    </div>
+  </section>
+
+  <!-- ========== 4. 가입 2/5: 인증코드 확인 ========== -->
+  <section class="screen" id="screen-signup-verify">
+    <div class="topbar">
+      <button class="back-btn" onclick="go('signup-email')">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+      </button>
+      <div class="progress-track"><div class="progress-fill" style="width: 33.33%;"></div></div>
+      <div class="step-text">2 / 6</div>
+    </div>
+
+    <h1 class="page-title">메일함을 확인해주세요</h1>
+    <p class="page-desc"><strong id="verify-email-display" style="color:var(--ink);">아직 입력 안 됨</strong>로<br>6자리 인증코드를 보냈어요.</p>
+
+    <div class="form-block">
+      <label class="form-label">인증코드</label>
+      <div class="pin-grid">
+        <input class="pin-cell" type="text" inputmode="numeric" maxlength="1" />
+        <input class="pin-cell" type="text" inputmode="numeric" maxlength="1" />
+        <input class="pin-cell" type="text" inputmode="numeric" maxlength="1" />
+        <input class="pin-cell" type="text" inputmode="numeric" maxlength="1" />
+        <input class="pin-cell" type="text" inputmode="numeric" maxlength="1" />
+        <input class="pin-cell" type="text" inputmode="numeric" maxlength="1" />
+      </div>
+      <div class="resend-row">
+        <span class="timer" id="timer">05 : 00</span>
+        <button class="resend-btn" onclick="resetTimer()">코드 재전송</button>
+      </div>
+    </div>
+
+    <div class="bottom-area">
+      <button class="btn-primary" onclick="go('signup-profile')">인증 완료</button>
+    </div>
+  </section>
+
+  <!-- ========== 5. 가입 3/5: 닉네임 + PIN ========== -->
+  <section class="screen" id="screen-signup-profile">
+    <div class="topbar">
+      <button class="back-btn" onclick="go('signup-verify')">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+      </button>
+      <div class="progress-track"><div class="progress-fill" style="width: 50%;"></div></div>
+      <div class="step-text">3 / 6</div>
+    </div>
+
+    <h1 class="page-title">감자 이름을 정해볼까요</h1>
+    <p class="page-desc">다른 사람에게 보여지는 이름이에요.</p>
+
+    <div class="form-block">
+      <label class="form-label">닉네임</label>
+      <div class="input-wrap">
+        <input type="text" id="input-nickname" placeholder="2~10자 한글/영문/숫자" maxlength="10">
+        <button class="check-btn" id="nickname-check-btn" onclick="checkNickname()">중복확인</button>
+      </div>
+      <div class="input-hint" id="nickname-hint">중복된 닉네임은 사용할 수 없어요.</div>
+    </div>
+
+    <div class="form-block">
+      <label class="form-label">비밀번호 등록</label>
+      <div class="pin-grid" id="pin-set-1">
+        <input class="pin-cell" type="password" inputmode="numeric" maxlength="1" />
+        <input class="pin-cell" type="password" inputmode="numeric" maxlength="1" />
+        <input class="pin-cell" type="password" inputmode="numeric" maxlength="1" />
+        <input class="pin-cell" type="password" inputmode="numeric" maxlength="1" />
+        <input class="pin-cell" type="password" inputmode="numeric" maxlength="1" />
+        <input class="pin-cell" type="password" inputmode="numeric" maxlength="1" />
+      </div>
+      <div class="input-hint">숫자 6자리. 로그인할 때 사용해요.</div>
+    </div>
+
+    <div class="form-block">
+      <label class="form-label">비밀번호 확인</label>
+      <div class="pin-grid" id="pin-set-2">
+        <input class="pin-cell" type="password" inputmode="numeric" maxlength="1" />
+        <input class="pin-cell" type="password" inputmode="numeric" maxlength="1" />
+        <input class="pin-cell" type="password" inputmode="numeric" maxlength="1" />
+        <input class="pin-cell" type="password" inputmode="numeric" maxlength="1" />
+        <input class="pin-cell" type="password" inputmode="numeric" maxlength="1" />
+        <input class="pin-cell" type="password" inputmode="numeric" maxlength="1" />
+      </div>
+      <div class="input-hint" id="pin-confirm-hint">위에서 입력한 비밀번호와 같게 입력해주세요.</div>
+    </div>
+
+    <div class="bottom-area">
+      <button class="btn-primary" onclick="submitNickname()">다음으로</button>
+    </div>
+  </section>
+
+  <!-- ========== 6. 가입 4/6: 학년 + 출생연도 (신규) ========== -->
+  <section class="screen" id="screen-signup-grade">
+    <div class="topbar">
+      <button class="back-btn" onclick="go('signup-profile')">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+      </button>
+      <div class="progress-track"><div class="progress-fill" style="width: 66.67%;"></div></div>
+      <div class="step-text">4 / 6</div>
+    </div>
+
+    <h1 class="page-title">어떤 감자인지<br>알려주세요</h1>
+    <p class="page-desc">입력하신 정보를 바탕으로<br>더 잘 매칭해드릴게요.</p>
+
+    <div class="form-block">
+      <label class="form-label">학년</label>
+      <div class="chip-group" id="grade-chips">
+        <button class="chip" onclick="selectGrade(this, '1학년')">1학년</button>
+        <button class="chip" onclick="selectGrade(this, '2학년')">2학년</button>
+        <button class="chip" onclick="selectGrade(this, '3학년')">3학년</button>
+        <button class="chip" onclick="selectGrade(this, '4학년 이상')">4학년 이상</button>
+        <button class="chip" onclick="selectGrade(this, '대학원')">대학원</button>
+      </div>
+    </div>
+
+    <div class="form-block">
+      <label class="form-label">재학 상태</label>
+      <div class="chip-group" id="status-chips">
+        <button class="chip" onclick="selectStatus(this, '재학 중')">재학 중</button>
+        <button class="chip" onclick="selectStatus(this, '휴학 중')">휴학 중</button>
+      </div>
+    </div>
+
+    <div class="form-block">
+      <label class="form-label">출생연도</label>
+      <div class="input-wrap">
+        <input type="text" id="input-birth-year" class="year-input" placeholder="2005" inputmode="numeric" maxlength="4">
+      </div>
+      <div class="input-hint">⚠️ 4자리 숫자. <strong>가입 후 수정할 수 없으니 정확하게 입력해주세요.</strong></div>
+    </div>
+
+    <div class="bottom-area">
+      <button class="btn-primary" onclick="submitGrade()">다음으로</button>
+    </div>
+  </section>
+
+  <!-- ========== 7. 가입 5/6: 알림 받을 메일 ========== -->
+  <section class="screen" id="screen-signup-notify">
+    <div class="topbar">
+      <button class="back-btn" onclick="go('signup-grade')">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+      </button>
+      <div class="progress-track"><div class="progress-fill" style="width: 83.33%;"></div></div>
+      <div class="step-text">5 / 6</div>
+    </div>
+
+    <h1 class="page-title">매칭 소식을<br>어디로 보낼까요</h1>
+    <p class="page-desc">매칭이 되면 바로 알려드릴게요.<br>평소 자주 쓰는 메일을 알려주세요.</p>
+
+    <div class="info-box">
+      <span class="ico">📬</span>
+      <span>강원대학교 웹메일은 자주 확인하지 않는 분이 많아요.<br>네이버, 구글 등 평소 쓰시는 메일을 추천해요.</span>
+    </div>
+
+    <div class="form-block">
+      <label class="form-label">알림 받을 메일 주소</label>
+      <div class="input-wrap">
+        <input type="email" id="input-notify-email" placeholder="example@gmail.com" inputmode="email">
+      </div>
+      <div class="input-hint">매칭 결과, 응답 요청 등 중요한 알림만 보내드려요.</div>
+    </div>
+
+    <div class="bottom-area">
+      <button class="btn-primary" onclick="submitNotify()">다음으로</button>
+    </div>
+  </section>
+
+  <!-- ========== 8. 가입 6/6: 약관 동의 ========== -->
+  <section class="screen" id="screen-signup-terms">
+    <div class="topbar">
+      <button class="back-btn" onclick="go('signup-notify')">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+      </button>
+      <div class="progress-track"><div class="progress-fill" style="width: 100%;"></div></div>
+      <div class="step-text">6 / 6</div>
+    </div>
+
+    <h1 class="page-title">거의 다 왔어요</h1>
+    <p class="page-desc">서비스 이용을 위해 약관에 동의해주세요.</p>
+
+    <div class="terms-block">
+      <div class="terms-row all" onclick="toggleAll(this)">
+        <div class="checkbox"></div>
+        <div class="terms-text">전체 동의</div>
+      </div>
+
+      <!-- 춘천캠퍼스 재학생 확인 (최상단 강조) -->
+      <div class="terms-row" onclick="toggleOne(this)">
+        <div class="checkbox"></div>
+        <div class="terms-text">
+          <span class="req">[필수]</span> 강원대학교 춘천캠퍼스 재학생 확인
+          <div style="font-size:11px; color: var(--ink-mute); margin-top: 3px; font-weight: 400;">타 캠퍼스는 아직 지원하지 않아요. 허위 신고 시 영구 정지됩니다.</div>
+        </div>
+      </div>
+
+      <div class="terms-row" onclick="toggleOne(this)">
+        <div class="checkbox"></div>
+        <div class="terms-text">
+          <span class="req">[필수]</span> 이용약관 동의
+        </div>
+        <a href="#" class="terms-link" onclick="event.stopPropagation();">보기</a>
+      </div>
+
+      <div class="terms-row" onclick="toggleOne(this)">
+        <div class="checkbox"></div>
+        <div class="terms-text">
+          <span class="req">[필수]</span> 개인정보 처리방침 동의
+        </div>
+        <a href="#" class="terms-link" onclick="event.stopPropagation();">보기</a>
+      </div>
+
+      <div class="terms-row" onclick="toggleOne(this)">
+        <div class="checkbox"></div>
+        <div class="terms-text">
+          <span class="req">[필수]</span> 매칭 운영 규칙 동의
+          <div style="font-size:11px; color: var(--ink-mute); margin-top: 3px; font-weight: 400;">2회 무응답 시 1주 매칭 정지 등</div>
+        </div>
+        <a href="#" class="terms-link" onclick="event.stopPropagation();">보기</a>
+      </div>
+
+      <div class="terms-row" onclick="toggleOne(this)">
+        <div class="checkbox"></div>
+        <div class="terms-text">
+          <span class="req">[필수]</span> 매칭 알림 메일 수신
+          <div style="font-size:11px; color: var(--ink-mute); margin-top: 3px; font-weight: 400;">매칭 결과를 받으려면 필요해요</div>
+        </div>
+      </div>
+    </div>
+
+    <div style="background: var(--knu-blue-soft); border-radius: var(--radius-m); padding: 14px 16px; font-size: 12px; color: var(--knu-blue); line-height: 1.6;">
+      ℹ️ 본 서비스는 강원대학교에서 운영하는 공식 서비스가 아닙니다.<br>강원대학교 재학생이 운영, 배포 중인 서비스입니다.<br>감사합니다.
+    </div>
+
+    <div class="bottom-area">
+      <button class="btn-primary" onclick="finishSignup()">가입 완료하기</button>
+    </div>
+  </section>
+
+  <!-- ========== 8. 가입 완료 ========== -->
+  <section class="screen" id="screen-done">
+    <div class="done-emoji">🥔</div>
+    <h1 class="done-title">환영해요, <span id="done-nickname">감자</span> 님!</h1>
+    <p class="done-desc">같이 공부할 사람을 찾으러 가볼까요.<br>매칭은 매일 12시와 자정에 진행돼요.</p>
+
+    <div class="summary-card">
+      <div class="summary-row">
+        <span class="k">강원대학교 웹메일</span>
+        <span class="v" id="summary-email">—</span>
+      </div>
+      <div class="summary-row">
+        <span class="k">닉네임</span>
+        <span class="v" id="summary-nickname">—</span>
+      </div>
+      <div class="summary-row">
+        <span class="k">학년</span>
+        <span class="v" id="summary-grade">—</span>
+      </div>
+      <div class="summary-row">
+        <span class="k">재학 상태</span>
+        <span class="v" id="summary-status">—</span>
+      </div>
+      <div class="summary-row">
+        <span class="k">출생연도</span>
+        <span class="v" id="summary-birth">—</span>
+      </div>
+      <div class="summary-row">
+        <span class="k">알림 받을 메일</span>
+        <span class="v" id="summary-notify">—</span>
+      </div>
+      <div class="summary-row">
+        <span class="k">가입일</span>
+        <span class="v">2026.05.13</span>
+      </div>
+    </div>
+
+    <div class="bottom-area">
+      <button class="btn-primary" onclick="location.href='dashboard.html'">시작하기</button>
+      <button class="btn-text" onclick="resetAll()">처음으로 돌아가기</button>
+    </div>
+  </section>
+
+</div>
+
+<script>
+  /* ========== 상태 저장 ========== */
+  const state = {
+    email: '',
+    nickname: '',
+    grade: '',
+    enrollmentStatus: '',
+    birthYear: '',
+    notifyEmail: ''
+  };
+
+  /* ========== 화면 전환 ========== */
+  function go(id){
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById('screen-' + id).classList.add('active');
+    window.scrollTo(0, 0);
+
+    // 인증 화면 진입 시 타이머 시작
+    if(id === 'signup-verify'){
+      startTimer();
+    } else {
+      stopTimer();
+    }
+  }
+
+  /* ========== 입력값 처리 ========== */
+  function submitEmail(){
+    const input = document.getElementById('input-email').value.trim();
+    if(!input){
+      alert('메일 아이디를 입력해주세요.');
+      return;
+    }
+    state.email = input + '@kangwon.ac.kr';
+    document.getElementById('verify-email-display').textContent = state.email;
+    go('signup-verify');
+  }
+
+  // 닉네임 중복확인 (더미: 항상 성공)
+  function checkNickname(){
+    const input = document.getElementById('input-nickname');
+    const btn = document.getElementById('nickname-check-btn');
+    const hint = document.getElementById('nickname-hint');
+    const value = input.value.trim();
+
+    if(value.length < 2){
+      hint.textContent = '닉네임은 2자 이상이어야 해요.';
+      hint.classList.add('error');
+      hint.classList.remove('success');
+      return;
+    }
+
+    // 실제로는 서버 호출. 지금은 더미로 항상 성공 처리
+    btn.textContent = '✓ 확인됨';
+    btn.classList.add('success');
+    hint.textContent = '사용 가능한 닉네임이에요!';
+    hint.classList.add('success');
+    hint.classList.remove('error');
+  }
+
+  // 닉네임 변경 시 중복확인 상태 리셋
+  document.addEventListener('input', e => {
+    if(e.target.id === 'input-nickname'){
+      const btn = document.getElementById('nickname-check-btn');
+      const hint = document.getElementById('nickname-hint');
+      btn.textContent = '중복확인';
+      btn.classList.remove('success');
+      hint.textContent = '중복된 닉네임은 사용할 수 없어요.';
+      hint.classList.remove('success', 'error');
+    }
+  });
+
+  // 비밀번호 두 칸 실시간 일치 검사
+  function checkPinMatch(){
+    const pin1 = Array.from(document.querySelectorAll('#pin-set-1 .pin-cell')).map(c => c.value).join('');
+    const pin2 = Array.from(document.querySelectorAll('#pin-set-2 .pin-cell')).map(c => c.value).join('');
+    const hint = document.getElementById('pin-confirm-hint');
+    if(!hint) return;
+
+    if(pin2.length === 6){
+      if(pin1 === pin2){
+        hint.textContent = '✓ 비밀번호가 일치해요.';
+        hint.classList.add('success');
+        hint.classList.remove('error');
+      } else {
+        hint.textContent = '비밀번호가 일치하지 않아요.';
+        hint.classList.add('error');
+        hint.classList.remove('success');
+      }
+    } else {
+      hint.textContent = '위에서 입력한 비밀번호와 같게 입력해주세요.';
+      hint.classList.remove('success', 'error');
+    }
+  }
+
+  function submitNickname(){
+    const nickname = document.getElementById('input-nickname').value.trim();
+    const btn = document.getElementById('nickname-check-btn');
+    const pin1 = Array.from(document.querySelectorAll('#pin-set-1 .pin-cell')).map(c => c.value).join('');
+    const pin2 = Array.from(document.querySelectorAll('#pin-set-2 .pin-cell')).map(c => c.value).join('');
+
+    if(!nickname){
+      alert('닉네임을 입력해주세요.');
+      return;
+    }
+    if(!btn.classList.contains('success')){
+      alert('닉네임 중복확인을 해주세요.');
+      return;
+    }
+    if(pin1.length !== 6 || pin2.length !== 6){
+      alert('비밀번호 6자리를 모두 입력해주세요.');
+      return;
+    }
+    if(pin1 !== pin2){
+      alert('비밀번호가 일치하지 않아요. 다시 확인해주세요.');
+      return;
+    }
+
+    state.nickname = nickname;
+    go('signup-grade');
+  }
+
+  // 학년 선택 (단일 선택)
+  function selectGrade(btn, value){
+    document.querySelectorAll('#grade-chips .chip').forEach(c => c.classList.remove('active'));
+    btn.classList.add('active');
+    state.grade = value;
+  }
+
+  // 재학 상태 선택 (단일 선택)
+  function selectStatus(btn, value){
+    document.querySelectorAll('#status-chips .chip').forEach(c => c.classList.remove('active'));
+    btn.classList.add('active');
+    state.enrollmentStatus = value;
+  }
+
+  function submitGrade(){
+    const birthYear = document.getElementById('input-birth-year').value.trim();
+    if(!state.grade){
+      alert('학년을 선택해주세요.');
+      return;
+    }
+    if(!state.enrollmentStatus){
+      alert('재학 상태를 선택해주세요.');
+      return;
+    }
+    if(!birthYear || birthYear.length !== 4 || isNaN(birthYear)){
+      alert('출생연도 4자리를 정확히 입력해주세요.');
+      return;
+    }
+    const year = parseInt(birthYear);
+    if(year < 1950 || year > 2015){
+      alert('출생연도가 올바르지 않아요.');
+      return;
+    }
+    state.birthYear = birthYear;
+    go('signup-notify');
+  }
+
+  function submitNotify(){
+    const input = document.getElementById('input-notify-email').value.trim();
+    if(!input){
+      alert('알림 받을 메일을 입력해주세요.');
+      return;
+    }
+    state.notifyEmail = input;
+    go('signup-terms');
+  }
+
+  function finishSignup(){
+    document.getElementById('done-nickname').textContent = state.nickname || '감자';
+    document.getElementById('summary-email').textContent = state.email || '—';
+    document.getElementById('summary-nickname').textContent = state.nickname || '—';
+    document.getElementById('summary-grade').textContent = state.grade || '—';
+    document.getElementById('summary-status').textContent = state.enrollmentStatus || '—';
+    document.getElementById('summary-birth').textContent = state.birthYear ? state.birthYear + '년' : '—';
+    document.getElementById('summary-notify').textContent = state.notifyEmail || '—';
+    go('done');
+  }
+
+  function resetAll(){
+    state.email = '';
+    state.nickname = '';
+    state.grade = '';
+    state.enrollmentStatus = '';
+    state.birthYear = '';
+    state.notifyEmail = '';
+    document.getElementById('input-email').value = '';
+    document.getElementById('input-nickname').value = '';
+    document.getElementById('input-birth-year').value = '';
+    document.getElementById('input-notify-email').value = '';
+    document.querySelectorAll('.pin-cell').forEach(c => {
+      c.value = '';
+      c.classList.remove('filled');
+    });
+    document.querySelectorAll('.checkbox').forEach(c => c.classList.remove('checked'));
+    document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+    go('landing');
+  }
+
+  /* ========== PIN 셀 자동 이동 ========== */
+  document.addEventListener('input', e => {
+    if(e.target.classList.contains('pin-cell')){
+      const cell = e.target;
+      if(cell.value){
+        cell.classList.add('filled');
+        const next = cell.nextElementSibling;
+        if(next && next.classList.contains('pin-cell')) next.focus();
+      } else {
+        cell.classList.remove('filled');
+      }
+      // 비밀번호 등록/확인 그리드면 일치 검사
+      const parentId = cell.parentElement.id;
+      if(parentId === 'pin-set-1' || parentId === 'pin-set-2'){
+        checkPinMatch();
+      }
+    }
+  });
+
+  document.addEventListener('keydown', e => {
+    if(e.target.classList.contains('pin-cell') && e.key === 'Backspace' && !e.target.value){
+      const prev = e.target.previousElementSibling;
+      if(prev && prev.classList.contains('pin-cell')){
+        prev.focus();
+        prev.value = '';
+        prev.classList.remove('filled');
+      }
+    }
+  });
+
+  /* ========== 타이머 (5분 카운트다운) ========== */
+  let timerInterval = null;
+  let timerSeconds = 300;
+
+  function startTimer(){
+    stopTimer();
+    timerSeconds = 300;
+    updateTimerDisplay();
+    timerInterval = setInterval(() => {
+      timerSeconds--;
+      updateTimerDisplay();
+      if(timerSeconds <= 0){
+        stopTimer();
+        const el = document.getElementById('timer');
+        el.textContent = '시간 만료';
+        el.classList.add('expired');
+      }
+    }, 1000);
+  }
+
+  function stopTimer(){
+    if(timerInterval){
+      clearInterval(timerInterval);
+      timerInterval = null;
+    }
+  }
+
+  function updateTimerDisplay(){
+    const el = document.getElementById('timer');
+    if(!el) return;
+    el.classList.remove('expired');
+    const m = String(Math.floor(timerSeconds / 60)).padStart(2, '0');
+    const s = String(timerSeconds % 60).padStart(2, '0');
+    el.textContent = `${m} : ${s}`;
+  }
+
+  function resetTimer(){
+    startTimer();
+  }
+
+  /* ========== 약관 동의 ========== */
+  function toggleAll(row){
+    const checkbox = row.querySelector('.checkbox');
+    const isChecked = checkbox.classList.contains('checked');
+    const allRows = row.parentElement.querySelectorAll('.terms-row');
+    allRows.forEach(r => {
+      const cb = r.querySelector('.checkbox');
+      if(isChecked) cb.classList.remove('checked');
+      else cb.classList.add('checked');
+    });
+  }
+
+  function toggleOne(row){
+    const checkbox = row.querySelector('.checkbox');
+    checkbox.classList.toggle('checked');
+
+    const block = row.parentElement;
+    const allBtn = block.querySelector('.terms-row.all .checkbox');
+    const others = block.querySelectorAll('.terms-row:not(.all) .checkbox');
+    const allChecked = Array.from(others).every(cb => cb.classList.contains('checked'));
+    if(allChecked) allBtn.classList.add('checked');
+    else allBtn.classList.remove('checked');
+  }
+</script>
+</body>
+</html>

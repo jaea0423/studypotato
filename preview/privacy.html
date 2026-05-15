@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<title>공부하는 감자 — 개인정보 처리방침</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/variable/pretendardvariable.css" />
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --knu-blue: #0047BB; --knu-blue-deep: #00347E; --knu-blue-soft: #E5ECF8;
+    --knu-orange: #FE5000; --knu-orange-soft: #FFE8DD;
+    --cream: #F7F3EC; --paper: #FFFFFF; --paper-warm: #FBF8F2;
+    --ink: #1A1A1A; --ink-soft: #555E68; --ink-mute: #8B95A4;
+    --line: #E8E2D4; --line-soft: #F0EBDF;
+    --error: #DC3545; --success: #2D7A3E;
+    --font-kr: 'Pretendard Variable', Pretendard, sans-serif;
+    --font-mono: 'JetBrains Mono', monospace;
+    --radius-s: 10px; --radius-m: 16px; --radius-l: 22px;
+  }
+  *{ margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color: transparent; }
+  button{ background:none; border:none; cursor:pointer; font-family: inherit; }
+  body{ font-family: var(--font-kr); background: var(--line); color: var(--ink); overflow-x: hidden; word-break: keep-all; line-height: 1.6; }
+  .app{ max-width: 480px; margin: 0 auto; background: var(--cream); min-height: 100vh; padding-bottom: 60px; }
+
+  .topbar{
+    display: flex; align-items: center; gap: 8px;
+    padding: 14px 20px 16px; background: var(--cream);
+    position: sticky; top: 0; z-index: 10;
+    border-bottom: 1px solid var(--line-soft);
+  }
+  .back-btn{
+    width: 36px; height: 36px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--ink-soft);
+  }
+  .back-btn:active{ background: var(--line-soft); }
+  .top-title{ font-size: 16px; font-weight: 800; }
+
+  .review-banner{
+    margin: 14px 24px 0; padding: 12px 14px;
+    background: var(--knu-orange-soft); border: 1px solid var(--knu-orange);
+    border-radius: var(--radius-s);
+    font-size: 11.5px; color: var(--knu-orange);
+    line-height: 1.55; font-family: var(--font-mono);
+  }
+  .review-banner strong{ font-weight: 700; }
+
+  .doc-meta{
+    padding: 18px 24px 8px;
+    font-family: var(--font-mono);
+    font-size: 11px; color: var(--ink-mute);
+    line-height: 1.7;
+  }
+  .doc-meta .k{ color: var(--ink-soft); margin-right: 6px; }
+
+  .doc-body{ padding: 0 24px; }
+  .doc-body h1{
+    font-size: 24px; font-weight: 800;
+    letter-spacing: -0.02em; margin: 8px 0 18px;
+    line-height: 1.25;
+  }
+  .doc-body h2{
+    font-size: 15px; font-weight: 800;
+    color: var(--knu-blue);
+    margin: 22px 0 8px;
+    padding-top: 14px;
+    border-top: 1px solid var(--line-soft);
+  }
+  .doc-body h2:first-of-type{ border-top: 0; padding-top: 0; margin-top: 8px; }
+  .doc-body p{
+    font-size: 13px; color: var(--ink-soft);
+    margin-bottom: 10px; line-height: 1.7;
+  }
+  .doc-body ol, .doc-body ul{
+    padding-left: 18px; margin-bottom: 12px;
+  }
+  .doc-body li{
+    font-size: 13px; color: var(--ink-soft);
+    margin-bottom: 6px; line-height: 1.65;
+  }
+  .doc-body li strong{ color: var(--ink); font-weight: 700; }
+
+  /* 정보 수집 테이블 */
+  .info-table{
+    width: 100%;
+    border-collapse: collapse;
+    margin: 10px 0 14px;
+    background: var(--paper);
+    border-radius: var(--radius-s);
+    overflow: hidden;
+    border: 1px solid var(--line);
+  }
+  .info-table th{
+    background: var(--paper-warm);
+    padding: 10px 12px;
+    text-align: left;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--ink-soft);
+    font-family: var(--font-mono);
+    letter-spacing: 0.03em;
+    border-bottom: 1px solid var(--line);
+  }
+  .info-table td{
+    padding: 10px 12px;
+    font-size: 12.5px;
+    color: var(--ink);
+    border-bottom: 1px solid var(--line-soft);
+    vertical-align: top;
+    line-height: 1.5;
+  }
+  .info-table tr:last-child td{ border-bottom: 0; }
+  .info-table td.k{
+    font-weight: 700;
+    width: 35%;
+    color: var(--knu-blue);
+  }
+
+  .doc-body .footer-note{
+    margin-top: 28px; padding: 14px;
+    background: var(--paper-warm); border-radius: var(--radius-s);
+    font-size: 11.5px; color: var(--ink-mute);
+    line-height: 1.6; text-align: center;
+    font-family: var(--font-mono);
+  }
+</style>
+</head>
+<body>
+
+<div class="app">
+
+  <div class="topbar">
+    <button class="back-btn" onclick="history.back()" aria-label="뒤로가기">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+    </button>
+    <div class="top-title">개인정보 처리방침</div>
+  </div>
+
+  <div class="review-banner">
+    ⚠️ <strong>출시 전 법률 검토 필수</strong> — 개인정보보호법 준수를 위해 정식 출시 전 법률 전문가 검토가 반드시 필요합니다.
+  </div>
+
+  <div class="doc-meta">
+    <div><span class="k">시행일</span>2026년 7월 1일 (예정)</div>
+    <div><span class="k">버전</span>v0.1 (초안)</div>
+  </div>
+
+  <div class="doc-body">
+
+    <h1>개인정보<br>처리방침</h1>
+
+    <h2>1. 수집하는 개인정보 항목</h2>
+    <p>본 서비스는 회원가입 및 매칭 서비스 제공을 위해 다음의 개인정보를 수집합니다.</p>
+
+    <table class="info-table">
+      <thead>
+        <tr><th>항목</th><th>설명</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="k">강원대 웹메일</td>
+          <td>본인 인증, 로그인 식별. @kangwon.ac.kr 도메인만 허용.</td>
+        </tr>
+        <tr>
+          <td class="k">닉네임</td>
+          <td>다른 이용자에게 표시되는 이름. 본명 사용을 권장하지 않습니다.</td>
+        </tr>
+        <tr>
+          <td class="k">비밀번호</td>
+          <td>6자리 숫자. 단방향 암호화 후 저장.</td>
+        </tr>
+        <tr>
+          <td class="k">알림 받을 메일</td>
+          <td>강대 메일 외 별도 메일 주소. 매칭 알림 발송용.</td>
+        </tr>
+        <tr>
+          <td class="k">학년·재학 상태</td>
+          <td>매칭 정합성 향상용. (1~4학년 이상/대학원, 재학중/휴학중)</td>
+        </tr>
+        <tr>
+          <td class="k">출생연도</td>
+          <td>4자리. 또래 식별 보조 정보.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <p><strong>수집하지 않는 항목:</strong> 학번, 본명, 성별, 전화번호, 주소, 주민등록번호 등</p>
+
+    <h2>2. 개인정보 수집·이용 목적</h2>
+    <ol>
+      <li><strong>본인 확인</strong>: 강원대 재학생임을 확인하기 위해</li>
+      <li><strong>매칭 제공</strong>: 학년·전공·시간대 등을 바탕으로 적합한 스터디 팀 매칭</li>
+      <li><strong>알림 발송</strong>: 매칭 결과, 팀 활동, 시스템 공지 안내</li>
+      <li><strong>부정 이용 방지</strong>: 다중 가입, 어뷰징, No-Show 등 방지</li>
+    </ol>
+
+    <h2>3. 보관 기간</h2>
+    <ol>
+      <li>회원 탈퇴 시 모든 개인정보는 <strong>즉시 파기</strong>합니다.</li>
+      <li>단, 다음의 경우 명시된 기간 동안 보관합니다.
+        <ul>
+          <li>관련 법령(전자상거래법 등)에 의한 보관 의무가 있는 경우 해당 기간</li>
+          <li>분쟁 처리·신고 처리 중인 정보: 처리 완료 시까지 (최대 30일)</li>
+          <li>부정 이용 방지를 위한 정지 이력: 1년</li>
+        </ul>
+      </li>
+    </ol>
+
+    <h2>4. 제3자 제공</h2>
+    <p>본 서비스는 이용자의 개인정보를 외부에 제공하지 않습니다. 다만 법령에 의거하거나 수사기관의 정당한 요청이 있는 경우에 한해 예외로 합니다.</p>
+
+    <h2>5. 위탁 처리</h2>
+    <p>서비스 운영을 위해 다음의 외부 서비스를 이용하며, 해당 업체의 개인정보 처리방침이 동시에 적용됩니다.</p>
+    <ul>
+      <li><strong>Supabase</strong> (데이터베이스·인증) — 사용자 정보 저장</li>
+      <li><strong>Vercel</strong> (호스팅) — 서비스 접근 로그</li>
+      <li><strong>Resend</strong> 또는 동급 메일 서비스 — 알림 메일 발송</li>
+    </ul>
+
+    <h2>6. 이용자의 권리</h2>
+    <p>이용자는 언제든지 다음의 권리를 행사할 수 있습니다.</p>
+    <ol>
+      <li>본인의 개인정보 조회·수정·삭제 요청</li>
+      <li>개인정보 처리 정지 요청</li>
+      <li>회원 탈퇴를 통한 전체 정보 삭제</li>
+      <li>법령상 권리 행사 — 운영자 메일로 문의</li>
+    </ol>
+
+    <h2>7. 안전 조치</h2>
+    <ol>
+      <li>비밀번호는 단방향 암호화(bcrypt 등) 후 저장</li>
+      <li>HTTPS를 통한 모든 통신 암호화</li>
+      <li>접근 권한 최소화 및 운영자 외 직접 접근 제한</li>
+      <li>정기 백업 및 침해 사고 대응 절차 운영</li>
+    </ol>
+
+    <h2>8. 개인정보 보호 책임자</h2>
+    <p>본 서비스의 개인정보 관리 책임자는 운영자 본인이며, 문의는 아래 메일로 부탁드립니다.</p>
+
+    <h2>9. 정책 변경</h2>
+    <p>본 처리방침은 사전 공지 후 변경될 수 있습니다. 변경 사항은 서비스 내 공지를 통해 안내합니다.</p>
+
+    <div class="footer-note">
+      문의: jaea0423@gmail.com<br>
+      운영자: 강원대학교 컴퓨터공학과 재학생
+    </div>
+
+  </div>
+</div>
+
+</body>
+</html>

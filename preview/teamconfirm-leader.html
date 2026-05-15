@@ -1,0 +1,1265 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<title>공부하는 감자 — 팀 확정 (팀장)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/variable/pretendardvariable.css" />
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --knu-blue: #0047BB;
+    --knu-blue-deep: #00347E;
+    --knu-blue-soft: #E5ECF8;
+    --knu-orange: #FE5000;
+    --knu-orange-soft: #FFE8DD;
+
+    --cream: #F7F3EC;
+    --paper: #FFFFFF;
+    --paper-warm: #FBF8F2;
+    --ink: #1A1A1A;
+    --ink-soft: #555E68;
+    --ink-mute: #8B95A4;
+    --line: #E8E2D4;
+    --line-soft: #F0EBDF;
+    --error: #DC3545;
+    --success: #2D7A3E;
+
+    --font-kr: 'Pretendard Variable', Pretendard, -apple-system, sans-serif;
+    --font-mono: 'JetBrains Mono', monospace;
+
+    --radius-s: 10px;
+    --radius-m: 16px;
+    --radius-l: 22px;
+  }
+
+  *{ margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color: transparent; }
+  button{ background:none; border:none; cursor:pointer; font-family: inherit; }
+  body{
+    font-family: var(--font-kr);
+    background: var(--line);
+    color: var(--ink);
+    overflow-x: hidden;
+    word-break: keep-all;
+    line-height: 1.5;
+  }
+
+  /* 모바일 컨테이너 */
+  .app{
+    max-width: 480px;
+    margin: 0 auto;
+    background: var(--cream);
+    min-height: 100vh;
+    padding-bottom: 80px;
+    position: relative;
+  }
+
+  /* 상단 카운트다운 필 */
+  .topbar{
+    padding: 14px 24px 8px;
+    display: flex;
+    justify-content: center;
+  }
+  .countdown-pill{
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--ink);
+    color: var(--cream);
+    padding: 8px 16px;
+    border-radius: 999px;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.03em;
+  }
+  .countdown-pill .ico{
+    color: var(--knu-orange);
+    display: flex;
+  }
+  .countdown-pill.urgent{
+    background: var(--knu-orange);
+    color: white;
+    animation: pulse 1.6s ease-in-out infinite;
+  }
+  .countdown-pill.urgent .ico{ color: white; }
+  @keyframes pulse{
+    0%, 100%{ transform: translateY(0); }
+    50%{ transform: translateY(-2px); }
+  }
+
+  /* ===== 히어로: 팀장이 되었어요 ===== */
+  .hero{
+    padding: 18px 24px 8px;
+    text-align: center;
+  }
+  .hero-emoji{
+    font-size: 56px;
+    margin-bottom: 12px;
+  }
+  .hero-title{
+    font-size: 22px;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    line-height: 1.3;
+    margin-bottom: 6px;
+  }
+  .hero-title em{
+    font-style: normal;
+    color: var(--knu-orange);
+  }
+  .hero-sub{
+    font-size: 13px;
+    color: var(--ink-soft);
+    line-height: 1.6;
+  }
+
+  /* ===== 팀 정보 어두운 카드 ===== */
+  .team-card{
+    background: var(--ink);
+    color: var(--cream);
+    border-radius: var(--radius-l);
+    margin: 16px 24px 0;
+    padding: 20px 22px;
+    position: relative;
+    overflow: hidden;
+  }
+  .team-card::before{
+    content: '';
+    position: absolute;
+    top: -40px; right: -40px;
+    width: 140px; height: 140px;
+    background: radial-gradient(circle, var(--knu-orange) 0%, transparent 70%);
+    opacity: 0.25;
+    pointer-events: none;
+  }
+  .team-card-label{
+    font-family: var(--font-mono);
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--knu-orange);
+    letter-spacing: 0.1em;
+    margin-bottom: 8px;
+  }
+  .team-name{
+    font-size: 26px;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    margin-bottom: 16px;
+  }
+  .team-meta{
+    display: flex;
+    gap: 14px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: rgba(247,243,236,0.7);
+  }
+  .team-meta strong{
+    color: var(--cream);
+    font-size: 13px;
+  }
+
+  /* ===== 팀원 명단 ===== */
+  .section{
+    padding: 22px 24px 0;
+  }
+  .section-title{
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--ink-soft);
+    font-family: var(--font-mono);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+  .members-list{
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .member-row{
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 14px;
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-m);
+  }
+  .member-row.leader{
+    background: var(--knu-orange-soft);
+    border-color: var(--knu-orange);
+  }
+  .member-avatar{
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    background: var(--knu-blue);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 15px;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+  .member-row.leader .member-avatar{ background: var(--knu-orange); }
+  .member-row .info{ flex: 1; min-width: 0; }
+  .member-row .nick{
+    font-size: 14px;
+    font-weight: 700;
+    margin-bottom: 2px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .leader-tag{
+    background: var(--knu-orange);
+    color: white;
+    font-family: var(--font-mono);
+    font-size: 9px;
+    font-weight: 700;
+    padding: 2px 6px;
+    border-radius: 3px;
+    letter-spacing: 0.05em;
+  }
+  .leader-tag.me{ background: var(--ink); color: var(--knu-orange); border: 1px solid var(--knu-orange); }
+  .member-row .meta{
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--ink-mute);
+  }
+
+  /* ===== 팀장 안내 박스 ===== */
+  .leader-intro{
+    margin: 16px 24px 0;
+    padding: 16px 18px;
+    background: var(--knu-blue-soft);
+    border-radius: var(--radius-m);
+    border-left: 4px solid var(--knu-blue);
+  }
+  .leader-intro h3{
+    font-size: 14px;
+    font-weight: 800;
+    color: var(--knu-blue);
+    margin-bottom: 8px;
+  }
+  .leader-intro p{
+    font-size: 13px;
+    color: var(--ink);
+    line-height: 1.65;
+  }
+  .leader-intro .sub{
+    font-size: 11px;
+    color: var(--ink-mute);
+    margin-top: 8px;
+    line-height: 1.5;
+    font-family: var(--font-mono);
+  }
+
+  /* ===== 체크리스트 ===== */
+  .checklist{
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+  .check-step{
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-m);
+    padding: 16px 18px;
+    transition: all 0.2s;
+  }
+  .check-step.done{
+    background: var(--paper-warm);
+    border-color: var(--success);
+  }
+  .check-step-head{
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+  }
+  .check-num{
+    width: 24px; height: 24px;
+    border-radius: 50%;
+    background: var(--knu-blue);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 700;
+    font-family: var(--font-mono);
+    flex-shrink: 0;
+  }
+  .check-step.done .check-num{
+    background: var(--success);
+  }
+  .check-step.done .check-num::before{
+    content: '✓';
+    font-size: 13px;
+  }
+  .check-step.done .check-num-text{ display: none; }
+  .check-title{
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--ink);
+    flex: 1;
+  }
+  .check-step.done .check-title{ color: var(--success); }
+  .check-desc{
+    font-size: 12px;
+    color: var(--ink-soft);
+    line-height: 1.6;
+    padding-left: 34px;
+  }
+
+  /* ===== 메시지 복사 박스 ===== */
+  .msg-box-wrap{
+    padding-left: 34px;
+    margin-top: 12px;
+  }
+  .msg-box{
+    background: var(--paper-warm);
+    border: 1px dashed var(--line);
+    border-radius: var(--radius-s);
+    padding: 12px 14px;
+    font-family: var(--font-kr);
+    font-size: 12.5px;
+    color: var(--ink);
+    line-height: 1.65;
+    white-space: pre-wrap;
+    word-break: break-word;
+    width: 100%;
+    resize: vertical;
+    min-height: 220px;
+    outline: none;
+    transition: border-color 0.15s;
+  }
+  .msg-box:focus{ border-color: var(--knu-blue); border-style: solid; }
+  .msg-actions{
+    display: flex;
+    gap: 8px;
+    margin-top: 10px;
+  }
+  .copy-btn{
+    flex: 1;
+    background: var(--knu-orange);
+    color: white;
+    padding: 11px;
+    border-radius: var(--radius-s);
+    font-size: 13px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    transition: all 0.15s;
+  }
+  .copy-btn:active{ transform: scale(0.97); background: #CC4000; }
+  .copy-btn.copied{
+    background: var(--success);
+  }
+  .reset-msg-btn{
+    background: var(--paper);
+    border: 1px solid var(--line);
+    color: var(--ink-soft);
+    padding: 11px 14px;
+    border-radius: var(--radius-s);
+    font-size: 12px;
+    font-weight: 500;
+  }
+
+  /* ===== 링크 등록 폼 ===== */
+  .link-form{
+    padding-left: 34px;
+    margin-top: 10px;
+  }
+  .link-input-wrap{
+    display: flex;
+    gap: 8px;
+  }
+  .link-input{
+    flex: 1;
+    padding: 11px 14px;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-s);
+    background: var(--paper);
+    font-size: 13px;
+    font-family: var(--font-kr);
+    color: var(--ink);
+    outline: none;
+    min-width: 0;
+    transition: border-color 0.15s;
+  }
+  .link-input:focus{ border-color: var(--knu-blue); }
+  .link-input::placeholder{ color: var(--ink-mute); font-family: var(--font-mono); font-size: 12px; }
+  .link-submit{
+    background: var(--ink);
+    color: var(--cream);
+    padding: 11px 18px;
+    border-radius: var(--radius-s);
+    font-size: 13px;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+  .link-submit:active{ background: var(--knu-blue-deep); }
+  .link-submit:disabled{
+    background: var(--line);
+    color: var(--ink-mute);
+    cursor: not-allowed;
+  }
+  .link-hint{
+    margin-top: 6px;
+    font-size: 11px;
+    color: var(--ink-mute);
+    line-height: 1.5;
+  }
+  .link-hint.error{ color: var(--error); }
+  .link-hint.success{ color: var(--success); font-weight: 600; }
+
+  /* ===== 오픈채팅 가이드 펼침 ===== */
+  .guide-toggle{
+    margin-top: 10px;
+    padding-left: 34px;
+  }
+  .guide-toggle-btn{
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--paper);
+    border: 1px solid var(--line);
+    padding: 8px 12px;
+    border-radius: 999px;
+    font-size: 12px;
+    color: var(--ink-soft);
+    font-weight: 500;
+  }
+  .guide-toggle-btn .chev{
+    transition: transform 0.2s;
+    display: flex;
+  }
+  .guide-toggle-btn.open .chev{ transform: rotate(180deg); }
+
+  .guide-content{
+    display: none;
+    margin-top: 10px;
+    margin-left: 34px;
+    background: var(--paper-warm);
+    border: 1px solid var(--line-soft);
+    border-radius: var(--radius-s);
+    padding: 14px 16px;
+  }
+  .guide-content.open{ display: block; }
+  .guide-content h4{
+    font-size: 12px;
+    font-weight: 700;
+    margin-bottom: 8px;
+    color: var(--ink);
+    font-family: var(--font-mono);
+    letter-spacing: 0.05em;
+  }
+  .guide-content ol{
+    padding-left: 16px;
+    font-size: 12px;
+    color: var(--ink-soft);
+    line-height: 1.8;
+  }
+  .guide-content li strong{ color: var(--ink); font-weight: 600; }
+  .guide-content .tip{
+    margin-top: 10px;
+    padding: 8px 10px;
+    background: var(--knu-orange-soft);
+    border-radius: var(--radius-s);
+    font-size: 11px;
+    color: var(--knu-orange);
+    font-weight: 600;
+  }
+
+  /* ===== 마무리 영역 ===== */
+  .finale{
+    padding: 28px 24px 24px;
+    text-align: center;
+  }
+  .finale-emoji{ font-size: 28px; margin-bottom: 6px; }
+  .finale-title{
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--ink);
+    margin-bottom: 4px;
+  }
+  .finale-sub{
+    font-size: 12px;
+    color: var(--ink-mute);
+    line-height: 1.6;
+  }
+
+  /* ===== FAQ ===== */
+  .faq-list{
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .faq-item{
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-m);
+    overflow: hidden;
+  }
+  .faq-q{
+    width: 100%;
+    text-align: left;
+    padding: 14px 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+  .faq-q:active{ background: var(--paper-warm); }
+  .faq-q .qmark{
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    background: var(--knu-blue-soft);
+    color: var(--knu-blue);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 700;
+    font-family: var(--font-mono);
+    flex-shrink: 0;
+  }
+  .faq-q .text{
+    flex: 1;
+    font-size: 13.5px;
+    font-weight: 600;
+    color: var(--ink);
+    line-height: 1.5;
+  }
+  .faq-q .chev{
+    color: var(--ink-mute);
+    transition: transform 0.2s;
+    flex-shrink: 0;
+    display: flex;
+  }
+  .faq-item.open .faq-q .chev{ transform: rotate(180deg); }
+  .faq-item.open .faq-q .qmark{ background: var(--knu-orange-soft); color: var(--knu-orange); }
+  .faq-a{
+    display: none;
+    padding: 0 16px 16px 48px;
+    font-size: 12.5px;
+    color: var(--ink-soft);
+    line-height: 1.7;
+  }
+  .faq-item.open .faq-a{ display: block; }
+  .faq-a strong{ color: var(--ink); }
+  .faq-a a.report-link{
+    color: var(--knu-orange);
+    text-decoration: underline;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .faq-a .sub{
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px dashed var(--line);
+    font-size: 11px;
+    color: var(--ink-mute);
+    font-family: var(--font-mono);
+    line-height: 1.55;
+  }
+
+  /* ===== 스터디 종료 ===== */
+  .end-study-section{
+    padding: 24px;
+    margin-top: 8px;
+    border-top: 1px solid var(--line-soft);
+  }
+  .end-study-btn{
+    width: 100%;
+    background: transparent;
+    border: 1px solid var(--line);
+    color: var(--ink-mute);
+    padding: 12px;
+    border-radius: var(--radius-s);
+    font-size: 13px;
+    font-weight: 500;
+    transition: all 0.15s;
+  }
+  .end-study-btn:active{
+    background: var(--paper-warm);
+    color: var(--ink-soft);
+  }
+  .end-study-hint{
+    text-align: center;
+    margin-top: 8px;
+    font-size: 11px;
+    color: var(--ink-mute);
+    font-family: var(--font-mono);
+    line-height: 1.55;
+  }
+
+  /* ===== 종료된 상태 (전체 흑백) ===== */
+  body.study-ended .app .topbar,
+  body.study-ended .app .hero,
+  body.study-ended .app .team-card,
+  body.study-ended .app .section,
+  body.study-ended .app .leader-intro,
+  body.study-ended .app .finale{
+    filter: grayscale(1);
+    opacity: 0.55;
+    pointer-events: none;
+  }
+  body.study-ended .end-study-section{
+    pointer-events: auto;
+    filter: none;
+    opacity: 1;
+  }
+  /* 종료 안내 배너 */
+  .ended-banner{
+    display: none;
+    margin: 16px 24px 0;
+    padding: 14px 16px;
+    background: var(--ink);
+    color: var(--cream);
+    border-radius: var(--radius-m);
+    text-align: center;
+    font-size: 13px;
+    font-weight: 600;
+  }
+  .ended-banner .label{
+    display: inline-block;
+    background: var(--knu-orange);
+    color: white;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    font-weight: 700;
+    padding: 2px 7px;
+    border-radius: 3px;
+    letter-spacing: 0.05em;
+    margin-right: 8px;
+    vertical-align: middle;
+  }
+  body.study-ended .ended-banner{ display: block; }
+
+  /* ===== 신고 모달 ===== */
+  .modal-overlay{
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.5);
+    z-index: 200;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+  }
+  .modal-overlay.show{ display: flex; }
+  .modal{
+    background: var(--paper);
+    border-radius: var(--radius-l);
+    width: 100%;
+    max-width: 380px;
+    padding: 24px 22px;
+  }
+  .modal h3{
+    font-size: 16px;
+    font-weight: 800;
+    margin-bottom: 6px;
+  }
+  .modal p{
+    font-size: 13px;
+    color: var(--ink-soft);
+    line-height: 1.6;
+    margin-bottom: 14px;
+  }
+  .modal-actions{
+    display: flex;
+    gap: 8px;
+    margin-top: 16px;
+  }
+  .modal-btn{
+    flex: 1;
+    padding: 11px;
+    border-radius: var(--radius-s);
+    font-size: 13px;
+    font-weight: 700;
+  }
+  .modal-btn.cancel{
+    background: var(--line-soft);
+    color: var(--ink-soft);
+  }
+  .modal-btn.confirm{
+    background: var(--ink);
+    color: var(--cream);
+  }
+  .modal-btn.confirm.danger{ background: var(--error); }
+
+  /* 토스트 */
+  .toast{
+    position: fixed;
+    bottom: 32px;
+    left: 50%;
+    transform: translateX(-50%) translateY(60px);
+    background: var(--ink);
+    color: var(--cream);
+    padding: 11px 18px;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 600;
+    opacity: 0;
+    pointer-events: none;
+    transition: all 0.25s;
+    z-index: 100;
+    white-space: nowrap;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+  }
+  .toast.show{
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+</style>
+</head>
+<body>
+
+<div class="app">
+
+  <!-- 24시간 카운트다운 -->
+  <div class="topbar">
+    <div class="countdown-pill" id="countdown-pill">
+      <span class="ico">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>
+        </svg>
+      </span>
+      <span>오픈채팅 등록까지 <strong id="countdown">23:54:12</strong></span>
+    </div>
+  </div>
+
+  <!-- 히어로 -->
+  <section class="hero">
+    <div class="hero-emoji">🎉</div>
+    <h1 class="hero-title">
+      축하해요!<br>
+      <em>팀장</em>이 되셨어요
+    </h1>
+    <p class="hero-sub">
+      팀장은 참여자 중 임의로 선정되며,<br>
+      <strong>팀장 희망자가 우선 배정</strong>돼요.
+    </p>
+  </section>
+
+  <!-- 팀 정보 카드 -->
+  <div class="team-card">
+    <div class="team-card-label">▸ 우리 팀</div>
+    <div class="team-name" id="team-name">과탑 돌격대</div>
+    <div class="team-meta">
+      <span>📚 <strong>시험 대비</strong></span>
+      <span>👥 <strong>5명</strong></span>
+      <span>📅 <strong>D-7</strong> 매칭</span>
+    </div>
+  </div>
+
+  <!-- 팀원 명단 -->
+  <section class="section">
+    <div class="section-title">▸ 팀원 · 5명</div>
+    <div class="members-list">
+
+      <!-- 본인 (팀장) -->
+      <div class="member-row leader">
+        <div class="member-avatar">나</div>
+        <div class="info">
+          <div class="nick">감자대장 <span class="leader-tag me">팀장 · 나</span></div>
+          <div class="meta">컴퓨터공학과 · 2학년</div>
+        </div>
+      </div>
+
+      <!-- 팀원 4명 (더미) -->
+      <div class="member-row">
+        <div class="member-avatar">호</div>
+        <div class="info">
+          <div class="nick">호빵맨</div>
+          <div class="meta">IT대학 · 3학년</div>
+        </div>
+      </div>
+      <div class="member-row">
+        <div class="member-avatar">박</div>
+        <div class="info">
+          <div class="nick">박수빈</div>
+          <div class="meta">자연과학대학 · 2학년</div>
+        </div>
+      </div>
+      <div class="member-row">
+        <div class="member-avatar">감</div>
+        <div class="info">
+          <div class="nick">감자소녀</div>
+          <div class="meta">공과대학 · 3학년</div>
+        </div>
+      </div>
+      <div class="member-row">
+        <div class="member-avatar">최</div>
+        <div class="info">
+          <div class="nick">최동현</div>
+          <div class="meta">IT대학 · 4학년</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 팀장 안내 -->
+  <div class="leader-intro">
+    <h3>팀장의 역할이 부담스러우신가요?</h3>
+    <p>
+      많은 걸 하실 필요는 없어요. <strong>스터디를 첫 발걸음만 떼주시면 돼요.</strong>
+      모임 시간·장소·주제는 팀원들과 함께 정하시면 되고, 팀장은 <strong>대화의 물꼬를 트는 역할</strong>이라고 생각해주세요.
+    </p>
+    <div class="sub">
+      💡 팀장이 모든 걸 결정할 필요는 없어요. 팀원들과 함께 만들어가요.
+    </div>
+  </div>
+
+  <!-- 체크리스트 -->
+  <section class="section">
+    <div class="section-title">▸ 지금 할 일</div>
+    <div class="checklist">
+
+      <!-- Step 1: 오픈채팅 만들기 -->
+      <div class="check-step" id="step-1">
+        <div class="check-step-head">
+          <div class="check-num"><span class="check-num-text">1</span></div>
+          <div class="check-title">스터디 오픈채팅 만들기</div>
+        </div>
+        <div class="check-desc">
+          카카오톡에서 우리 팀의 오픈채팅을 먼저 만들어주세요. 익명 활동이 보장돼요.
+        </div>
+        <div class="guide-toggle">
+          <button class="guide-toggle-btn" id="guide-toggle-btn" onclick="toggleGuide()">
+            <span>오픈채팅 만드는 방법을 모르겠어요</span>
+            <span class="chev">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </span>
+          </button>
+        </div>
+        <div class="guide-content" id="guide-content">
+          <h4>오픈채팅 만들기 (카카오톡)</h4>
+          <ol>
+            <li>카카오톡 실행 → 하단 <strong>"지금"</strong> 탭</li>
+            <li>상단 <strong>오픈채팅 만들기</strong> 버튼</li>
+            <li><strong>그룹채팅 만들기</strong> 선택</li>
+            <li>방 이름은 우리 팀명으로 (검색 허용은 <strong>해제 추천</strong>)</li>
+            <li>완료 후 우측 상단 <strong>≡</strong> 메뉴 → 우측 상단 <strong>공유</strong> → <strong>링크 복사</strong></li>
+          </ol>
+          <div class="tip">💡 검색 허용을 해제하면 링크 아는 사람만 들어올 수 있어요.</div>
+        </div>
+      </div>
+
+      <!-- Step 2: 링크 등록 -->
+      <div class="check-step" id="step-2">
+        <div class="check-step-head">
+          <div class="check-num"><span class="check-num-text">2</span></div>
+          <div class="check-title">오픈채팅 링크 등록하기</div>
+        </div>
+        <div class="check-desc">
+          만든 오픈채팅 링크를 등록하면 팀원들에게 자동으로 안내돼요.
+          <strong>24시간 내에 등록하지 않으면 매칭이 무산</strong>돼요.
+        </div>
+        <div class="link-form">
+          <div class="link-input-wrap">
+            <input type="url" class="link-input" id="link-input"
+                   placeholder="https://open.kakao.com/o/..."
+                   oninput="validateLink()" />
+            <button class="link-submit" id="link-submit" onclick="submitLink()" disabled>등록</button>
+          </div>
+          <div class="link-hint" id="link-hint">카카오톡 오픈채팅 링크를 붙여넣어 주세요.</div>
+        </div>
+      </div>
+
+      <!-- Step 3: 메시지 보내기 -->
+      <div class="check-step" id="step-3">
+        <div class="check-step-head">
+          <div class="check-num"><span class="check-num-text">3</span></div>
+          <div class="check-title">팀원들에게 첫 메시지 보내기</div>
+        </div>
+        <div class="check-desc">
+          아래 메시지를 복사해서 오픈채팅에 보내세요. 필요하면 직접 수정해도 좋아요.
+          <strong>구체적인 운영 사항은 팀원들과 함께 정해주세요.</strong>
+        </div>
+        <div class="msg-box-wrap">
+          <textarea class="msg-box" id="msg-box" spellcheck="false"></textarea>
+          <div class="msg-actions">
+            <button class="copy-btn" id="copy-btn" onclick="copyMessage()">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+              </svg>
+              <span id="copy-btn-text">메시지 복사하기</span>
+            </button>
+            <button class="reset-msg-btn" onclick="resetMessage()">기본 메시지로</button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- 마무리 -->
+  <div class="finale">
+    <div class="finale-emoji">🥔</div>
+    <div class="finale-title">즐거운 스터디 되세요!</div>
+    <div class="finale-sub">
+      매칭 확정 후에는 "내 스터디" 탭에서 언제든<br>
+      팀 정보를 확인하실 수 있어요.
+    </div>
+  </div>
+
+  <!-- 종료 안내 배너 (스터디 끝낸 후에만 표시) -->
+  <div class="ended-banner">
+    <span class="label">종료됨</span>
+    이 스터디는 종료되었어요. 팀원들에게도 같이 적용돼요.
+  </div>
+
+  <!-- FAQ -->
+  <section class="section">
+    <div class="section-title">▸ 자주 묻는 질문</div>
+    <div class="faq-list">
+
+      <div class="faq-item">
+        <button class="faq-q" onclick="toggleFaq(this)">
+          <span class="qmark">Q</span>
+          <span class="text">팀원이 채팅방에 들어오지 않으면 어떻게 해야 하나요?</span>
+          <span class="chev">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </span>
+        </button>
+        <div class="faq-a">
+          매칭과 동의가 끝난 상태라 <strong>이제부터의 결정은 팀장님께 있어요.</strong>
+          팀원들과 채팅방에서 의논해서 진행하셔도 좋고, 안 들어온 팀원을 빼고 시작하셔도 괜찮아요.
+          <div class="sub">
+            💡 채팅방 만들고 안내 메일까지 갔는데도 끝까지 응답이 없는 경우엔
+            <a class="report-link" onclick="openReportModal()">No-Show로 신고</a>해주세요.
+          </div>
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-q" onclick="toggleFaq(this)">
+          <span class="qmark">Q</span>
+          <span class="text">스터디를 끝내고 싶어요. 어떻게 해야 하나요?</span>
+          <span class="chev">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </span>
+        </button>
+        <div class="faq-a">
+          이 화면 맨 아래의 <strong>"스터디 끝내기"</strong> 버튼을 눌러주세요.
+          팀원 모두에게 종료 처리가 적용돼요. 정보는 삭제되지 않고 비활성 상태로 남아요.
+          <div class="sub">
+            💡 끝내기는 팀장만 할 수 있어요. 한 번 끝내면 같은 팀으로 다시 활성화할 수는 없어요.
+          </div>
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-q" onclick="toggleFaq(this)">
+          <span class="qmark">Q</span>
+          <span class="text">팀원이 약속을 안 지키거나 모임에 나오지 않아요.</span>
+          <span class="chev">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </span>
+        </button>
+        <div class="faq-a">
+          확정된 스터디에서의 No-Show는 다른 감자들의 매칭 기회까지 줄여서
+          서비스 운영에 어려움을 줘요. 부드럽게 한 번 이야기해본 뒤에도
+          반복된다면 <a class="report-link" onclick="openReportModal()">신고</a>해주세요.
+          <div class="sub">
+            💡 신고 1건만으로 바로 제재되진 않아요. 운영진이 확인 후 조치해요.
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- 스터디 끝내기 -->
+  <div class="end-study-section">
+    <button class="end-study-btn" onclick="openEndModal()">스터디 끝내기</button>
+    <div class="end-study-hint">팀원 모두에게 종료 처리가 적용돼요</div>
+  </div>
+
+</div>
+
+<!-- ============================================================
+     모달: 스터디 종료 확인
+     ============================================================ -->
+<div class="modal-overlay" id="end-modal">
+  <div class="modal">
+    <h3>스터디를 끝내시겠어요?</h3>
+    <p>
+      <strong>모든 팀원에게 종료 처리가 적용</strong>돼요.
+      한 번 끝내면 같은 팀으로 다시 활성화할 수는 없고,
+      각자 새 매칭 카드를 만들어야 해요.
+    </p>
+    <div class="modal-actions">
+      <button class="modal-btn cancel" onclick="closeEndModal()">취소</button>
+      <button class="modal-btn confirm" onclick="endStudy()">끝내기</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     모달: No-Show 신고
+     ============================================================ -->
+<div class="modal-overlay" id="report-modal">
+  <div class="modal">
+    <h3>No-Show 신고</h3>
+    <p>
+      신고 내용은 운영진이 확인 후 처리해요.
+      신고 1건만으로 바로 제재되지 않으니 부담 없이 사실대로 알려주세요.
+    </p>
+    <div class="modal-actions">
+      <button class="modal-btn cancel" onclick="closeReportModal()">취소</button>
+      <button class="modal-btn confirm" onclick="submitReport()">신고 접수</button>
+    </div>
+  </div>
+</div>
+
+<!-- 토스트 -->
+<div class="toast" id="toast"></div>
+
+<script>
+  /* ============================================================
+     팀 데이터 (실제는 서버에서 받아옴 — 데모용 더미)
+     ============================================================ */
+  const TEAM = {
+    name: '과탑 돌격대',
+    leaderNick: '감자대장',
+    members: ['감자대장', '호빵맨', '박수빈', '감자소녀', '최동현']
+  };
+
+  /* ============================================================
+     기본 메시지 템플릿
+     ============================================================ */
+  function buildDefaultMessage(){
+    return `안녕하세요! ${TEAM.name} 팀장 ${TEAM.leaderNick}입니다.
+함께 매칭된 분들 만나서 반가워요 🥔
+
+스터디를 본격적으로 시작하기 전에 함께 정해야 할 것들이 있어요. 의견 부탁드려요!
+
+[정해야 할 것들]
+• 정기 모임 : (예: 매주 월/수 오후 8시)
+• 모임 장소 : (예: 정문 이디야커피, 도서관 그룹스터디룸)
+• 스터디 주제 : (예: 자료구조 수업 + 백준 문제풀이)
+• 운영 규칙 : (예: 결석 시 미리 알리기, 자료 공유 방식)
+
+편하게 의견 나눠봐요. 잘 부탁드립니다!`;
+  }
+
+  /* ============================================================
+     초기 렌더링
+     ============================================================ */
+  document.addEventListener('DOMContentLoaded', () => {
+    document.getElementById('team-name').textContent = TEAM.name;
+    resetMessage();
+    startCountdown();
+  });
+
+  /* ============================================================
+     카운트다운: 등록 마감까지 24시간
+     ============================================================ */
+  // 데모: 23시간 54분 12초 남은 상태로 시작
+  const deadline = new Date();
+  deadline.setHours(deadline.getHours() + 23);
+  deadline.setMinutes(deadline.getMinutes() + 54);
+  deadline.setSeconds(deadline.getSeconds() + 12);
+
+  let countdownTimer = null;
+  function startCountdown(){
+    updateCountdown();
+    countdownTimer = setInterval(updateCountdown, 1000);
+  }
+  function updateCountdown(){
+    const el = document.getElementById('countdown');
+    const pill = document.getElementById('countdown-pill');
+    const diff = deadline - new Date();
+    if(diff <= 0){
+      el.textContent = '만료됨';
+      pill.classList.add('urgent');
+      clearInterval(countdownTimer);
+      return;
+    }
+    const h = Math.floor(diff / 3600000);
+    const m = Math.floor((diff % 3600000) / 60000);
+    const s = Math.floor((diff % 60000) / 1000);
+    el.textContent = String(h).padStart(2,'0') + ':' + String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0');
+    // 1시간 미만 시 urgent 스타일
+    pill.classList.toggle('urgent', h < 1);
+  }
+
+  /* ============================================================
+     오픈채팅 가이드 펼침
+     ============================================================ */
+  function toggleGuide(){
+    document.getElementById('guide-toggle-btn').classList.toggle('open');
+    document.getElementById('guide-content').classList.toggle('open');
+  }
+
+  /* ============================================================
+     메시지 복사
+     ============================================================ */
+  function resetMessage(){
+    document.getElementById('msg-box').value = buildDefaultMessage();
+  }
+
+  function copyMessage(){
+    const text = document.getElementById('msg-box').value;
+    const btn = document.getElementById('copy-btn');
+    const btnText = document.getElementById('copy-btn-text');
+
+    // 클립보드 API + 폴백
+    const done = () => {
+      btn.classList.add('copied');
+      btnText.textContent = '복사됐어요!';
+      // step-1 자동 완료 마크 (메시지 복사 = 톡방 만들고 메시지 준비 단계 가정 어렵지만, 사용자 행동으로 간주 가능)
+      // 다만 명확한 행동 단서가 아니므로 step-3는 명시적으로 자동 완료 안 함
+      showToast('메시지가 복사됐어요. 오픈채팅에 붙여넣으세요!');
+      setTimeout(() => {
+        btn.classList.remove('copied');
+        btnText.textContent = '메시지 복사하기';
+      }, 2400);
+    };
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(text).then(done).catch(() => fallbackCopy(text, done));
+    } else {
+      fallbackCopy(text, done);
+    }
+  }
+
+  function fallbackCopy(text, onDone){
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    ta.style.position = 'fixed';
+    ta.style.top = '-9999px';
+    document.body.appendChild(ta);
+    ta.select();
+    try{ document.execCommand('copy'); onDone(); }
+    catch(e){ showToast('복사 실패. 직접 선택해서 복사해주세요.'); }
+    finally{ document.body.removeChild(ta); }
+  }
+
+  /* ============================================================
+     오픈채팅 링크 등록
+     ============================================================ */
+  function validateLink(){
+    const v = document.getElementById('link-input').value.trim();
+    const hint = document.getElementById('link-hint');
+    const btn = document.getElementById('link-submit');
+
+    if(v.length === 0){
+      hint.textContent = '카카오톡 오픈채팅 링크를 붙여넣어 주세요.';
+      hint.className = 'link-hint';
+      btn.disabled = true;
+      return;
+    }
+
+    const isKakao = /^https:\/\/open\.kakao\.com\//.test(v);
+    if(!isKakao){
+      hint.textContent = '카카오톡 오픈채팅 링크만 등록할 수 있어요. (https://open.kakao.com/...)';
+      hint.className = 'link-hint error';
+      btn.disabled = true;
+      return;
+    }
+
+    hint.textContent = '등록 가능한 링크예요.';
+    hint.className = 'link-hint success';
+    btn.disabled = false;
+  }
+
+  function submitLink(){
+    const v = document.getElementById('link-input').value.trim();
+    if(!v) return;
+
+    // Step 1과 Step 2를 동시에 완료로 마크 (링크 등록 = 톡방을 만들었다는 증거)
+    document.getElementById('step-1').classList.add('done');
+    document.getElementById('step-2').classList.add('done');
+
+    showToast('오픈채팅 링크가 등록됐어요! 팀원들에게 안내가 갑니다.');
+
+    // 입력 잠금
+    document.getElementById('link-input').disabled = true;
+    document.getElementById('link-submit').disabled = true;
+    document.getElementById('link-submit').textContent = '등록됨';
+
+    // 카운트다운 멈춤
+    if(countdownTimer){
+      clearInterval(countdownTimer);
+      document.getElementById('countdown-pill').classList.remove('urgent');
+      document.getElementById('countdown').textContent = '등록 완료';
+    }
+
+    // 데모: 일정 시간 후 대시보드 이동 (필요 시 주석 처리)
+    // setTimeout(() => { window.location.href = 'dashboard.html'; }, 2500);
+  }
+
+  /* ============================================================
+     FAQ 펼침
+     ============================================================ */
+  function toggleFaq(btn){
+    btn.parentElement.classList.toggle('open');
+  }
+
+  /* ============================================================
+     스터디 종료
+     ============================================================ */
+  function openEndModal(){
+    document.getElementById('end-modal').classList.add('show');
+  }
+  function closeEndModal(){
+    document.getElementById('end-modal').classList.remove('show');
+  }
+  function endStudy(){
+    closeEndModal();
+    document.body.classList.add('study-ended');
+    // 카운트다운 멈춤
+    if(countdownTimer){
+      clearInterval(countdownTimer);
+      countdownTimer = null;
+    }
+    // 끝내기 버튼 자체도 비활성화
+    const btn = document.querySelector('.end-study-btn');
+    btn.disabled = true;
+    btn.style.opacity = '0.4';
+    btn.style.pointerEvents = 'none';
+    document.querySelector('.end-study-hint').textContent = '이 스터디는 종료됐어요.';
+    // 화면 상단으로
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    showToast('스터디가 종료됐어요. 팀원들에게도 적용돼요.');
+  }
+
+  /* ============================================================
+     No-Show 신고
+     ============================================================ */
+  function openReportModal(){
+    document.getElementById('report-modal').classList.add('show');
+  }
+  function closeReportModal(){
+    document.getElementById('report-modal').classList.remove('show');
+  }
+  function submitReport(){
+    closeReportModal();
+    showToast('신고가 접수됐어요. 확인해 처리할게요.');
+  }
+
+  /* ============================================================
+     토스트
+     ============================================================ */
+  let toastTimer = null;
+  function showToast(message){
+    const toast = document.getElementById('toast');
+    toast.textContent = message;
+    toast.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => toast.classList.remove('show'), 2600);
+  }
+</script>
+</body>
+</html>

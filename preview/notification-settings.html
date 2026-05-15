@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<title>공부하는 감자 — 알림 설정</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/variable/pretendardvariable.css" />
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --knu-blue: #0047BB; --knu-blue-deep: #00347E; --knu-blue-soft: #E5ECF8;
+    --knu-orange: #FE5000; --knu-orange-soft: #FFE8DD;
+    --cream: #F7F3EC; --paper: #FFFFFF; --paper-warm: #FBF8F2;
+    --ink: #1A1A1A; --ink-soft: #555E68; --ink-mute: #8B95A4;
+    --line: #E8E2D4; --line-soft: #F0EBDF;
+    --error: #DC3545; --success: #2D7A3E;
+    --font-kr: 'Pretendard Variable', Pretendard, sans-serif;
+    --font-mono: 'JetBrains Mono', monospace;
+    --radius-s: 10px; --radius-m: 16px; --radius-l: 22px;
+  }
+  *{ margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color: transparent; }
+  button{ background:none; border:none; cursor:pointer; font-family: inherit; }
+  body{ font-family: var(--font-kr); background: var(--line); color: var(--ink); overflow-x: hidden; word-break: keep-all; line-height: 1.5; }
+  .app{ max-width: 480px; margin: 0 auto; background: var(--cream); min-height: 100vh; padding-bottom: 60px; position: relative; }
+
+  .topbar{
+    display: flex; align-items: center; gap: 8px;
+    padding: 14px 20px 16px;
+    background: var(--cream);
+    position: sticky; top: 0; z-index: 10;
+    border-bottom: 1px solid var(--line-soft);
+  }
+  .back-btn{
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--ink-soft);
+  }
+  .back-btn:active{ background: var(--line-soft); }
+  .top-title{ font-size: 16px; font-weight: 800; flex: 1; }
+
+  /* 페이지 헤더 */
+  .page-head{
+    padding: 20px 24px 8px;
+  }
+  .page-head h1{
+    font-size: 24px;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    margin-bottom: 4px;
+  }
+  .page-head h1 em{
+    font-style: normal;
+    color: var(--knu-orange);
+  }
+  .page-head .sub{
+    font-size: 13px;
+    color: var(--ink-soft);
+    line-height: 1.6;
+  }
+
+  /* 메일 정보 카드 */
+  .mail-info{
+    margin: 16px 24px 0;
+    padding: 14px 16px;
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-m);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .mail-info .ico{
+    font-size: 22px;
+    flex-shrink: 0;
+  }
+  .mail-info .body{ flex: 1; min-width: 0; }
+  .mail-info .label{
+    font-size: 11px;
+    color: var(--ink-mute);
+    font-family: var(--font-mono);
+    letter-spacing: 0.03em;
+    margin-bottom: 2px;
+  }
+  .mail-info .addr{
+    font-size: 13.5px;
+    font-weight: 700;
+    color: var(--ink);
+    word-break: break-all;
+  }
+  .mail-info .change-btn{
+    background: var(--paper-warm);
+    border: 1px solid var(--line);
+    color: var(--ink-soft);
+    font-size: 11px;
+    font-weight: 600;
+    padding: 6px 10px;
+    border-radius: 999px;
+    flex-shrink: 0;
+  }
+
+  /* 섹션 */
+  .section{
+    padding: 22px 24px 0;
+  }
+  .section-head{
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    margin-bottom: 6px;
+  }
+  .section-title{
+    font-size: 14px;
+    font-weight: 800;
+    color: var(--ink);
+  }
+  .section-tag{
+    font-family: var(--font-mono);
+    font-size: 10px;
+    font-weight: 700;
+    padding: 2px 7px;
+    border-radius: 4px;
+    letter-spacing: 0.05em;
+  }
+  .section-tag.required{
+    background: var(--knu-orange);
+    color: white;
+  }
+  .section-tag.optional{
+    background: var(--knu-blue-soft);
+    color: var(--knu-blue);
+    border: 1px solid var(--knu-blue);
+  }
+  .section-sub{
+    font-size: 12px;
+    color: var(--ink-mute);
+    line-height: 1.55;
+    margin-bottom: 12px;
+    padding-left: 2px;
+  }
+
+  /* 알림 항목 */
+  .notif-list{
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-m);
+    overflow: hidden;
+  }
+  .notif-item{
+    display: flex;
+    align-items: center;
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--line-soft);
+  }
+  .notif-item:last-child{ border-bottom: 0; }
+  .notif-info{ flex: 1; min-width: 0; padding-right: 14px; }
+  .notif-name{
+    font-size: 13.5px;
+    font-weight: 700;
+    color: var(--ink);
+    margin-bottom: 3px;
+  }
+  .notif-desc{
+    font-size: 11.5px;
+    color: var(--ink-mute);
+    line-height: 1.5;
+  }
+
+  /* 토글 스위치 */
+  .toggle{
+    position: relative;
+    width: 46px; height: 26px;
+    flex-shrink: 0;
+    cursor: pointer;
+  }
+  .toggle input{
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+  }
+  .toggle-slider{
+    position: absolute;
+    inset: 0;
+    background: var(--line);
+    border-radius: 999px;
+    transition: background 0.2s;
+  }
+  .toggle-slider::before{
+    content: '';
+    position: absolute;
+    top: 3px; left: 3px;
+    width: 20px; height: 20px;
+    background: white;
+    border-radius: 50%;
+    transition: transform 0.2s;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+  }
+  .toggle input:checked ~ .toggle-slider{ background: var(--knu-orange); }
+  .toggle input:checked ~ .toggle-slider::before{ transform: translateX(20px); }
+  .toggle input:disabled ~ .toggle-slider{ opacity: 0.5; cursor: not-allowed; }
+  .toggle.locked .toggle-slider{
+    background: var(--knu-orange);
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+  .toggle.locked .toggle-slider::before{ transform: translateX(20px); }
+
+  /* 잠금 라벨 */
+  .lock-label{
+    font-family: var(--font-mono);
+    font-size: 9px;
+    font-weight: 700;
+    color: var(--ink-mute);
+    margin-left: 8px;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+
+  /* 안내 콜아웃 */
+  .callout{
+    margin: 18px 24px 0;
+    padding: 14px 16px;
+    background: var(--knu-orange-soft);
+    border-left: 4px solid var(--knu-orange);
+    border-radius: var(--radius-s);
+    font-size: 12px;
+    color: var(--ink);
+    line-height: 1.65;
+  }
+  .callout strong{ color: var(--knu-orange); font-weight: 700; }
+
+  .info-callout{
+    margin: 18px 24px 0;
+    padding: 14px 16px;
+    background: var(--knu-blue-soft);
+    border-left: 4px solid var(--knu-blue);
+    border-radius: var(--radius-s);
+    font-size: 12px;
+    color: var(--ink);
+    line-height: 1.65;
+  }
+  .info-callout strong{ color: var(--knu-blue); font-weight: 700; }
+
+  /* 토스트 */
+  .toast{
+    position: fixed; bottom: 32px; left: 50%;
+    transform: translateX(-50%) translateY(60px);
+    background: var(--ink); color: var(--cream);
+    padding: 11px 18px; border-radius: 999px;
+    font-size: 13px; font-weight: 600;
+    opacity: 0; pointer-events: none;
+    transition: all 0.25s; z-index: 100;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+  }
+  .toast.show{ opacity: 1; transform: translateX(-50%) translateY(0); }
+</style>
+</head>
+<body>
+
+<div class="app">
+
+  <div class="topbar">
+    <button class="back-btn" onclick="history.back()" aria-label="뒤로가기">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+    </button>
+    <div class="top-title">알림 설정</div>
+  </div>
+
+  <!-- 페이지 헤더 -->
+  <div class="page-head">
+    <h1>알림 <em>설정</em></h1>
+    <div class="sub">
+      알림은 등록한 메일로 보내드려요.<br>
+      서비스를 이용하지 않는 동안에는 <strong>꼭 필요한 알림만</strong> 발송돼요.
+    </div>
+  </div>
+
+  <!-- 등록 메일 정보 -->
+  <div class="mail-info">
+    <span class="ico">✉️</span>
+    <div class="body">
+      <div class="label">▸ 알림 받을 메일</div>
+      <div class="addr">jaea0423@gmail.com</div>
+    </div>
+    <button class="change-btn" onclick="location.href='profile-edit.html'">변경</button>
+  </div>
+
+  <!-- 필수 알림 -->
+  <section class="section">
+    <div class="section-head">
+      <span class="section-title">필수 알림</span>
+      <span class="section-tag required">필수</span>
+    </div>
+    <div class="section-sub">
+      서비스 이용에 필요한 알림이라 끌 수 없어요. 받기 싫으시면 회원 탈퇴를 해주셔야 해요.
+    </div>
+    <div class="notif-list">
+      <div class="notif-item">
+        <div class="notif-info">
+          <div class="notif-name">매칭 도착</div>
+          <div class="notif-desc">자동 매칭 또는 팀 지원 응답 알림</div>
+        </div>
+        <label class="toggle locked">
+          <input type="checkbox" checked disabled>
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+      <div class="notif-item">
+        <div class="notif-info">
+          <div class="notif-name">팀 확정 / 무산</div>
+          <div class="notif-desc">매칭 응답 마감 후 결과 안내</div>
+        </div>
+        <label class="toggle locked">
+          <input type="checkbox" checked disabled>
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+      <div class="notif-item">
+        <div class="notif-info">
+          <div class="notif-name">팀장 채팅방 등록</div>
+          <div class="notif-desc">팀장이 오픈채팅 만들면 입장 링크 안내</div>
+        </div>
+        <label class="toggle locked">
+          <input type="checkbox" checked disabled>
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+      <div class="notif-item">
+        <div class="notif-info">
+          <div class="notif-name">팀 변경 알림</div>
+          <div class="notif-desc">팀장이 팀 정보를 수정하거나 팀원이 나갔을 때</div>
+        </div>
+        <label class="toggle locked">
+          <input type="checkbox" checked disabled>
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+      <div class="notif-item">
+        <div class="notif-info">
+          <div class="notif-name">계정 보안</div>
+          <div class="notif-desc">비밀번호 변경, 잠금, 신고 처리 결과</div>
+        </div>
+        <label class="toggle locked">
+          <input type="checkbox" checked disabled>
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+    </div>
+  </section>
+
+  <!-- 선택 알림 -->
+  <section class="section">
+    <div class="section-head">
+      <span class="section-title">선택 알림</span>
+      <span class="section-tag optional">선택</span>
+    </div>
+    <div class="section-sub">
+      받고 싶지 않으시면 끄셔도 돼요. 서비스 이용엔 영향이 없어요.
+    </div>
+    <div class="notif-list">
+      <div class="notif-item">
+        <div class="notif-info">
+          <div class="notif-name">커뮤니티 댓글</div>
+          <div class="notif-desc">내 게시글에 댓글이 달렸을 때</div>
+        </div>
+        <label class="toggle">
+          <input type="checkbox" checked onchange="onToggle(this, '커뮤니티 댓글')">
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+      <div class="notif-item">
+        <div class="notif-info">
+          <div class="notif-name">커뮤니티 답글</div>
+          <div class="notif-desc">내 댓글에 답글이 달렸을 때</div>
+        </div>
+        <label class="toggle">
+          <input type="checkbox" checked onchange="onToggle(this, '커뮤니티 답글')">
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+      <div class="notif-item">
+        <div class="notif-info">
+          <div class="notif-name">매칭 카드 만료 임박</div>
+          <div class="notif-desc">카드 만료 24시간 전 안내</div>
+        </div>
+        <label class="toggle">
+          <input type="checkbox" checked onchange="onToggle(this, '카드 만료 임박')">
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+      <div class="notif-item">
+        <div class="notif-info">
+          <div class="notif-name">서비스 공지사항</div>
+          <div class="notif-desc">정기 점검, 새 기능, 운영 정책 변경 안내</div>
+        </div>
+        <label class="toggle">
+          <input type="checkbox" checked onchange="onToggle(this, '서비스 공지사항')">
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+    </div>
+  </section>
+
+  <!-- 안내 -->
+  <div class="info-callout">
+    💡 <strong>스팸이 아니에요.</strong>
+    팀이 구해진 후 오픈채팅이 시작되면 별다른 일이 없는 한 메일이 가지 않아요.
+    조용히 잘 굴러가도록 만들었어요.
+  </div>
+
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  function onToggle(input, name){
+    const status = input.checked ? '켰어요' : '껐어요';
+    showToast(`'${name}' 알림을 ${status}`);
+  }
+
+  let toastTimer = null;
+  function showToast(message){
+    const toast = document.getElementById('toast');
+    toast.textContent = message;
+    toast.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => toast.classList.remove('show'), 2000);
+  }
+</script>
+</body>
+</html>

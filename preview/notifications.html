@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<title>공부하는 감자 — 알림</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/variable/pretendardvariable.css" />
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --knu-blue: #0047BB; --knu-blue-deep: #00347E; --knu-blue-soft: #E5ECF8;
+    --knu-orange: #FE5000; --knu-orange-soft: #FFE8DD;
+    --cream: #F7F3EC; --paper: #FFFFFF; --paper-warm: #FBF8F2;
+    --ink: #1A1A1A; --ink-soft: #555E68; --ink-mute: #8B95A4;
+    --line: #E8E2D4; --line-soft: #F0EBDF;
+    --error: #DC3545; --success: #2D7A3E;
+    --font-kr: 'Pretendard Variable', Pretendard, sans-serif;
+    --font-mono: 'JetBrains Mono', monospace;
+    --radius-s: 10px; --radius-m: 16px; --radius-l: 22px;
+  }
+  *{ margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color: transparent; }
+  button{ background:none; border:none; cursor:pointer; font-family: inherit; }
+  body{ font-family: var(--font-kr); background: var(--line); color: var(--ink); overflow-x: hidden; word-break: keep-all; line-height: 1.5; }
+  .app{ max-width: 480px; margin: 0 auto; background: var(--cream); min-height: 100vh; padding-bottom: 60px; }
+
+  /* 상단 바 */
+  .topbar{
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 14px 24px 16px; background: var(--cream);
+    position: sticky; top: 0; z-index: 10;
+    border-bottom: 1px solid var(--line-soft);
+  }
+  .back-btn{
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--ink-soft);
+  }
+  .back-btn:active{ background: var(--line-soft); }
+  .top-title{
+    font-size: 16px;
+    font-weight: 800;
+    color: var(--ink);
+  }
+  .top-action{
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--ink-mute);
+    padding: 6px 10px;
+    border-radius: 999px;
+  }
+  .top-action:active{ background: var(--line-soft); }
+  .top-action.has-unread{ color: var(--knu-orange); }
+
+  /* 그룹 헤더 */
+  .group-head{
+    padding: 18px 24px 8px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--ink-soft);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  /* 알림 리스트 */
+  .notif-list{ padding: 0 24px; }
+  .notif-item{
+    display: flex;
+    gap: 12px;
+    padding: 14px 14px;
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-m);
+    margin-bottom: 8px;
+    width: 100%;
+    text-align: left;
+    cursor: pointer;
+    transition: all 0.15s;
+    position: relative;
+  }
+  .notif-item:active{ transform: scale(0.99); }
+  .notif-item.unread{
+    background: var(--knu-orange-soft);
+    border-color: var(--knu-orange);
+  }
+  .notif-item.unread::before{
+    content: '';
+    position: absolute;
+    top: 18px; left: -3px;
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--knu-orange);
+  }
+
+  .notif-ico{
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    background: var(--knu-blue-soft);
+    color: var(--knu-blue);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px;
+    flex-shrink: 0;
+  }
+  .notif-ico.success{ background: #E0F0E4; color: var(--success); }
+  .notif-ico.warn{ background: var(--knu-orange-soft); color: var(--knu-orange); }
+  .notif-ico.system{ background: var(--line-soft); color: var(--ink-soft); }
+  .notif-ico.member{ background: #F0E5FF; color: #7C3AED; }
+
+  .notif-body{ flex: 1; min-width: 0; }
+  .notif-title{
+    font-size: 13.5px;
+    font-weight: 700;
+    color: var(--ink);
+    margin-bottom: 3px;
+    line-height: 1.4;
+  }
+  .notif-desc{
+    font-size: 12.5px;
+    color: var(--ink-soft);
+    line-height: 1.55;
+    margin-bottom: 6px;
+  }
+  .notif-time{
+    font-size: 11px;
+    color: var(--ink-mute);
+    font-family: var(--font-mono);
+  }
+
+  .notif-item.read .notif-title{ font-weight: 600; color: var(--ink-soft); }
+  .notif-item.read .notif-desc{ color: var(--ink-mute); }
+
+  /* 빈 상태 */
+  .empty{
+    text-align: center;
+    padding: 60px 24px;
+  }
+  .empty-emoji{
+    font-size: 44px;
+    margin-bottom: 12px;
+    opacity: 0.5;
+  }
+  .empty-title{
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--ink-soft);
+    margin-bottom: 4px;
+  }
+  .empty-desc{
+    font-size: 12px;
+    color: var(--ink-mute);
+    line-height: 1.55;
+  }
+
+  /* 토스트 */
+  .toast{
+    position: fixed; bottom: 32px; left: 50%;
+    transform: translateX(-50%) translateY(60px);
+    background: var(--ink); color: var(--cream);
+    padding: 11px 18px; border-radius: 999px;
+    font-size: 13px; font-weight: 600;
+    opacity: 0; pointer-events: none;
+    transition: all 0.25s; z-index: 100;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+  }
+  .toast.show{ opacity: 1; transform: translateX(-50%) translateY(0); }
+</style>
+</head>
+<body>
+
+<div class="app">
+
+  <!-- 상단 바 -->
+  <div class="topbar">
+    <button class="back-btn" onclick="history.back()" aria-label="뒤로가기">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+    </button>
+    <div class="top-title">알림</div>
+    <button class="top-action has-unread" id="mark-all" onclick="markAllRead()">모두 읽음</button>
+  </div>
+
+  <!-- 알림 목록 -->
+  <div id="notif-container">
+
+    <!-- 오늘 -->
+    <div class="group-head">▸ 오늘</div>
+    <div class="notif-list">
+
+      <button class="notif-item unread" onclick="openNotif(this, 'teamconfirm-leader.html')">
+        <div class="notif-ico success">🎉</div>
+        <div class="notif-body">
+          <div class="notif-title">매칭이 확정됐어요!</div>
+          <div class="notif-desc">"과탑 돌격대" 팀에 합류했어요. 팀장으로 지명되셨어요.</div>
+          <div class="notif-time">방금 전</div>
+        </div>
+      </button>
+
+      <button class="notif-item unread" onclick="openNotif(this, 'matchresponse.html')">
+        <div class="notif-ico">🤝</div>
+        <div class="notif-body">
+          <div class="notif-title">새 매칭이 도착했어요</div>
+          <div class="notif-desc">5명의 감자들과 매칭됐어요. 24시간 안에 응답해주세요.</div>
+          <div class="notif-time">2시간 전</div>
+        </div>
+      </button>
+
+      <button class="notif-item unread" onclick="openNotif(this, null)">
+        <div class="notif-ico member">👋</div>
+        <div class="notif-body">
+          <div class="notif-title">박수빈 님이 팀에 합류했어요</div>
+          <div class="notif-desc">"백준 골드 도전" 팀에 새 팀원이 참여했어요.</div>
+          <div class="notif-time">5시간 전</div>
+        </div>
+      </button>
+
+    </div>
+
+    <!-- 어제 -->
+    <div class="group-head">▸ 어제</div>
+    <div class="notif-list">
+
+      <button class="notif-item read" onclick="openNotif(this, null)">
+        <div class="notif-ico">🔗</div>
+        <div class="notif-body">
+          <div class="notif-title">오픈채팅 링크가 등록됐어요</div>
+          <div class="notif-desc">"과탑 돌격대" 팀장이 오픈채팅을 만들었어요. 입장해주세요.</div>
+          <div class="notif-time">어제 21:14</div>
+        </div>
+      </button>
+
+      <button class="notif-item read" onclick="openNotif(this, null)">
+        <div class="notif-ico warn">⏱</div>
+        <div class="notif-body">
+          <div class="notif-title">매칭 카드가 곧 만료돼요</div>
+          <div class="notif-desc">남은 시간 24시간. 활동 의향이 있으시면 그대로 두세요.</div>
+          <div class="notif-time">어제 14:00</div>
+        </div>
+      </button>
+
+    </div>
+
+    <!-- 지난 주 -->
+    <div class="group-head">▸ 지난주</div>
+    <div class="notif-list">
+
+      <button class="notif-item read" onclick="openNotif(this, null)">
+        <div class="notif-ico member">👋</div>
+        <div class="notif-body">
+          <div class="notif-title">최동현 님이 스터디에서 나갔어요</div>
+          <div class="notif-desc">"백준 골드 도전" 팀에서 한 분이 나갔어요.</div>
+          <div class="notif-time">5월 8일</div>
+        </div>
+      </button>
+
+      <button class="notif-item read" onclick="openNotif(this, null)">
+        <div class="notif-ico warn">🏁</div>
+        <div class="notif-body">
+          <div class="notif-title">"TOEIC 800 클럽" 스터디가 종료됐어요</div>
+          <div class="notif-desc">팀장이 스터디를 종료했어요. 정보는 "내 스터디"에서 확인할 수 있어요.</div>
+          <div class="notif-time">5월 7일</div>
+        </div>
+      </button>
+
+      <button class="notif-item read" onclick="openNotif(this, null)">
+        <div class="notif-ico system">📢</div>
+        <div class="notif-body">
+          <div class="notif-title">서비스 운영 시간 안내</div>
+          <div class="notif-desc">매일 8시 / 14시 / 20시에 자동 매칭이 돌아가요.</div>
+          <div class="notif-time">5월 6일</div>
+        </div>
+      </button>
+
+    </div>
+
+  </div>
+
+  <!-- 빈 상태 (모든 알림 삭제 시 표시) -->
+  <div class="empty" id="empty-state" style="display:none">
+    <div class="empty-emoji">🥔</div>
+    <div class="empty-title">새 알림이 없어요</div>
+    <div class="empty-desc">매칭이나 팀 활동이 생기면 여기로 알려드릴게요.</div>
+  </div>
+
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  /* 알림 클릭: 읽음 처리 + 해당 화면 이동 */
+  function openNotif(btn, target){
+    btn.classList.remove('unread');
+    btn.classList.add('read');
+    updateMarkAllBadge();
+    if(target){
+      window.location.href = target;
+    }
+  }
+
+  /* 모두 읽음 처리 */
+  function markAllRead(){
+    const unreads = document.querySelectorAll('.notif-item.unread');
+    if(unreads.length === 0){
+      showToast('읽지 않은 알림이 없어요');
+      return;
+    }
+    unreads.forEach(el => {
+      el.classList.remove('unread');
+      el.classList.add('read');
+    });
+    updateMarkAllBadge();
+    showToast('모든 알림을 읽음 처리했어요');
+  }
+
+  function updateMarkAllBadge(){
+    const btn = document.getElementById('mark-all');
+    const hasUnread = document.querySelector('.notif-item.unread');
+    btn.classList.toggle('has-unread', !!hasUnread);
+  }
+
+  /* 토스트 */
+  let toastTimer = null;
+  function showToast(message){
+    const toast = document.getElementById('toast');
+    toast.textContent = message;
+    toast.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => toast.classList.remove('show'), 2400);
+  }
+</script>
+</body>
+</html>

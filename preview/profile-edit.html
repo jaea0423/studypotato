@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<title>공부하는 감자 — 프로필 수정</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/variable/pretendardvariable.css" />
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --knu-blue: #0047BB; --knu-blue-deep: #00347E; --knu-blue-soft: #E5ECF8;
+    --knu-orange: #FE5000; --knu-orange-soft: #FFE8DD;
+    --cream: #F7F3EC; --paper: #FFFFFF; --paper-warm: #FBF8F2;
+    --ink: #1A1A1A; --ink-soft: #555E68; --ink-mute: #8B95A4;
+    --line: #E8E2D4; --line-soft: #F0EBDF;
+    --error: #DC3545; --success: #2D7A3E;
+    --font-kr: 'Pretendard Variable', Pretendard, sans-serif;
+    --font-mono: 'JetBrains Mono', monospace;
+    --radius-s: 10px; --radius-m: 16px; --radius-l: 22px;
+  }
+  *{ margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color: transparent; }
+  button{ background:none; border:none; cursor:pointer; font-family: inherit; }
+  body{ font-family: var(--font-kr); background: var(--line); color: var(--ink); overflow-x: hidden; word-break: keep-all; line-height: 1.5; }
+  .app{ max-width: 480px; margin: 0 auto; background: var(--cream); min-height: 100vh; padding-bottom: 100px; position: relative; }
+
+  /* 상단 바 */
+  .topbar{
+    display: flex; align-items: center; gap: 8px;
+    padding: 14px 20px 16px;
+    background: var(--cream);
+    position: sticky; top: 0; z-index: 10;
+    border-bottom: 1px solid var(--line-soft);
+  }
+  .back-btn{
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--ink-soft);
+  }
+  .back-btn:active{ background: var(--line-soft); }
+  .top-title{ font-size: 16px; font-weight: 800; flex: 1; }
+
+  /* 헤더 */
+  .page-head{
+    padding: 20px 24px 8px;
+  }
+  .page-head h1{
+    font-size: 24px;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    margin-bottom: 4px;
+  }
+  .page-head .sub{
+    font-size: 12.5px;
+    color: var(--ink-soft);
+  }
+
+  /* 폼 블록 */
+  .form-block{ padding: 20px 24px 4px; }
+  .form-label-row{
+    display: flex; align-items: center; gap: 8px;
+    margin-bottom: 10px;
+  }
+  .form-label{
+    font-size: 13.5px;
+    font-weight: 700;
+    color: var(--ink);
+  }
+  .form-label .badge{
+    font-family: var(--font-mono);
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--ink-mute);
+    background: var(--paper-warm);
+    border: 1px solid var(--line);
+    padding: 2px 7px;
+    border-radius: 999px;
+    letter-spacing: 0.03em;
+  }
+  .form-label .badge.locked{
+    color: var(--ink-mute);
+    background: var(--line-soft);
+  }
+  .form-sub{
+    font-size: 12px;
+    color: var(--ink-mute);
+    margin-bottom: 10px;
+    line-height: 1.55;
+    padding-left: 2px;
+  }
+
+  /* 인풋 */
+  .input-wrap{
+    display: flex;
+    gap: 8px;
+  }
+  .form-input{
+    flex: 1;
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-s);
+    padding: 12px 14px;
+    font-family: var(--font-kr);
+    font-size: 14px;
+    color: var(--ink);
+    outline: none;
+    min-width: 0;
+    transition: border-color 0.15s;
+  }
+  .form-input:focus{ border-color: var(--knu-blue); }
+  .form-input::placeholder{ color: var(--ink-mute); }
+  .form-input.locked{
+    background: var(--line-soft);
+    color: var(--ink-mute);
+    cursor: not-allowed;
+  }
+  .check-btn{
+    background: var(--ink);
+    color: var(--cream);
+    padding: 0 16px;
+    border-radius: var(--radius-s);
+    font-size: 12px;
+    font-weight: 700;
+    flex-shrink: 0;
+    min-width: 78px;
+  }
+  .check-btn:active{ transform: scale(0.96); }
+  .check-btn.success{ background: var(--success); }
+  .check-btn.disabled{
+    background: var(--line);
+    color: var(--ink-mute);
+    cursor: not-allowed;
+  }
+  .input-hint{
+    margin-top: 6px;
+    font-size: 11.5px;
+    color: var(--ink-mute);
+    line-height: 1.5;
+    padding-left: 2px;
+  }
+  .input-hint.error{ color: var(--error); }
+  .input-hint.success{ color: var(--success); font-weight: 600; }
+
+  /* 닉네임 변경 메타 (마지막 변경 / 다음 변경 가능일) */
+  .nick-meta{
+    margin-top: 8px;
+    padding: 10px 12px;
+    background: var(--paper-warm);
+    border-radius: var(--radius-s);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--ink-soft);
+    line-height: 1.65;
+    display: none;
+  }
+  .nick-meta.show{ display: block; }
+  .nick-meta .row{
+    display: flex;
+    justify-content: space-between;
+  }
+  .nick-meta .k{ color: var(--ink-mute); }
+  .nick-meta .v{ color: var(--ink); font-weight: 600; }
+  .nick-meta.locked{
+    background: #FEEAEA;
+    color: var(--error);
+  }
+  .nick-meta.locked .k,
+  .nick-meta.locked .v{ color: var(--error); }
+
+  /* 칩 */
+  .chip-group{
+    display: flex;
+    flex-wrap: wrap;
+    gap: 7px;
+  }
+  .chip{
+    flex-shrink: 0;
+    background: var(--paper);
+    border: 1px solid var(--line);
+    padding: 9px 14px;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--ink-soft);
+    transition: all 0.15s;
+  }
+  .chip:active{ transform: scale(0.96); }
+  .chip.active{
+    background: var(--ink);
+    color: var(--cream);
+    border-color: var(--ink);
+    font-weight: 600;
+  }
+
+  /* 셀렉트 */
+  .form-select{
+    width: 100%;
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-s);
+    padding: 12px 38px 12px 14px;
+    font-family: var(--font-kr);
+    font-size: 14px;
+    color: var(--ink);
+    appearance: none;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%238B95A4' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'/></svg>");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    outline: none;
+  }
+  .form-select:focus{ border-color: var(--knu-blue); }
+
+  /* 하단 고정 버튼 */
+  .bottom-bar{
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    z-index: 50;
+    pointer-events: none;
+  }
+  .bottom-inner{
+    max-width: 480px;
+    margin: 0 auto;
+    padding: 12px 24px 18px;
+    background: linear-gradient(to top, var(--cream) 70%, transparent);
+    pointer-events: auto;
+  }
+  .btn-primary{
+    width: 100%;
+    background: var(--knu-orange);
+    color: white;
+    padding: 14px;
+    border-radius: var(--radius-s);
+    font-size: 14px;
+    font-weight: 700;
+    transition: all 0.15s;
+  }
+  .btn-primary:active{ transform: scale(0.99); background: #CC4000; }
+  .btn-primary:disabled{
+    background: var(--line);
+    color: var(--ink-mute);
+    cursor: not-allowed;
+  }
+
+  /* 변경 사항 안내 */
+  .changes-note{
+    margin: 18px 24px 0;
+    padding: 12px 14px;
+    background: var(--knu-blue-soft);
+    border-radius: var(--radius-s);
+    font-size: 12px;
+    color: var(--knu-blue);
+    line-height: 1.55;
+  }
+
+  /* 토스트 */
+  .toast{
+    position: fixed; bottom: 84px; left: 50%;
+    transform: translateX(-50%) translateY(60px);
+    background: var(--ink); color: var(--cream);
+    padding: 11px 18px; border-radius: 999px;
+    font-size: 13px; font-weight: 600;
+    opacity: 0; pointer-events: none;
+    transition: all 0.25s; z-index: 100;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+  }
+  .toast.show{ opacity: 1; transform: translateX(-50%) translateY(0); }
+</style>
+</head>
+<body>
+
+<div class="app">
+
+  <!-- 상단 바 -->
+  <div class="topbar">
+    <button class="back-btn" onclick="confirmLeave()" aria-label="뒤로가기">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+    </button>
+    <div class="top-title">프로필 수정</div>
+  </div>
+
+  <!-- 페이지 헤더 -->
+  <div class="page-head">
+    <h1>내 정보 <em style="font-style:normal;color:var(--knu-orange)">수정</em></h1>
+    <div class="sub">언제든 다시 바꿀 수 있어요.</div>
+  </div>
+
+  <!-- 강대 웹메일 (수정 불가) -->
+  <div class="form-block">
+    <div class="form-label-row">
+      <span class="form-label">강원대 웹메일</span>
+      <span class="badge locked">수정 불가</span>
+    </div>
+    <div class="form-sub">본인 인증에 사용된 메일이라 변경할 수 없어요.</div>
+    <input class="form-input locked" type="email" value="202313564@kangwon.ac.kr" readonly>
+  </div>
+
+  <!-- 닉네임 -->
+  <div class="form-block">
+    <div class="form-label-row">
+      <span class="form-label">닉네임</span>
+      <span class="badge" id="nick-lock-badge" style="display:none">변경 잠금</span>
+    </div>
+    <div class="form-sub">2~10자, 다른 이용자와 겹치지 않게. <strong>한 번 변경하면 30일 동안 다시 변경할 수 없어요.</strong></div>
+    <div class="input-wrap">
+      <input class="form-input" id="nick-input" type="text"
+             value="감자대장" maxlength="10"
+             oninput="onNickChange()" />
+      <button class="check-btn disabled" id="check-btn" onclick="checkNick()">중복확인</button>
+    </div>
+    <div class="input-hint" id="nick-hint">현재 닉네임이에요.</div>
+    <div class="nick-meta" id="nick-meta">
+      <!-- JS로 채움: 마지막 변경일 / 다음 변경 가능일 -->
+    </div>
+  </div>
+
+  <!-- 알림 받을 메일 -->
+  <div class="form-block">
+    <div class="form-label-row">
+      <span class="form-label">알림 받을 메일</span>
+    </div>
+    <div class="form-sub">매칭/팀 활동 알림을 받을 메일이에요. 강대 메일이 아니어도 돼요.</div>
+    <input class="form-input" id="notify-input" type="email"
+           value="jaea0423@gmail.com"
+           placeholder="example@gmail.com" />
+  </div>
+
+  <!-- 학년 -->
+  <div class="form-block">
+    <div class="form-label-row">
+      <span class="form-label">학년</span>
+    </div>
+    <div class="chip-group" id="grade-chips">
+      <button class="chip" onclick="selectChip(this, 'grade', '1학년')">1학년</button>
+      <button class="chip active" onclick="selectChip(this, 'grade', '2학년')">2학년</button>
+      <button class="chip" onclick="selectChip(this, 'grade', '3학년')">3학년</button>
+      <button class="chip" onclick="selectChip(this, 'grade', '4학년 이상')">4학년 이상</button>
+      <button class="chip" onclick="selectChip(this, 'grade', '대학원')">대학원</button>
+    </div>
+  </div>
+
+  <!-- 재학 상태 -->
+  <div class="form-block">
+    <div class="form-label-row">
+      <span class="form-label">재학 상태</span>
+    </div>
+    <div class="chip-group" id="status-chips">
+      <button class="chip active" onclick="selectChip(this, 'status', '재학 중')">재학 중</button>
+      <button class="chip" onclick="selectChip(this, 'status', '휴학 중')">휴학 중</button>
+    </div>
+  </div>
+
+  <!-- 출생연도 (수정 불가) -->
+  <div class="form-block">
+    <div class="form-label-row">
+      <span class="form-label">출생연도</span>
+      <span class="badge locked">수정 불가</span>
+    </div>
+    <div class="form-sub">가입 시 한 번만 입력하고 변경할 수 없어요.</div>
+    <input class="form-input locked" type="text" id="birth-display" value="2005년" readonly>
+  </div>
+
+  <!-- 변경 안내 -->
+  <div class="changes-note" id="changes-note" style="display:none">
+    💡 <span id="changes-text">변경 사항이 있어요.</span> 저장 버튼을 눌러 적용해주세요.
+  </div>
+
+</div>
+
+<!-- 하단 고정 저장 버튼 -->
+<div class="bottom-bar">
+  <div class="bottom-inner">
+    <button class="btn-primary" id="save-btn" disabled onclick="saveProfile()">변경 사항 저장</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  /* ============================================================
+     원본 데이터 (실제는 서버에서 받아옴 — 데모 더미)
+     ============================================================ */
+  const ORIGINAL = {
+    nick: '감자대장',
+    notifyEmail: 'jaea0423@gmail.com',
+    grade: '2학년',
+    status: '재학 중',
+    birthYear: 2005,
+    // 닉네임 마지막 변경일 (데모 — 실제는 서버에서 받아옴)
+    // 아래 날짜를 오늘 기준 30일 안으로 두면 잠금 상태 시뮬레이션 가능
+    nickChangedAt: '2026-05-01'   // 13일 전 (= 17일 후 변경 가능)
+  };
+
+  // 현재 폼 상태
+  const form = { ...ORIGINAL };
+  let nickChecked = true;  // 기존 닉네임은 이미 확인된 상태
+  let nickLocked = false;  // 30일 미경과 시 true
+
+  /* 출생연도는 가입 시 입력 후 수정 불가 — 단순 표시만 */
+  function showBirthYear(){
+    const display = document.getElementById('birth-display');
+    if(display) display.value = ORIGINAL.birthYear + '년';
+  }
+
+  /* ============================================================
+     닉네임 30일 변경 제한 체크
+     ============================================================ */
+  const NICK_LOCK_DAYS = 30;
+
+  function fmtDate(d){
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2,'0');
+    const day = String(d.getDate()).padStart(2,'0');
+    return `${y}.${m}.${day}`;
+  }
+
+  function checkNickLock(){
+    const last = new Date(ORIGINAL.nickChangedAt + 'T00:00:00');
+    const next = new Date(last);
+    next.setDate(next.getDate() + NICK_LOCK_DAYS);
+    const now = new Date();
+    const daysLeft = Math.ceil((next - now) / (24 * 3600 * 1000));
+
+    nickLocked = daysLeft > 0;
+
+    const meta = document.getElementById('nick-meta');
+    const lockBadge = document.getElementById('nick-lock-badge');
+    const input = document.getElementById('nick-input');
+    const checkBtn = document.getElementById('check-btn');
+
+    meta.classList.add('show');
+
+    if(nickLocked){
+      // 잠금 — 입력 자체를 막음
+      input.disabled = true;
+      input.classList.add('locked');
+      checkBtn.classList.add('disabled');
+      lockBadge.style.display = 'inline-block';
+      meta.classList.add('locked');
+      meta.innerHTML = `
+        <div class="row"><span class="k">▸ 마지막 변경</span><span class="v">${fmtDate(last)}</span></div>
+        <div class="row"><span class="k">▸ 다음 변경 가능</span><span class="v">${fmtDate(next)} (${daysLeft}일 남음)</span></div>
+      `;
+    } else {
+      meta.classList.remove('locked');
+      meta.innerHTML = `
+        <div class="row"><span class="k">▸ 마지막 변경</span><span class="v">${fmtDate(last)}</span></div>
+        <div class="row"><span class="k">▸ 상태</span><span class="v" style="color:var(--success)">변경 가능</span></div>
+      `;
+    }
+  }
+
+  /* ============================================================
+     칩 선택
+     ============================================================ */
+  function selectChip(btn, key, value){
+    const group = btn.parentElement;
+    group.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+    btn.classList.add('active');
+    form[key] = value;
+    updateChangesUI();
+  }
+
+  /* ============================================================
+     닉네임 변경
+     ============================================================ */
+  function onNickChange(){
+    if(nickLocked) return;
+    const v = document.getElementById('nick-input').value.trim();
+    form.nick = v;
+    const hint = document.getElementById('nick-hint');
+    const checkBtn = document.getElementById('check-btn');
+
+    // 원본과 같으면 확인 불필요
+    if(v === ORIGINAL.nick){
+      nickChecked = true;
+      hint.textContent = '현재 닉네임이에요.';
+      hint.className = 'input-hint';
+      checkBtn.classList.add('disabled');
+      checkBtn.classList.remove('success');
+      checkBtn.textContent = '중복확인';
+    } else if(v.length < 2){
+      nickChecked = false;
+      hint.textContent = '2자 이상 입력해주세요.';
+      hint.className = 'input-hint error';
+      checkBtn.classList.add('disabled');
+      checkBtn.classList.remove('success');
+      checkBtn.textContent = '중복확인';
+    } else {
+      // 새 닉네임 — 중복확인 필요
+      nickChecked = false;
+      hint.textContent = '중복확인을 해주세요.';
+      hint.className = 'input-hint';
+      checkBtn.classList.remove('disabled', 'success');
+      checkBtn.textContent = '중복확인';
+    }
+    updateChangesUI();
+  }
+
+  function checkNick(){
+    if(nickLocked) return;
+    const v = document.getElementById('nick-input').value.trim();
+    if(v.length < 2 || v === ORIGINAL.nick) return;
+
+    // 데모: '감자', '호빵맨' 등은 사용 중이라고 가정
+    const taken = ['감자', '호빵맨', '감자소녀', '코드몬스터', '수학천재'];
+    const hint = document.getElementById('nick-hint');
+    const checkBtn = document.getElementById('check-btn');
+
+    if(taken.includes(v)){
+      nickChecked = false;
+      hint.textContent = '이미 사용 중인 닉네임이에요.';
+      hint.className = 'input-hint error';
+      checkBtn.classList.remove('success');
+    } else {
+      nickChecked = true;
+      hint.textContent = '사용할 수 있는 닉네임이에요.';
+      hint.className = 'input-hint success';
+      checkBtn.classList.add('success');
+      checkBtn.textContent = '확인됨';
+    }
+    updateChangesUI();
+  }
+
+  /* ============================================================
+     알림 메일 변경
+     ============================================================ */
+  document.getElementById('notify-input').addEventListener('input', e => {
+    form.notifyEmail = e.target.value.trim();
+    updateChangesUI();
+  });
+
+  /* ============================================================
+     변경 사항 감지 + 저장 버튼 활성화
+     ============================================================ */
+  function getChangedFields(){
+    const changed = [];
+    if(form.nick !== ORIGINAL.nick) changed.push('닉네임');
+    if(form.notifyEmail !== ORIGINAL.notifyEmail) changed.push('알림 메일');
+    if(form.grade !== ORIGINAL.grade) changed.push('학년');
+    if(form.status !== ORIGINAL.status) changed.push('재학 상태');
+    return changed;
+  }
+
+  function updateChangesUI(){
+    const changed = getChangedFields();
+    const note = document.getElementById('changes-note');
+    const saveBtn = document.getElementById('save-btn');
+
+    if(changed.length === 0){
+      note.style.display = 'none';
+      saveBtn.disabled = true;
+      return;
+    }
+
+    note.style.display = 'block';
+    document.getElementById('changes-text').textContent = changed.join(' · ') + ' 변경됨.';
+
+    // 닉네임이 바뀌었는데 중복확인 안 된 경우 저장 비활성
+    if(form.nick !== ORIGINAL.nick && !nickChecked){
+      saveBtn.disabled = true;
+    } else if(!isValidEmail(form.notifyEmail)){
+      saveBtn.disabled = true;
+    } else {
+      saveBtn.disabled = false;
+    }
+  }
+
+  function isValidEmail(s){
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(s);
+  }
+
+  /* ============================================================
+     저장 / 뒤로가기
+     ============================================================ */
+  function saveProfile(){
+    showToast('프로필이 저장됐어요');
+    // 실제: 서버 API 호출 후 이전 화면으로
+    setTimeout(() => { window.location.href = 'dashboard.html'; }, 1200);
+  }
+
+  function confirmLeave(){
+    const changed = getChangedFields();
+    if(changed.length > 0){
+      if(!confirm('변경 사항이 저장되지 않았어요.\n그래도 나가시겠어요?')) return;
+    }
+    history.back();
+  }
+
+  /* ============================================================
+     토스트
+     ============================================================ */
+  let toastTimer = null;
+  function showToast(message){
+    const toast = document.getElementById('toast');
+    toast.textContent = message;
+    toast.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => toast.classList.remove('show'), 2400);
+  }
+
+  /* ============================================================
+     초기화
+     ============================================================ */
+  document.addEventListener('DOMContentLoaded', () => {
+    showBirthYear();
+    checkNickLock();
+  });
+</script>
+</body>
+</html>

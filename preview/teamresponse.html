@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<title>공부하는 감자 — 팀이 완성됐어요</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/variable/pretendardvariable.css" />
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+  :root{
+    --knu-blue: #0047BB;
+    --knu-blue-deep: #00347E;
+    --knu-blue-soft: #E5ECF8;
+    --knu-orange: #FE5000;
+    --knu-orange-soft: #FFE8DD;
+
+    --cream: #F7F3EC;
+    --paper: #FFFFFF;
+    --paper-warm: #FBF8F2;
+    --ink: #1A1A1A;
+    --ink-soft: #555E68;
+    --ink-mute: #8B95A4;
+    --line: #E8E2D4;
+    --line-soft: #F0EBDF;
+    --error: #DC3545;
+    --success: #2D7A3E;
+
+    --font-kr: 'Pretendard Variable', Pretendard, -apple-system, sans-serif;
+    --font-mono: 'JetBrains Mono', monospace;
+
+    --radius-s: 10px;
+    --radius-m: 16px;
+    --radius-l: 22px;
+  }
+
+  *, *::before, *::after{ margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body{ overflow-x: hidden; max-width: 100%; width: 100%; }
+  html{ font-size: 16px; -webkit-text-size-adjust: 100%; }
+  body{
+    font-family: var(--font-kr);
+    background: var(--paper-warm);
+    color: var(--ink);
+    line-height: 1.5;
+    min-height: 100vh;
+    word-break: keep-all;
+    overflow-wrap: break-word;
+  }
+  button{ font-family: inherit; cursor: pointer; border: 0; background: none; color: inherit; }
+
+  .app{
+    max-width: 480px;
+    min-height: 100vh;
+    margin: 0 auto;
+    background: var(--cream);
+    position: relative;
+    box-shadow: 0 0 40px rgba(0,0,0,0.06);
+    padding: 20px 24px 32px;
+    display: flex;
+    flex-direction: column;
+  }
+  @media (min-width: 481px){ body{ background: #E8E2D4; } }
+
+  /* 상단바 */
+  .topbar{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+  }
+  .back-btn{
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .back-btn:active{ background: var(--line-soft); }
+
+  .countdown-pill{
+    background: var(--ink);
+    color: var(--cream);
+    padding: 7px 14px;
+    border-radius: 999px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+  }
+  .countdown-pill .ico-clock{ color: var(--knu-orange); }
+  .countdown-pill.urgent{
+    background: var(--knu-orange);
+    animation: subtleShake 1.5s ease-in-out infinite;
+  }
+  .countdown-pill.urgent .ico-clock{ color: white; }
+  @keyframes subtleShake{
+    0%, 100%{ transform: rotate(0deg); }
+    25%{ transform: rotate(-1deg); }
+    75%{ transform: rotate(1deg); }
+  }
+
+  /* 히어로 */
+  .hero{
+    text-align: center;
+    padding: 24px 0 32px;
+    margin-bottom: 8px;
+  }
+  .hero-emoji{
+    font-size: 76px;
+    line-height: 1;
+    margin-bottom: 18px;
+    display: inline-block;
+    animation: pop 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  @keyframes pop{
+    0%{ transform: scale(0.5); opacity: 0; }
+    60%{ transform: scale(1.15); opacity: 1; }
+    100%{ transform: scale(1); }
+  }
+  .hero h1{
+    font-size: 28px;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    line-height: 1.2;
+    margin-bottom: 10px;
+  }
+  .hero h1 em{ color: var(--knu-orange); font-style: normal; }
+  .hero p{
+    font-size: 14px;
+    color: var(--ink-soft);
+    line-height: 1.6;
+  }
+  .hero p strong{ color: var(--ink); font-weight: 700; }
+
+  /* 섹션 라벨 */
+  .section-label{
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--ink-mute);
+    letter-spacing: 0.08em;
+    margin: 0 4px 10px;
+  }
+
+  /* 팀 정보 카드 */
+  .team-info{
+    background: var(--ink);
+    color: var(--cream);
+    border-radius: var(--radius-l);
+    padding: 24px 22px;
+    margin-bottom: 24px;
+    position: relative;
+    overflow: hidden;
+  }
+  .team-info::before{
+    content: '';
+    position: absolute;
+    right: -50px; top: -50px;
+    width: 180px; height: 180px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(238,124,0,0.28), transparent 70%);
+  }
+  .team-tag{
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--knu-orange);
+    letter-spacing: 0.1em;
+    margin-bottom: 12px;
+    position: relative;
+  }
+  .team-name{
+    font-size: 22px;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    margin-bottom: 14px;
+    line-height: 1.25;
+    position: relative;
+  }
+  .team-meta{
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 16px;
+    position: relative;
+  }
+  .team-chip{
+    background: rgba(247,243,236,0.1);
+    color: var(--cream);
+    font-size: 11px;
+    font-weight: 600;
+    padding: 4px 9px;
+    border-radius: 999px;
+    font-family: var(--font-mono);
+    letter-spacing: 0.02em;
+  }
+  .team-bio{
+    font-size: 13px;
+    color: var(--cream);
+    line-height: 1.6;
+    padding: 12px 14px;
+    background: rgba(247,243,236,0.06);
+    border-radius: var(--radius-s);
+    border-left: 3px solid var(--knu-orange);
+    position: relative;
+  }
+
+  /* 팀원 리스트 */
+  .members-section{ margin-bottom: 20px; }
+  .member-card{
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-l);
+    padding: 18px;
+    margin-bottom: 10px;
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+    transition: border-color 0.2s;
+  }
+  .member-card.leader{
+    border-color: var(--knu-orange);
+    background: linear-gradient(180deg, var(--knu-orange-soft) 0%, var(--paper) 60%);
+  }
+  .member-avatar-lg{
+    width: 48px; height: 48px;
+    border-radius: 50%;
+    background: var(--knu-orange);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    font-weight: 800;
+    flex-shrink: 0;
+  }
+  .member-avatar-lg.blue{ background: var(--knu-blue); }
+  .member-avatar-lg.dark{ background: var(--ink); color: var(--cream); }
+  .member-avatar-lg.warm{ background: #CC4000; }
+  .member-info{ flex: 1; min-width: 0; }
+  .member-nick-row{
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 3px;
+  }
+  .member-nick{
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+  }
+  .leader-badge{
+    background: var(--knu-orange);
+    color: white;
+    font-size: 9px;
+    font-weight: 700;
+    padding: 2px 7px;
+    border-radius: 4px;
+    letter-spacing: 0.04em;
+    font-family: var(--font-mono);
+  }
+  .member-meta{
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--ink-mute);
+    margin-bottom: 8px;
+    letter-spacing: 0.02em;
+  }
+  .member-bio{
+    font-size: 13px;
+    color: var(--ink);
+    line-height: 1.55;
+    padding: 8px 12px;
+    background: var(--paper-warm);
+    border-radius: var(--radius-s);
+    border-left: 3px solid var(--knu-orange-soft);
+  }
+
+  /* 안내 박스 */
+  .response-info{
+    background: var(--paper-warm);
+    border: 1px dashed var(--line);
+    border-radius: var(--radius-m);
+    padding: 14px 16px;
+    margin-bottom: 20px;
+    font-size: 12px;
+    color: var(--ink-soft);
+    line-height: 1.6;
+  }
+  .response-info strong{ color: var(--ink); font-weight: 700; }
+  .response-info .row{ display: flex; gap: 8px; margin-bottom: 4px; }
+  .response-info .row:last-child{ margin-bottom: 0; }
+  .response-info .ico{ flex-shrink: 0; }
+
+  /* 응답 액션 */
+  .response-actions{
+    margin-top: auto;
+    padding-top: 8px;
+  }
+  .btn-accept{
+    width: 100%;
+    background: var(--knu-orange);
+    color: white;
+    padding: 18px;
+    border-radius: var(--radius-m);
+    font-size: 16px;
+    font-weight: 800;
+    letter-spacing: -0.01em;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    box-shadow: 0 8px 20px rgba(238,124,0,0.25);
+    margin-bottom: 8px;
+  }
+  .btn-accept:active{
+    transform: scale(0.98);
+    background: #CC4000;
+    box-shadow: 0 4px 10px rgba(238,124,0,0.2);
+  }
+  .btn-decline{
+    width: 100%;
+    background: transparent;
+    color: var(--ink-mute);
+    padding: 14px;
+    font-size: 14px;
+    font-weight: 600;
+    transition: all 0.15s;
+  }
+  .btn-decline:active{ color: var(--ink-soft); }
+
+  /* 토스트 */
+  .toast{
+    position: fixed;
+    bottom: 32px;
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: var(--ink);
+    color: var(--cream);
+    padding: 12px 22px;
+    border-radius: 999px;
+    font-size: 14px;
+    font-weight: 600;
+    opacity: 0;
+    pointer-events: none;
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    z-index: 2000;
+    box-shadow: 0 12px 28px rgba(14,26,43,0.3);
+    max-width: calc(100% - 48px);
+    text-align: center;
+    line-height: 1.4;
+  }
+  .toast.show{
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+</style>
+</head>
+<body>
+
+<div class="app">
+
+  <!-- 상단바 -->
+  <div class="topbar">
+    <button class="back-btn" onclick="history.back()">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+    </button>
+
+    <div class="countdown-pill" id="countdown-pill">
+      <svg class="ico-clock" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="10"/>
+        <polyline points="12 6 12 12 16 14"/>
+      </svg>
+      <span>응답까지 <span id="countdown">23:59:00</span></span>
+    </div>
+  </div>
+
+  <!-- 히어로 -->
+  <section class="hero">
+    <div class="hero-emoji">🎉</div>
+    <h1>팀이 <em>완성</em>됐어요!</h1>
+    <p>지원하신 팀에 인원이 다 모였어요.<br>같이 공부할지 결정해주세요.</p>
+  </section>
+
+  <!-- 팀 정보 카드 -->
+  <div class="section-label">▸ 팀 정보</div>
+  <div class="team-info">
+    <div class="team-tag">▸ 팀 정보</div>
+    <div class="team-name">자료구조 트리 정복단</div>
+    <div class="team-meta">
+      <span class="team-chip">📚 시험 대비</span>
+      <span class="team-chip">🌳 기본</span>
+      <span class="team-chip">⏰ 평일 저녁</span>
+      <span class="team-chip">📍 대면</span>
+      <span class="team-chip">👥 5명</span>
+    </div>
+    <div class="team-bio">"트리 챕터에서 막힌 분들 같이 풀어요. 백준 문제 같이 분석하고 토론하는 방식이에요. 매주 화/목 19시 도서관 모임, 보충 일정 협의 가능합니다."</div>
+  </div>
+
+  <!-- 팀원 소개 -->
+  <div class="section-label">▸ 함께할 감자들 (4명)</div>
+  <div class="members-section">
+
+    <!-- 멤버 1: 팀장 -->
+    <div class="member-card leader">
+      <div class="member-avatar-lg">민</div>
+      <div class="member-info">
+        <div class="member-nick-row">
+          <span class="member-nick">호빵맨</span>
+          <span class="leader-badge">팀장</span>
+        </div>
+        <div class="member-meta">컴퓨터공학과 · 3학년 · 2003년</div>
+        <div class="member-bio">"트리 챕터에서 막힌 분들 같이 풀어요"</div>
+      </div>
+    </div>
+
+    <!-- 멤버 2 -->
+    <div class="member-card">
+      <div class="member-avatar-lg blue">수</div>
+      <div class="member-info">
+        <div class="member-nick-row">
+          <span class="member-nick">박수빈</span>
+        </div>
+        <div class="member-meta">수학과 · 2학년 · 2005년</div>
+        <div class="member-bio">"트리 자료구조 기초부터 다시 다지고 싶어요"</div>
+      </div>
+    </div>
+
+    <!-- 멤버 3 -->
+    <div class="member-card">
+      <div class="member-avatar-lg dark">지</div>
+      <div class="member-info">
+        <div class="member-nick-row">
+          <span class="member-nick">감자소녀</span>
+        </div>
+        <div class="member-meta">AI융합학과 · 2학년 · 2005년</div>
+        <div class="member-bio">"지난 학기 자료구조 재수강이에요. 도와주세요"</div>
+      </div>
+    </div>
+
+    <!-- 멤버 4 -->
+    <div class="member-card">
+      <div class="member-avatar-lg warm">서</div>
+      <div class="member-info">
+        <div class="member-nick-row">
+          <span class="member-nick">코드냥이</span>
+        </div>
+        <div class="member-meta">컴퓨터공학과 · 3학년 · 2003년</div>
+        <div class="member-bio">"재시험 안 보고 싶어요. 같이 합시다"</div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- 안내 박스 -->
+  <div class="response-info">
+    <div class="row">
+      <span class="ico">✓</span>
+      <span><strong>최소 인원(3명) 이상 수락</strong> 시 매칭이 확정돼요. 1~2명이 거절해도 무산되지 않아요.</span>
+    </div>
+    <div class="row">
+      <span class="ico">⚡</span>
+      <span>응답이 모두 모이거나 24시간이 지나면 <strong>최소 인원 충족 여부</strong>로 결과가 결정돼요.</span>
+    </div>
+    <div class="row">
+      <span class="ico">⏱</span>
+      <span>24시간 내 무응답은 <strong>불참 처리</strong>되며, 2회 누적 시 1주일 매칭이 정지돼요.</span>
+    </div>
+  </div>
+
+  <!-- 응답 액션 -->
+  <div class="response-actions">
+    <button class="btn-accept" onclick="acceptTeam()">
+      🥔 참여할게요
+    </button>
+    <button class="btn-decline" onclick="declineTeam()">
+      저와 맞지 않은 것 같아요
+    </button>
+  </div>
+
+</div>
+
+<!-- 토스트 -->
+<div class="toast" id="toast"></div>
+
+<script>
+  /* 응답 카운트다운 (24시간) */
+  const responseDeadline = new Date();
+  responseDeadline.setHours(responseDeadline.getHours() + 23);
+  responseDeadline.setMinutes(responseDeadline.getMinutes() + 59);
+
+  function updateResponseCountdown(){
+    const now = new Date();
+    const diff = responseDeadline - now;
+
+    const pill = document.getElementById('countdown-pill');
+    const el = document.getElementById('countdown');
+
+    if(diff <= 0){
+      el.textContent = '만료';
+      pill.classList.add('urgent');
+      return;
+    }
+
+    const hours = Math.floor(diff / 3600000);
+    const minutes = Math.floor((diff % 3600000) / 60000);
+    const seconds = Math.floor((diff % 60000) / 1000);
+
+    el.textContent =
+      `${String(hours).padStart(2,'0')}:` +
+      `${String(minutes).padStart(2,'0')}:` +
+      `${String(seconds).padStart(2,'0')}`;
+
+    if(hours < 1) pill.classList.add('urgent');
+    else pill.classList.remove('urgent');
+  }
+
+  updateResponseCountdown();
+  setInterval(updateResponseCountdown, 1000);
+
+  /* 응답 처리 */
+  function acceptTeam(){
+    showToast('참여 응답이 등록됐어요!\n다른 팀원들의 응답을 기다려주세요.');
+    // 토스트 보여준 뒤 대시보드로 이동 (매칭 확정 화면은 추후 추가)
+    setTimeout(() => { window.location.href = 'dashboard.html'; }, 1500);
+  }
+
+  function declineTeam(){
+    if(confirm('이 팀에 참여하지 않으시겠어요?\n팀에서 빠지고 팀장에게 알림이 가요.')){
+      showToast('팀 합류를 거절했어요');
+      // 토스트 보여준 뒤 대시보드로 이동
+      setTimeout(() => { window.location.href = 'dashboard.html'; }, 1500);
+    }
+  }
+
+  /* 토스트 */
+  let toastTimer = null;
+  function showToast(message){
+    const toast = document.getElementById('toast');
+    toast.innerHTML = message.replace(/\n/g, '<br>');
+    toast.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => toast.classList.remove('show'), 3000);
+  }
+</script>
+</body>
+</html>

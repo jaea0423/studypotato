@@ -1,0 +1,3198 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<title>공부하는 감자 — 홈</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/variable/pretendardvariable.css" />
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+  :root{
+    --knu-blue: #0047BB;
+    --knu-blue-deep: #00347E;
+    --knu-blue-soft: #E5ECF8;
+    --knu-orange: #FE5000;
+    --knu-orange-soft: #FFE8DD;
+
+    --cream: #F7F3EC;
+    --paper: #FFFFFF;
+    --paper-warm: #FBF8F2;
+    --ink: #1A1A1A;
+    --ink-soft: #555E68;
+    --ink-mute: #8B95A4;
+    --line: #E8E2D4;
+    --line-soft: #F0EBDF;
+    --error: #DC3545;
+    --success: #2D7A3E;
+
+    --font-kr: 'Pretendard Variable', Pretendard, -apple-system, sans-serif;
+    --font-mono: 'JetBrains Mono', monospace;
+
+    --radius-s: 10px;
+    --radius-m: 16px;
+    --radius-l: 22px;
+    --tabbar-h: 64px;
+  }
+
+  *, *::before, *::after{ margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body{ overflow-x: hidden; max-width: 100%; width: 100%; }
+  html{ font-size: 16px; -webkit-text-size-adjust: 100%; }
+  body{
+    font-family: var(--font-kr);
+    background: var(--paper-warm);
+    color: var(--ink);
+    line-height: 1.5;
+    min-height: 100vh;
+    word-break: keep-all;
+    overflow-wrap: break-word;
+  }
+  button{ font-family: inherit; cursor: pointer; border: 0; background: none; color: inherit; }
+  a{ text-decoration: none; color: inherit; }
+
+  .app{
+    max-width: 480px;
+    min-height: 100vh;
+    margin: 0 auto;
+    background: var(--cream);
+    position: relative;
+    box-shadow: 0 0 40px rgba(0,0,0,0.06);
+    padding-bottom: var(--tabbar-h);
+  }
+  @media (min-width: 481px){ body{ background: #E8E2D4; } }
+
+  /* 상단 헤더 */
+  .header{
+    padding: 24px 24px 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+  }
+  .greeting .small{
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--ink-mute);
+    letter-spacing: 0.05em;
+    margin-bottom: 4px;
+  }
+  .greeting h1{
+    font-size: 24px;
+    font-weight: 800;
+    letter-spacing: -0.025em;
+    line-height: 1.2;
+  }
+  .greeting h1 em{ color: var(--knu-orange); font-style: normal; }
+  .bell-btn{
+    width: 40px; height: 40px;
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    position: relative;
+    flex-shrink: 0;
+  }
+  .bell-btn:active{ background: var(--paper-warm); }
+  .bell-dot{
+    position: absolute;
+    top: 9px; right: 10px;
+    width: 8px; height: 8px;
+    background: var(--knu-orange);
+    border-radius: 50%;
+    border: 2px solid var(--paper);
+  }
+
+  /* 개발용 토글 — 기본 숨김. body.preview-mode 일 때만 표시 */
+  [data-dev-only]{ display: none !important; }
+  body.preview-mode [data-dev-only]{ display: flex !important; }
+  body.preview-mode [data-dev-only].dev-toggle{ display: flex !important; }
+  .dev-toggle{
+    margin: 0 24px 16px;
+    background: var(--ink);
+    color: var(--cream);
+    border-radius: 999px;
+    padding: 4px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.05em;
+  }
+  .dev-toggle button{
+    flex: 1;
+    padding: 7px;
+    border-radius: 999px;
+    color: rgba(247,243,236,0.5);
+    transition: all 0.2s;
+  }
+  .dev-toggle button.active{
+    background: var(--knu-orange);
+    color: var(--ink);
+    font-weight: 700;
+  }
+  /* preview-mode 안내 배지 */
+  .preview-mode-badge{
+    display: none;
+    position: fixed;
+    top: 8px; right: 8px;
+    background: var(--knu-orange);
+    color: white;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    font-weight: 700;
+    padding: 4px 10px;
+    border-radius: 999px;
+    letter-spacing: 0.05em;
+    z-index: 100;
+    pointer-events: none;
+  }
+  body.preview-mode .preview-mode-badge{ display: block; }
+
+  /* 상태 콘텐츠 */
+  .state-content{
+    display: none;
+    padding: 0 24px;
+  }
+  .state-content.active{ display: block; animation: fadeIn 0.3s ease; }
+  @keyframes fadeIn{
+    from{ opacity: 0; transform: translateY(8px); }
+    to{ opacity: 1; transform: translateY(0); }
+  }
+
+  /* 상태 A: 빈 카드 */
+  .empty-hero{
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-l);
+    padding: 36px 28px 28px;
+    text-align: center;
+    margin-bottom: 14px;
+  }
+  .empty-emoji{
+    font-size: 60px;
+    line-height: 1;
+    margin-bottom: 20px;
+    display: inline-block;
+    animation: gentleSpin 4s ease-in-out infinite;
+  }
+  @keyframes gentleSpin{
+    0%, 100%{ transform: rotate(-6deg); }
+    50%{ transform: rotate(6deg); }
+  }
+  .empty-hero h2{
+    font-size: 20px;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    margin-bottom: 10px;
+    line-height: 1.3;
+  }
+  .empty-hero p{
+    font-size: 13px;
+    color: var(--ink-soft);
+    line-height: 1.55;
+    margin-bottom: 24px;
+  }
+  .btn-primary{
+    width: 100%;
+    background: var(--knu-blue);
+    color: white;
+    padding: 16px;
+    border-radius: var(--radius-m);
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+  .btn-primary:active{ transform: scale(0.98); background: var(--knu-blue-deep); }
+  .btn-primary.orange{ background: var(--knu-orange); }
+  .btn-primary.orange:active{ background: #CC4000; }
+
+  /* 통계 카드 */
+  .quick-stats{
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 14px;
+  }
+  .stat-card{
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-m);
+    padding: 18px 16px;
+  }
+  .stat-card .label{
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--ink-mute);
+    letter-spacing: 0.08em;
+    margin-bottom: 6px;
+  }
+  .stat-card .num{
+    font-size: 28px;
+    font-weight: 800;
+    color: var(--knu-blue);
+    letter-spacing: -0.02em;
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+  .stat-card .num.orange{ color: var(--knu-orange); }
+  .stat-card .desc{
+    font-size: 11px;
+    color: var(--ink-soft);
+  }
+
+  /* 상태 B: 매칭 대기 중 */
+  .match-status{
+    background: var(--ink);
+    color: var(--cream);
+    border-radius: var(--radius-l);
+    padding: 28px 24px 24px;
+    position: relative;
+    overflow: hidden;
+    margin-bottom: 14px;
+  }
+  .match-status::before{
+    content: '';
+    position: absolute;
+    right: -60px; top: -60px;
+    width: 200px; height: 200px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(238,124,0,0.3), transparent 70%);
+  }
+  .status-label{
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--knu-orange);
+    letter-spacing: 0.1em;
+    margin-bottom: 14px;
+    position: relative;
+  }
+  .status-label .dot{
+    display: inline-block;
+    width: 6px; height: 6px;
+    background: var(--knu-orange);
+    border-radius: 50%;
+    margin-right: 6px;
+    animation: pulse 1.8s infinite;
+  }
+  @keyframes pulse{
+    0%, 100%{ opacity: 1; transform: scale(1); }
+    50%{ opacity: 0.5; transform: scale(1.3); }
+  }
+  .status-state{
+    font-size: 24px;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    line-height: 1.2;
+    margin-bottom: 18px;
+    position: relative;
+  }
+  .status-state em{ color: var(--knu-orange); font-style: normal; }
+
+  .countdown-wrap{
+    background: rgba(247,243,236,0.06);
+    border-radius: var(--radius-m);
+    padding: 16px 18px;
+    margin-bottom: 18px;
+    position: relative;
+  }
+  .countdown-label{
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: rgba(247,243,236,0.5);
+    letter-spacing: 0.1em;
+    margin-bottom: 6px;
+  }
+  .countdown{
+    font-family: var(--font-mono);
+    font-size: 32px;
+    font-weight: 700;
+    color: var(--cream);
+    letter-spacing: 0.05em;
+    line-height: 1;
+  }
+  .countdown .unit{
+    color: rgba(247,243,236,0.4);
+    font-size: 18px;
+    margin: 0 2px;
+  }
+  .waiting-note{
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px solid rgba(247,243,236,0.08);
+    font-size: 12px;
+    color: rgba(247,243,236,0.6);
+    font-family: var(--font-mono);
+  }
+  /* 매칭 대기 중일 때 표시되는 통계 (대기 인원 / 매칭 팀 수) */
+  .waiting-stats{
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid rgba(247,243,236,0.08);
+    display: flex;
+    gap: 16px;
+  }
+  .waiting-stat{
+    flex: 1;
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+  }
+  .waiting-stat .num{
+    font-size: 22px;
+    font-weight: 800;
+    color: var(--cream);
+    font-family: var(--font-mono);
+  }
+  .waiting-stat .num.orange{ color: var(--knu-orange); }
+  .waiting-stat .label{
+    font-size: 11px;
+    color: rgba(247,243,236,0.6);
+    font-family: var(--font-mono);
+  }
+
+  .card-preview{
+    border-top: 1px solid rgba(247,243,236,0.1);
+    padding-top: 18px;
+    margin-bottom: 18px;
+    position: relative;
+  }
+  .preview-row{
+    display: flex;
+    justify-content: space-between;
+    padding: 7px 0;
+    font-size: 13px;
+    gap: 12px;
+  }
+  .preview-row .k{
+    color: rgba(247,243,236,0.5);
+    flex-shrink: 0;
+    font-weight: 500;
+  }
+  .preview-row .v{
+    color: var(--cream);
+    font-weight: 600;
+    text-align: right;
+    line-height: 1.4;
+  }
+
+  .card-actions{
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    position: relative;
+  }
+  .card-action-btn{
+    background: rgba(247,243,236,0.08);
+    color: var(--cream);
+    padding: 12px;
+    border-radius: var(--radius-s);
+    font-size: 13px;
+    font-weight: 600;
+    transition: all 0.2s;
+  }
+  .card-action-btn:active{ background: rgba(247,243,236,0.15); }
+  .card-action-btn.danger{ color: #FF8B8B; }
+
+  /* 활동 피드 */
+  .feed-section{ margin-top: 6px; }
+  .section-title{
+    font-size: 14px;
+    font-weight: 700;
+    margin-bottom: 12px;
+    letter-spacing: -0.01em;
+    padding: 0 4px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .section-title .badge{
+    background: var(--knu-orange);
+    color: white;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    padding: 2px 7px;
+    border-radius: 999px;
+    font-weight: 600;
+  }
+  .feed-list{
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-m);
+    padding: 6px;
+  }
+  .feed-item{
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 14px;
+    border-radius: var(--radius-s);
+  }
+  .feed-ico{
+    width: 34px; height: 34px;
+    border-radius: 50%;
+    background: var(--knu-blue-soft);
+    color: var(--knu-blue);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    flex-shrink: 0;
+  }
+  .feed-ico.orange{ background: var(--knu-orange-soft); color: var(--knu-orange); }
+  .feed-text{ flex: 1; min-width: 0; }
+  .feed-text .t{ font-size: 13px; font-weight: 500; }
+  .feed-text .s{
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--ink-mute);
+    margin-top: 2px;
+  }
+
+  /* ========== 매칭 탭 ========== */
+  /* 세그먼트 컨트롤 */
+  .segment-control{
+    display: flex;
+    background: var(--paper-warm);
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    padding: 4px;
+    margin: 0 24px 20px;
+  }
+  .segment-btn{
+    flex: 1;
+    padding: 10px;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--ink-mute);
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+  }
+  .segment-btn.active{
+    background: var(--paper);
+    color: var(--ink);
+    box-shadow: 0 2px 8px rgba(14,26,43,0.08);
+    font-weight: 700;
+  }
+
+  /* 모드 콘텐츠 */
+  .mode-content{ display: none; }
+  .mode-content.active{ display: block; animation: fadeIn 0.3s ease; }
+
+  /* 매칭 상태 콘텐츠 */
+  .match-state-content{ display: none; padding: 0 24px; }
+  .match-state-content.active{ display: block; animation: fadeIn 0.3s ease; }
+
+  /* 보류 카드 리스트 */
+  .paused-list-head{
+    font-size: 13px;
+    color: var(--ink-soft);
+    margin: 0 4px 14px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .paused-list-head .count{
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--ink-mute);
+  }
+  .paused-list-head .count strong{
+    color: var(--knu-orange);
+    font-weight: 700;
+  }
+
+  .paused-item{
+    background: var(--paper);
+    border: 1.5px solid var(--line);
+    border-radius: var(--radius-l);
+    padding: 20px 18px;
+    margin-bottom: 12px;
+    opacity: 0.95;
+  }
+  .paused-reason-row{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+  }
+  .paused-reason{
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 700;
+    font-family: var(--font-mono);
+    letter-spacing: 0.02em;
+  }
+  .paused-reason.expired{
+    background: var(--paper-warm);
+    color: var(--ink-soft);
+  }
+  .paused-reason.joined{
+    background: var(--knu-blue-soft);
+    color: var(--knu-blue);
+  }
+  .paused-meta{
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--ink-mute);
+  }
+  .paused-topic{
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    margin-bottom: 6px;
+    line-height: 1.3;
+  }
+  .paused-summary{
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--ink-mute);
+    margin-bottom: 16px;
+    letter-spacing: 0.02em;
+  }
+  .paused-actions{
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .btn-activate{
+    background: var(--knu-orange);
+    color: white;
+    padding: 12px;
+    border-radius: var(--radius-s);
+    font-size: 13px;
+    font-weight: 700;
+    transition: all 0.15s;
+  }
+  .btn-activate:active{ transform: scale(0.98); background: #CC4000; }
+  .sub-actions{
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+  }
+  .btn-sub{
+    padding: 11px;
+    border-radius: var(--radius-s);
+    font-size: 12px;
+    font-weight: 600;
+    background: var(--paper-warm);
+    color: var(--ink-soft);
+    transition: all 0.15s;
+  }
+  .btn-sub:active{ transform: scale(0.97); background: var(--line-soft); }
+  .btn-sub.danger{
+    color: var(--error);
+  }
+  .btn-sub.danger:active{ background: rgba(220,53,69,0.08); }
+
+  /* 방 만들기 CTA */
+  .create-room-card{
+    width: calc(100% - 48px);
+    margin: 0 24px 16px;
+    background: linear-gradient(135deg, var(--knu-orange) 0%, #CC4000 100%);
+    color: white;
+    border-radius: var(--radius-l);
+    padding: 22px 24px;
+    text-align: left;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    transition: all 0.2s;
+    box-shadow: 0 8px 20px rgba(238,124,0,0.18);
+  }
+  .create-room-card:active{
+    transform: scale(0.98);
+    box-shadow: 0 4px 10px rgba(238,124,0,0.15);
+  }
+  .create-room-icon{
+    width: 44px; height: 44px;
+    background: rgba(255,255,255,0.2);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    font-size: 22px;
+  }
+  .create-room-text{ flex: 1; }
+  .create-room-title{
+    font-size: 16px;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    margin-bottom: 3px;
+  }
+  .create-room-desc{
+    font-size: 12px;
+    opacity: 0.9;
+    line-height: 1.4;
+  }
+  .create-room-arrow{
+    font-size: 18px;
+    flex-shrink: 0;
+  }
+
+  /* 카테고리 필터 (가로 스크롤) */
+  .filter-scroll{
+    display: flex;
+    gap: 7px;
+    overflow-x: auto;
+    padding: 4px 24px 16px;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+  .filter-scroll::-webkit-scrollbar{ display: none; }
+  .filter-chip{
+    flex-shrink: 0;
+    background: var(--paper);
+    border: 1px solid var(--line);
+    padding: 7px 14px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--ink-soft);
+    transition: all 0.15s;
+    white-space: nowrap;
+  }
+  .filter-chip:active{ transform: scale(0.96); }
+  .filter-chip.active{
+    background: var(--ink);
+    color: var(--cream);
+    border-color: var(--ink);
+    font-weight: 600;
+  }
+
+  /* 방 리스트 */
+  .room-list{
+    padding: 0 24px;
+  }
+  .room-card{
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-l);
+    padding: 20px 18px;
+    margin-bottom: 12px;
+    transition: all 0.15s;
+    cursor: pointer;
+  }
+  .room-card:active{ transform: scale(0.99); }
+  .room-card:hover{ border-color: var(--knu-blue); }
+  .room-card-head{
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+  .room-tag{
+    background: var(--knu-blue-soft);
+    color: var(--knu-blue);
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 600;
+    font-family: var(--font-mono);
+  }
+  .room-tag.orange{ background: var(--knu-orange-soft); color: var(--knu-orange); }
+  .room-recruiting{
+    background: var(--knu-orange);
+    color: white;
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 700;
+    font-family: var(--font-mono);
+    letter-spacing: 0.03em;
+  }
+  .room-name{
+    font-size: 17px;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    margin-bottom: 4px;
+    line-height: 1.3;
+  }
+  .room-leader{
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--ink-mute);
+    margin-bottom: 12px;
+    letter-spacing: 0.02em;
+  }
+  .room-bio{
+    font-size: 13px;
+    color: var(--ink);
+    line-height: 1.55;
+    margin-bottom: 14px;
+    padding: 10px 12px;
+    background: var(--paper-warm);
+    border-radius: var(--radius-s);
+    border-left: 3px solid var(--knu-orange-soft);
+  }
+  .room-foot{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 14px;
+    border-top: 1px dashed var(--line);
+  }
+  .room-meta{
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--ink-mute);
+    letter-spacing: 0.02em;
+  }
+  .room-apply-btn{
+    background: var(--ink);
+    color: var(--cream);
+    padding: 8px 16px;
+    border-radius: var(--radius-s);
+    font-size: 12px;
+    font-weight: 700;
+    transition: all 0.15s;
+  }
+  .room-apply-btn:active{ transform: scale(0.95); background: var(--knu-blue-deep); }
+  .room-apply-btn.full{
+    background: var(--line);
+    color: var(--ink-mute);
+    cursor: not-allowed;
+  }
+
+  /* ===== 검색바 ===== */
+  .search-bar{
+    margin: 0 24px 12px;
+    display: flex;
+    align-items: center;
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-m);
+    padding: 0 14px;
+    height: 44px;
+    transition: border-color 0.15s;
+  }
+  .search-bar:focus-within{ border-color: var(--ink); }
+  .search-icon{
+    color: var(--ink-mute);
+    flex-shrink: 0;
+    margin-right: 10px;
+  }
+  .search-input{
+    flex: 1;
+    border: none;
+    background: transparent;
+    font-family: var(--font-kr);
+    font-size: 14px;
+    color: var(--ink);
+    outline: none;
+    min-width: 0;
+  }
+  .search-input::placeholder{ color: var(--ink-mute); }
+  .search-clear-btn{
+    flex-shrink: 0;
+    margin-left: 8px;
+    color: var(--ink-mute);
+    background: var(--line-soft);
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    line-height: 1;
+  }
+  .search-clear-btn.show{ display: flex; }
+
+  /* ===== 필터 툴바 (더보기 버튼 + 정렬) ===== */
+  .filter-toolbar{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 24px 12px;
+    gap: 8px;
+  }
+  .filter-toggle-btn{
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    background: var(--paper);
+    border: 1px solid var(--line);
+    padding: 7px 12px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--ink-soft);
+  }
+  .filter-toggle-btn.has-active{
+    background: var(--knu-orange-soft);
+    border-color: var(--knu-orange);
+    color: var(--knu-orange);
+    font-weight: 700;
+  }
+  .filter-toggle-btn .filter-count{
+    background: var(--knu-orange);
+    color: white;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 1px 6px;
+    border-radius: 999px;
+    min-width: 16px;
+    text-align: center;
+  }
+  .sort-select{
+    background: var(--paper);
+    border: 1px solid var(--line);
+    padding: 7px 28px 7px 12px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--ink-soft);
+    font-family: var(--font-kr);
+    appearance: none;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 24 24' fill='none' stroke='%238B95A4' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'/></svg>");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+  }
+
+  /* ===== 필터 펼침 패널 ===== */
+  .filter-panel{
+    display: none;
+    margin: 0 24px 12px;
+    padding: 16px;
+    background: var(--paper-warm);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-m);
+  }
+  .filter-panel.open{ display: block; }
+  .filter-group{ margin-bottom: 14px; }
+  .filter-group:last-child{ margin-bottom: 0; }
+  .filter-group-title{
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--ink-soft);
+    margin-bottom: 8px;
+    font-family: var(--font-mono);
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+  .filter-group-chips{
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .filter-mini-chip{
+    background: var(--paper);
+    border: 1px solid var(--line);
+    padding: 6px 11px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--ink-soft);
+    transition: all 0.12s;
+  }
+  .filter-mini-chip:active{ transform: scale(0.96); }
+  .filter-mini-chip.active{
+    background: var(--ink);
+    color: var(--cream);
+    border-color: var(--ink);
+    font-weight: 600;
+  }
+  .filter-reset-row{
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px dashed var(--line);
+  }
+  .filter-reset-btn{
+    background: transparent;
+    color: var(--ink-mute);
+    font-size: 11px;
+    font-weight: 500;
+    padding: 4px 8px;
+    text-decoration: underline;
+  }
+
+  /* ===== 결과 카운트 ===== */
+  .result-count{
+    padding: 0 24px 8px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--ink-mute);
+    letter-spacing: 0.03em;
+  }
+  .result-count strong{ color: var(--knu-blue); font-weight: 700; }
+
+  /* ===== 빈 결과 ===== */
+  .empty-rooms{
+    padding: 40px 24px 60px;
+    text-align: center;
+  }
+  .empty-rooms-emoji{
+    font-size: 40px;
+    margin-bottom: 12px;
+    opacity: 0.6;
+  }
+  .empty-rooms-title{
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--ink);
+    margin-bottom: 6px;
+  }
+  .empty-rooms-desc{
+    font-size: 12px;
+    color: var(--ink-mute);
+    line-height: 1.5;
+  }
+
+  /* ===== 방 카드 배지 (마감 임박/거의 찰/NEW) ===== */
+  .room-badges{
+    display: flex;
+    gap: 5px;
+    flex-wrap: wrap;
+    margin-bottom: 8px;
+  }
+  .room-badge{
+    font-family: var(--font-mono);
+    font-size: 10px;
+    font-weight: 700;
+    padding: 3px 7px;
+    border-radius: 4px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+  .room-badge.urgent{
+    background: var(--knu-orange);
+    color: white;
+  }
+  .room-badge.almost-full{
+    background: var(--knu-blue);
+    color: white;
+  }
+  .room-badge.new{
+    background: var(--success);
+    color: white;
+  }
+  /* 최소 인원 충족 — 차분한 톤 (거의 다 찼어요와 색을 다르게) */
+  .room-badge.min-met{
+    background: var(--knu-blue-soft);
+    color: var(--knu-blue);
+    border: 1px solid var(--knu-blue);
+  }
+
+  /* 방 카드 - 검색어 하이라이트 */
+  .room-card mark{
+    background: var(--knu-orange-soft);
+    color: var(--knu-orange);
+    padding: 0 2px;
+    border-radius: 3px;
+    font-weight: 700;
+  }
+
+  /* ===== 방장: 내가 만든 방 영역 ===== */
+  .my-rooms-section{
+    padding: 0 24px 16px;
+  }
+  .my-rooms-head{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+  .my-rooms-title{
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--ink);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .my-rooms-title em{
+    font-style: normal;
+    color: var(--knu-orange);
+    font-family: var(--font-mono);
+    font-size: 11px;
+  }
+  .my-room-card{
+    background: var(--ink);
+    color: var(--cream);
+    border-radius: var(--radius-m);
+    padding: 16px 18px;
+    margin-bottom: 10px;
+    position: relative;
+    overflow: hidden;
+  }
+  .my-room-card::before{
+    content: '';
+    position: absolute;
+    top: -30px; right: -30px;
+    width: 100px; height: 100px;
+    background: radial-gradient(circle, var(--knu-orange) 0%, transparent 70%);
+    opacity: 0.18;
+    pointer-events: none;
+  }
+  .my-room-card-head{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+  .my-room-leader-tag{
+    background: var(--knu-orange);
+    color: white;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    font-weight: 700;
+    padding: 3px 8px;
+    border-radius: 4px;
+    letter-spacing: 0.05em;
+  }
+  .my-room-deadline{
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--ink-mute);
+  }
+  .my-room-deadline strong{ color: var(--knu-orange); }
+  .my-room-name{
+    font-size: 16px;
+    font-weight: 800;
+    margin-bottom: 8px;
+  }
+  .my-room-stats{
+    display: flex;
+    gap: 14px;
+    margin-bottom: 12px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--ink-mute);
+  }
+  .my-room-stats strong{ color: var(--cream); font-size: 13px; }
+  .my-room-actions{
+    display: flex;
+    gap: 8px;
+  }
+  .my-room-btn{
+    flex: 1;
+    background: rgba(255,255,255,0.1);
+    color: var(--cream);
+    padding: 8px;
+    border-radius: var(--radius-s);
+    font-size: 12px;
+    font-weight: 600;
+  }
+  .my-room-btn:active{ background: rgba(255,255,255,0.2); }
+  .my-room-btn.danger{ color: #FF8A95; }
+
+  /* 다른 탭 placeholder */
+  .tab-content{ display: none; }
+  .tab-content.active{ display: block; }
+  .tab-placeholder{
+    padding: 100px 24px;
+    text-align: center;
+  }
+  .tab-placeholder .ph-emoji{ font-size: 64px; margin-bottom: 20px; display: inline-block; }
+  .tab-placeholder h2{
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    margin-bottom: 10px;
+  }
+  .tab-placeholder p{
+    font-size: 13px;
+    color: var(--ink-soft);
+    line-height: 1.55;
+  }
+
+  /* ========== 내 스터디 탭 ========== */
+  .tab-page-head{
+    padding: 24px 24px 16px;
+  }
+  .tab-page-head .small{
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--ink-mute);
+    letter-spacing: 0.05em;
+    margin-bottom: 4px;
+  }
+  .tab-page-head h1{
+    font-size: 24px;
+    font-weight: 800;
+    letter-spacing: -0.025em;
+    line-height: 1.2;
+  }
+  .tab-page-head h1 em{ color: var(--knu-orange); font-style: normal; }
+
+  .study-list{
+    padding: 0 24px;
+  }
+  .study-card{
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-l);
+    padding: 22px 20px;
+    margin-bottom: 14px;
+  }
+  .study-card-head{
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+  .study-tag{
+    display: inline-block;
+    background: var(--knu-blue-soft);
+    color: var(--knu-blue);
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 600;
+    font-family: var(--font-mono);
+    margin-bottom: 8px;
+  }
+  .study-tag.orange{ background: var(--knu-orange-soft); color: var(--knu-orange); }
+  .study-name{
+    font-size: 18px;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    margin-bottom: 4px;
+  }
+  .study-meta{
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--ink-mute);
+    letter-spacing: 0.02em;
+  }
+  .kakao-btn{
+    background: #FAE100;
+    color: #3C1E1E;
+    padding: 10px 14px;
+    border-radius: var(--radius-s);
+    font-size: 12px;
+    font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    flex-shrink: 0;
+    transition: all 0.15s;
+  }
+  .kakao-btn:active{ background: #F5D900; transform: scale(0.96); }
+
+  .members-row{
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    padding-top: 14px;
+    border-top: 1px dashed var(--line);
+  }
+  .member-chip{
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--paper-warm);
+    padding: 5px 10px 5px 5px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 600;
+  }
+  .member-chip.leader{
+    background: var(--knu-orange-soft);
+    color: var(--knu-orange);
+  }
+  .member-avatar{
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    background: var(--knu-blue);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: 700;
+  }
+  .member-chip.leader .member-avatar{
+    background: var(--knu-orange);
+    color: white;
+  }
+  .leader-tag{
+    background: rgba(255,255,255,0.5);
+    color: var(--knu-orange);
+    font-size: 9px;
+    font-weight: 700;
+    padding: 2px 6px;
+    border-radius: 4px;
+    letter-spacing: 0.04em;
+    font-family: var(--font-mono);
+    margin-left: 2px;
+  }
+
+  /* 카드 상단의 큰 역할 라벨 (팀장 / 팀원) */
+  .role-tag-big{
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    background: var(--knu-orange);
+    color: white;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 700;
+    padding: 4px 10px;
+    border-radius: 4px;
+    letter-spacing: 0.05em;
+    margin-bottom: 8px;
+  }
+  .role-tag-big.member{
+    background: var(--knu-blue);
+    color: white;
+  }
+
+  /* 스터디 카드 액션 (자세히 / 끝내기 / 나가기) */
+  .study-actions{
+    display: flex;
+    gap: 8px;
+    margin-top: 14px;
+    padding-top: 14px;
+    border-top: 1px dashed var(--line);
+  }
+  .study-action-btn.detail{
+    background: var(--ink);
+    color: var(--cream);
+    border-color: var(--ink);
+    font-weight: 600;
+  }
+  .study-action-btn.detail:active{ background: var(--knu-blue-deep); }
+
+  /* 동시 참여 제한 안내 (눈에 띄지 않게) */
+  .study-limit-note{
+    text-align: center;
+    padding: 16px 24px 8px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--ink-mute);
+    line-height: 1.5;
+  }
+  .study-action-btn{
+    flex: 1;
+    background: var(--paper);
+    border: 1px solid var(--line);
+    color: var(--ink-mute);
+    padding: 9px;
+    border-radius: var(--radius-s);
+    font-size: 12px;
+    font-weight: 500;
+    transition: all 0.15s;
+  }
+  .study-action-btn:active{
+    background: var(--paper-warm);
+    color: var(--ink-soft);
+  }
+  .study-action-btn.report{
+    color: var(--ink-mute);
+  }
+  /* 종료된 스터디 카드 */
+  .study-card.ended{
+    filter: grayscale(1);
+    opacity: 0.6;
+    pointer-events: none;
+    position: relative;
+  }
+  .study-card.ended .study-actions{ display: none; }
+  .study-ended-badge{
+    display: none;
+    position: absolute;
+    top: 14px; right: 14px;
+    background: var(--ink);
+    color: var(--cream);
+    font-family: var(--font-mono);
+    font-size: 10px;
+    font-weight: 700;
+    padding: 3px 8px;
+    border-radius: 4px;
+    letter-spacing: 0.05em;
+  }
+  .study-card.ended .study-ended-badge{ display: block; }
+  /* 나간 상태 (팀원이 나간 경우 카드 자체는 회색이지만 다른 라벨) */
+  .study-card.ended.left .study-ended-badge{ background: var(--ink-mute); }
+
+  /* ===== 공용 모달 ===== */
+  .modal-overlay{
+    display: none;
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.5);
+    z-index: 200;
+    align-items: center; justify-content: center;
+    padding: 24px;
+  }
+  .modal-overlay.show{ display: flex; }
+  .modal{
+    background: var(--paper);
+    border-radius: var(--radius-l);
+    width: 100%; max-width: 380px;
+    padding: 24px 22px;
+  }
+  .modal h3{
+    font-size: 16px;
+    font-weight: 800;
+    margin-bottom: 8px;
+  }
+  .modal p{
+    font-size: 13px;
+    color: var(--ink-soft);
+    line-height: 1.65;
+    margin-bottom: 14px;
+  }
+  .modal p strong{ color: var(--ink); }
+  .modal .notice{
+    background: var(--paper-warm);
+    border-left: 3px solid var(--knu-orange);
+    padding: 10px 12px;
+    border-radius: var(--radius-s);
+    font-size: 12px;
+    color: var(--ink-soft);
+    margin: 8px 0 14px;
+    line-height: 1.55;
+  }
+  .modal-actions{
+    display: flex; gap: 8px;
+    margin-top: 14px;
+  }
+  .modal-btn{
+    flex: 1; padding: 11px;
+    border-radius: var(--radius-s);
+    font-size: 13px;
+    font-weight: 700;
+  }
+  .modal-btn.cancel{
+    background: var(--line-soft);
+    color: var(--ink-soft);
+  }
+  .modal-btn.confirm{
+    background: var(--ink);
+    color: var(--cream);
+  }
+
+  /* ===== 커뮤니티 탭 ===== */
+  .community-notice{
+    margin: 0 24px 0;
+    padding: 14px 16px;
+    background: var(--knu-orange-soft);
+    border: 1px solid var(--knu-orange);
+    border-radius: var(--radius-m);
+  }
+  .community-notice .head{
+    display: flex; align-items: center; gap: 8px;
+    font-size: 13px; font-weight: 700;
+    color: var(--knu-orange);
+    margin-bottom: 6px;
+  }
+  .community-notice .body{
+    font-size: 12px;
+    color: var(--ink);
+    line-height: 1.6;
+  }
+  .community-notice .body strong{ color: var(--knu-orange); font-weight: 700; }
+
+  .post-list{
+    padding: 6px 24px 0;
+  }
+  .post-card{
+    display: block;
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-m);
+    padding: 16px 18px;
+    margin-bottom: 10px;
+    transition: all 0.15s;
+    text-decoration: none;
+    color: inherit;
+  }
+  .post-card:active{ transform: scale(0.99); }
+  .post-card:hover{ border-color: var(--knu-blue); }
+  .post-cat{
+    display: inline-block;
+    background: var(--paper-warm);
+    color: var(--ink-soft);
+    padding: 3px 9px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 700;
+    font-family: var(--font-mono);
+    margin-bottom: 8px;
+  }
+  .post-cat.blue{ background: var(--knu-blue-soft); color: var(--knu-blue); }
+  .post-cat.orange{ background: var(--knu-orange-soft); color: var(--knu-orange); }
+  .post-title{
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--ink);
+    margin-bottom: 6px;
+    line-height: 1.4;
+  }
+  .post-snippet{
+    font-size: 12.5px;
+    color: var(--ink-soft);
+    line-height: 1.55;
+    margin-bottom: 10px;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .post-foot{
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--ink-mute);
+  }
+  .post-foot .author{ color: var(--ink-soft); font-weight: 600; }
+  .post-foot .meta{ margin-left: auto; }
+  .post-foot .meta + .meta{ margin-left: 8px; }
+  .post-foot .dot{ opacity: 0.5; }
+
+  /* 플로팅 글쓰기 버튼 */
+  .fab{
+    position: fixed;
+    right: calc(50% - 240px + 20px);  /* 480px 컨테이너 우측 */
+    bottom: 78px;  /* 탭바 위 */
+    width: 54px; height: 54px;
+    border-radius: 50%;
+    background: var(--knu-orange);
+    color: white;
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 6px 20px rgba(254,80,0,0.4);
+    z-index: 30;
+    transition: all 0.15s;
+  }
+  .fab:active{ transform: scale(0.94); background: #CC4000; }
+  @media (max-width: 480px){
+    .fab{ right: 20px; }
+  }
+
+  /* ========== 프로필 탭 ========== */
+  .profile-summary{
+    margin: 0 24px 16px;
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-l);
+    padding: 28px 24px;
+    text-align: center;
+  }
+  .profile-avatar{
+    width: 76px; height: 76px;
+    border-radius: 50%;
+    background: var(--knu-orange);
+    color: var(--ink);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 32px;
+    font-weight: 800;
+    margin-bottom: 14px;
+  }
+  .profile-nick{
+    font-size: 22px;
+    font-weight: 800;
+    letter-spacing: -0.025em;
+    margin-bottom: 4px;
+  }
+  .profile-meta{
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--ink-mute);
+  }
+
+  /* 프로필 정보 카드 */
+  .profile-info{
+    margin: 0 24px 14px;
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-l);
+    padding: 6px 18px;
+  }
+  .info-row{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 0;
+    border-bottom: 1px dashed var(--line-soft);
+    font-size: 13px;
+    gap: 12px;
+  }
+  .info-row:last-child{ border-bottom: 0; }
+  .info-row .k{
+    color: var(--ink-mute);
+    font-weight: 500;
+    flex-shrink: 0;
+  }
+  .info-row .v{
+    color: var(--ink);
+    font-weight: 600;
+    text-align: right;
+    word-break: break-all;
+  }
+
+  /* 메뉴 리스트 */
+  .menu-list{
+    margin: 0 24px 14px;
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-l);
+    padding: 6px;
+  }
+  .menu-item{
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px;
+    border-radius: var(--radius-s);
+    font-size: 14px;
+    font-weight: 500;
+    text-align: left;
+    transition: background 0.15s;
+  }
+  .menu-item:active{ background: var(--paper-warm); }
+  .menu-item .right{
+    color: var(--ink-mute);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+  }
+  .menu-item.danger{ color: var(--error); }
+  .menu-section-title{
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--ink-mute);
+    letter-spacing: 0.08em;
+    margin: 20px 28px 6px;
+  }
+
+  /* 하단 탭바 */
+  .tabbar{
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    max-width: 480px;
+    margin: 0 auto;
+    height: var(--tabbar-h);
+    background: rgba(255, 255, 255, 0.92);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-top: 1px solid var(--line);
+    display: flex;
+    z-index: 100;
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  .tab-btn{
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    color: var(--ink-mute);
+    padding: 8px 0;
+    transition: color 0.15s;
+  }
+  .tab-btn.active{ color: var(--knu-orange); }
+  .tab-btn .ico{
+    width: 22px; height: 22px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .tab-btn .label{
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+  }
+  .tab-btn.active .label{ font-weight: 700; }
+
+  /* 토스트 */
+  .toast{
+    position: fixed;
+    bottom: calc(var(--tabbar-h) + 16px);
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: var(--ink);
+    color: var(--cream);
+    padding: 12px 22px;
+    border-radius: 999px;
+    font-size: 14px;
+    font-weight: 600;
+    opacity: 0;
+    pointer-events: none;
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    z-index: 2000;
+    box-shadow: 0 12px 28px rgba(14,26,43,0.3);
+    white-space: nowrap;
+  }
+  .toast.show{
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+</style>
+</head>
+<body>
+
+<!-- 미리보기 모드 안내 배지 (?preview=1 또는 dev 모드일 때만 표시) -->
+<div class="preview-mode-badge">PREVIEW MODE</div>
+
+<div class="app">
+
+  <!-- ========== HOME 탭 ========== -->
+  <div class="tab-content active" id="tab-home">
+
+    <header class="header">
+      <div class="greeting">
+        <div class="small">▸ 오늘</div>
+        <h1><em>재아 감자</em>님,<br>안녕하세요</h1>
+      </div>
+      <button class="bell-btn" onclick="location.href='notifications.html'">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+          <path d="M13.73 21a2 2 0 01-3.46 0"/>
+        </svg>
+        <span class="bell-dot"></span>
+      </button>
+    </header>
+
+    <!-- 디자인 미리보기용 상태 토글 (출시 빌드에서는 자동으로 숨김 — body.preview-mode 일 때만 표시) -->
+    <div class="dev-toggle" data-dev-only>
+      <button class="active" onclick="setState('empty', this)">매칭 카드 없음</button>
+      <button onclick="setState('waiting', this)">매칭 대기 중</button>
+    </div>
+
+    <!-- 상태 A: 매칭 카드 없음 -->
+    <div class="state-content active" id="state-empty">
+
+      <div class="empty-hero">
+        <div class="empty-emoji">🥔</div>
+        <h2>아직 매칭 카드가 없어요</h2>
+        <p>매칭 카드를 만들면 잘 맞는 감자들을 찾아드려요.<br>한 번에 카드 1개까지 만들 수 있어요.</p>
+        <button class="btn-primary orange" onclick="goMatchCard()">
+          매칭 카드 만들기
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </button>
+      </div>
+
+      <div class="quick-stats">
+        <div class="stat-card">
+          <div class="label">▸ 매칭 대기 중</div>
+          <div class="num">23<span style="font-size:14px; color:var(--ink-mute); margin-left: 4px;">명</span></div>
+          <div class="desc">매칭 대기 중인 감자</div>
+        </div>
+        <div class="stat-card">
+          <div class="label">▸ 이번 주</div>
+          <div class="num orange">5<span style="font-size:14px; color:var(--ink-mute); margin-left: 4px;">팀</span></div>
+          <div class="desc">이번 주 매칭 완료</div>
+        </div>
+      </div>
+
+      <div class="feed-section">
+        <div class="section-title">최근 소식</div>
+        <div class="feed-list">
+          <div class="feed-item">
+            <div class="feed-ico orange">✓</div>
+            <div class="feed-text">
+              <div class="t">5번째 팀이 매칭되었어요</div>
+              <div class="s">1시간 전 · 시험 대비 / 4명</div>
+            </div>
+          </div>
+          <div class="feed-item">
+            <div class="feed-ico">🥔</div>
+            <div class="feed-text">
+              <div class="t">새로운 감자가 가입했어요</div>
+              <div class="s">3시간 전</div>
+            </div>
+          </div>
+          <div class="feed-item">
+            <div class="feed-ico orange">✓</div>
+            <div class="feed-text">
+              <div class="t">4번째 팀이 매칭되었어요</div>
+              <div class="s">오전 8:00 · 코딩테스트 / 5명</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- 상태 B: 매칭 대기 중 -->
+    <div class="state-content" id="state-waiting">
+
+      <div class="match-status">
+        <div class="status-label">
+          <span class="dot"></span>
+          MATCHING IN PROGRESS
+        </div>
+        <div class="status-state">매칭 <em>대기 중</em></div>
+
+        <div class="countdown-wrap">
+          <div class="countdown-label">▸ 매칭 만료까지</div>
+          <div class="countdown" id="countdown">--<span class="unit">일</span> --<span class="unit">:</span>--<span class="unit">:</span>--</div>
+          <div class="waiting-stats">
+            <div class="waiting-stat">
+              <span class="num">12</span>
+              <span class="label">명 매칭 대기</span>
+            </div>
+            <div class="waiting-stat">
+              <span class="num orange">5</span>
+              <span class="label">팀 매칭 완료</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="card-preview">
+          <div class="preview-row">
+            <span class="k">카테고리</span>
+            <span class="v">시험 대비</span>
+          </div>
+          <div class="preview-row">
+            <span class="k">주제</span>
+            <span class="v">자료구조 시험 대비</span>
+          </div>
+          <div class="preview-row">
+            <span class="k">수준</span>
+            <span class="v">기본</span>
+          </div>
+          <div class="preview-row">
+            <span class="k">전공 범위</span>
+            <span class="v">같은 단과대학</span>
+          </div>
+          <div class="preview-row">
+            <span class="k">시간대</span>
+            <span class="v">평일 저녁, 주말 오후</span>
+          </div>
+          <div class="preview-row">
+            <span class="k">모임</span>
+            <span class="v">대면, 비대면</span>
+          </div>
+        </div>
+
+        <div class="card-actions">
+          <button class="card-action-btn" onclick="goMatchCard()">카드 수정</button>
+          <button class="card-action-btn danger" onclick="cancelMatch()">매칭 취소</button>
+        </div>
+      </div>
+
+      <div class="feed-section">
+        <div class="section-title">최근 소식</div>
+        <div class="feed-list">
+          <div class="feed-item">
+            <div class="feed-ico">🥔</div>
+            <div class="feed-text">
+              <div class="t">새로운 감자 2명이 같은 카테고리에 추가됐어요</div>
+              <div class="s">방금 전</div>
+            </div>
+          </div>
+          <div class="feed-item">
+            <div class="feed-ico orange">✓</div>
+            <div class="feed-text">
+              <div class="t">5번째 팀이 매칭되었어요</div>
+              <div class="s">1시간 전 · 시험 대비 / 4명</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- MATCH 탭 -->
+  <div class="tab-content" id="tab-match">
+
+    <div class="tab-page-head">
+      <div class="small">▸ 매칭</div>
+      <h1>매칭<em>하기</em></h1>
+    </div>
+
+    <!-- 세그먼트 컨트롤 -->
+    <div class="segment-control">
+      <button class="segment-btn active" onclick="switchMode('ai', this)">🤝 자동 매칭</button>
+      <button class="segment-btn" onclick="switchMode('browse', this)">🔍 직접 찾아보기</button>
+    </div>
+
+    <!-- ========== 자동 매칭 모드 ========== -->
+    <div class="mode-content active" id="mode-ai">
+
+      <!-- 개발 토글 -->
+      <div class="dev-toggle" data-dev-only>
+        <button class="active" onclick="setMatchState('empty', this)">카드 없음</button>
+        <button onclick="setMatchState('waiting', this)">대기 중</button>
+        <button onclick="setMatchState('paused', this)">보류 중</button>
+      </div>
+
+      <!-- 상태 1: 매칭 카드 없음 -->
+      <div class="match-state-content active" id="match-empty">
+        <div class="empty-hero">
+          <div class="empty-emoji">🥔</div>
+          <h2>매칭 카드를 만들어보세요</h2>
+          <p>조건을 입력하면 잘 맞는 4~6명을<br>자동으로 매칭해드려요.</p>
+          <button class="btn-primary orange" onclick="goMatchCard()">
+            매칭 카드 만들기
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- 상태 2: 매칭 대기 중 -->
+      <div class="match-state-content" id="match-waiting">
+        <div class="match-status">
+          <div class="status-label">
+            <span class="dot"></span>
+            MATCHING IN PROGRESS
+          </div>
+          <div class="status-state">매칭 <em>대기 중</em></div>
+
+          <div class="countdown-wrap">
+            <div class="countdown-label">▸ 매칭 만료까지</div>
+            <div class="countdown" id="countdown-match">--<span class="unit">일</span> --<span class="unit">:</span>--<span class="unit">:</span>--</div>
+            <div class="waiting-note">현재 12명이 매칭 대기 중이에요</div>
+          </div>
+
+          <div class="card-preview">
+            <div class="preview-row">
+              <span class="k">카테고리</span>
+              <span class="v">시험 대비</span>
+            </div>
+            <div class="preview-row">
+              <span class="k">주제</span>
+              <span class="v">자료구조 시험 대비</span>
+            </div>
+            <div class="preview-row">
+              <span class="k">수준</span>
+              <span class="v">기본</span>
+            </div>
+            <div class="preview-row">
+              <span class="k">전공 범위</span>
+              <span class="v">같은 단과대학</span>
+            </div>
+            <div class="preview-row">
+              <span class="k">시간대</span>
+              <span class="v">평일 저녁, 주말 오후</span>
+            </div>
+            <div class="preview-row">
+              <span class="k">모임</span>
+              <span class="v">대면, 비대면</span>
+            </div>
+          </div>
+
+          <div class="card-actions">
+            <button class="card-action-btn" onclick="goMatchCard()">카드 수정</button>
+            <button class="card-action-btn danger" onclick="cancelMatch()">매칭 취소</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 상태 3: 보류 중 (리스트) -->
+      <div class="match-state-content" id="match-paused">
+
+        <div class="paused-list-head">
+          <span>보류된 매칭 카드</span>
+          <span class="count"><strong>2</strong>개</span>
+        </div>
+
+        <!-- 보류 카드 1: 직접 찾아보기로 매칭됨 -->
+        <div class="paused-item">
+          <div class="paused-reason-row">
+            <span class="paused-reason joined">▸ 팀 합류로 보류</span>
+            <span class="paused-meta">3일 전</span>
+          </div>
+          <div class="paused-topic">자료구조 시험 대비</div>
+          <div class="paused-summary">시험 대비 · 기본 · 평일 저녁, 주말 오후 · 대면, 비대면</div>
+
+          <div class="paused-actions">
+            <button class="btn-activate" onclick="showToast('카드 다시 활성화')">다시 활성화</button>
+            <div class="sub-actions">
+              <button class="btn-sub" onclick="goMatchCard()">카드 수정하기</button>
+              <button class="btn-sub danger" onclick="confirmDelete()">카드 삭제하기</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- 보류 카드 2: 시간 만료 -->
+        <div class="paused-item">
+          <div class="paused-reason-row">
+            <span class="paused-reason expired">▸ 매칭 시간 만료</span>
+            <span class="paused-meta">10일 전</span>
+          </div>
+          <div class="paused-topic">TOEIC 800점 목표</div>
+          <div class="paused-summary">어학 · 중급 · 주말 오후, 주말 저녁 · 비대면</div>
+
+          <div class="paused-actions">
+            <button class="btn-activate" onclick="showToast('카드 다시 활성화')">다시 활성화</button>
+            <div class="sub-actions">
+              <button class="btn-sub" onclick="goMatchCard()">카드 수정하기</button>
+              <button class="btn-sub danger" onclick="confirmDelete()">카드 삭제하기</button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- ========== 직접 찾아보기 모드 ========== -->
+    <div class="mode-content" id="mode-browse">
+
+      <!-- 팀 만들기 CTA -->
+      <button class="create-room-card" onclick="location.href='groupcreate.html'">
+        <div class="create-room-icon">📋</div>
+        <div class="create-room-text">
+          <div class="create-room-title">새 팀 만들기</div>
+          <div class="create-room-desc">팀장이 되어 원하는 팀원을 모집해요</div>
+        </div>
+        <div class="create-room-arrow">→</div>
+      </button>
+
+      <!-- 내가 만든 팀 (팀장 모집 진행 상황) -->
+      <div class="my-rooms-section" id="my-rooms-section">
+        <!-- JS로 렌더링 -->
+      </div>
+
+      <!-- 검색바: 팀 이름 / 주제 / 과목 / 설명 검색 -->
+      <div class="search-bar">
+        <svg class="search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="11" cy="11" r="7"/><path d="M21 21l-4.35-4.35"/>
+        </svg>
+        <input class="search-input" id="room-search" type="text"
+               placeholder="팀 이름·주제·과목·설명 검색"
+               oninput="onSearchInput(this.value)"
+               onkeydown="onSearchKeydown(event)" />
+        <button class="search-clear-btn" id="search-clear" onclick="clearSearch()" aria-label="검색어 지우기">×</button>
+      </div>
+
+      <!-- 카테고리 필터 (단일 선택, 가로 스크롤) -->
+      <div class="filter-scroll" id="category-filter">
+        <button class="filter-chip active" data-cat="전체" onclick="setCategoryFilter(this)">전체</button>
+        <button class="filter-chip" data-cat="시험 대비" onclick="setCategoryFilter(this)">📚 시험 대비</button>
+        <button class="filter-chip" data-cat="자격증" onclick="setCategoryFilter(this)">📜 자격증</button>
+        <button class="filter-chip" data-cat="코딩테스트" onclick="setCategoryFilter(this)">💻 코딩테스트</button>
+        <button class="filter-chip" data-cat="어학" onclick="setCategoryFilter(this)">🌏 어학</button>
+        <button class="filter-chip" data-cat="프로젝트" onclick="setCategoryFilter(this)">🚀 프로젝트</button>
+        <button class="filter-chip" data-cat="자율 학습" onclick="setCategoryFilter(this)">📖 자율</button>
+        <button class="filter-chip" data-cat="기타" onclick="setCategoryFilter(this)">✨ 기타</button>
+      </div>
+
+      <!-- 필터 툴바: 더보기 필터 + 정렬 -->
+      <div class="filter-toolbar">
+        <button class="filter-toggle-btn" id="filter-toggle" onclick="toggleFilterPanel()">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="12" x2="14" y2="12"/><line x1="4" y1="18" x2="9" y2="18"/>
+          </svg>
+          <span>더보기 필터</span>
+          <span class="filter-count" id="filter-count" style="display:none">0</span>
+        </button>
+        <select class="sort-select" id="sort-select" onchange="onSortChange(this.value)">
+          <option value="urgent">마감 임박순</option>
+          <option value="newest">새로 만든 순</option>
+          <option value="filling">차고 있는 순</option>
+          <option value="empty">새로 시작 순</option>
+        </select>
+      </div>
+
+      <!-- 필터 펼침 패널 -->
+      <div class="filter-panel" id="filter-panel">
+        <div class="filter-group">
+          <div class="filter-group-title">모임 방식</div>
+          <div class="filter-group-chips" data-group="mode">
+            <button class="filter-mini-chip" data-value="대면" onclick="toggleMiniChip(this)">대면</button>
+            <button class="filter-mini-chip" data-value="비대면" onclick="toggleMiniChip(this)">비대면</button>
+          </div>
+        </div>
+        <div class="filter-group">
+          <div class="filter-group-title">시간대</div>
+          <div class="filter-group-chips" data-group="time">
+            <button class="filter-mini-chip" data-value="평일 아침" onclick="toggleMiniChip(this)">평일 아침</button>
+            <button class="filter-mini-chip" data-value="평일 오전" onclick="toggleMiniChip(this)">평일 오전</button>
+            <button class="filter-mini-chip" data-value="평일 오후" onclick="toggleMiniChip(this)">평일 오후</button>
+            <button class="filter-mini-chip" data-value="평일 저녁" onclick="toggleMiniChip(this)">평일 저녁</button>
+            <button class="filter-mini-chip" data-value="평일 밤" onclick="toggleMiniChip(this)">평일 밤</button>
+            <button class="filter-mini-chip" data-value="주말 아침" onclick="toggleMiniChip(this)">주말 아침</button>
+            <button class="filter-mini-chip" data-value="주말 오전" onclick="toggleMiniChip(this)">주말 오전</button>
+            <button class="filter-mini-chip" data-value="주말 오후" onclick="toggleMiniChip(this)">주말 오후</button>
+            <button class="filter-mini-chip" data-value="주말 저녁" onclick="toggleMiniChip(this)">주말 저녁</button>
+            <button class="filter-mini-chip" data-value="주말 밤" onclick="toggleMiniChip(this)">주말 밤</button>
+          </div>
+        </div>
+        <div class="filter-group">
+          <div class="filter-group-title">학습 스타일</div>
+          <div class="filter-group-chips" data-group="style">
+            <button class="filter-mini-chip" data-value="예습형" onclick="toggleMiniChip(this)">예습형</button>
+            <button class="filter-mini-chip" data-value="복습형" onclick="toggleMiniChip(this)">복습형</button>
+            <button class="filter-mini-chip" data-value="문제풀이" onclick="toggleMiniChip(this)">문제풀이</button>
+            <button class="filter-mini-chip" data-value="개념토론" onclick="toggleMiniChip(this)">개념토론</button>
+            <button class="filter-mini-chip" data-value="프로젝트" onclick="toggleMiniChip(this)">프로젝트</button>
+          </div>
+        </div>
+        <div class="filter-group">
+          <div class="filter-group-title">모집 인원</div>
+          <div class="filter-group-chips" data-group="people">
+            <button class="filter-mini-chip" data-value="2" onclick="toggleMiniChip(this)">2명</button>
+            <button class="filter-mini-chip" data-value="3" onclick="toggleMiniChip(this)">3명</button>
+            <button class="filter-mini-chip" data-value="4" onclick="toggleMiniChip(this)">4명</button>
+            <button class="filter-mini-chip" data-value="5" onclick="toggleMiniChip(this)">5명</button>
+            <button class="filter-mini-chip" data-value="6" onclick="toggleMiniChip(this)">6명</button>
+          </div>
+        </div>
+        <div class="filter-group">
+          <div class="filter-group-title">수준</div>
+          <div class="filter-group-chips" data-group="level">
+            <button class="filter-mini-chip" data-value="초보" onclick="toggleMiniChip(this)">초보</button>
+            <button class="filter-mini-chip" data-value="기본" onclick="toggleMiniChip(this)">기본</button>
+            <button class="filter-mini-chip" data-value="중급" onclick="toggleMiniChip(this)">중급</button>
+            <button class="filter-mini-chip" data-value="고급" onclick="toggleMiniChip(this)">고급</button>
+          </div>
+        </div>
+        <div class="filter-reset-row">
+          <button class="filter-reset-btn" onclick="resetExtraFilters()">필터 초기화</button>
+        </div>
+      </div>
+
+      <!-- 결과 카운트 -->
+      <div class="result-count" id="result-count">총 <strong>0</strong>개 방</div>
+
+      <!-- 팀 목록 (JS 동적 렌더링) -->
+      <div class="room-list" id="room-list"></div>
+
+      <!-- 빈 결과 -->
+      <div class="empty-rooms" id="empty-rooms" style="display:none">
+        <div class="empty-rooms-emoji">🥔</div>
+        <div class="empty-rooms-title">조건에 맞는 팀이 없어요</div>
+        <div class="empty-rooms-desc">검색어를 바꾸거나 필터를 줄여보세요</div>
+        <button class="filter-toggle-btn" style="margin-top:14px" onclick="resetAllBrowseFilters()">
+          모든 필터 초기화
+        </button>
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- STUDY 탭 -->
+  <!-- ============================================================
+       COMMUNITY TAB (NEW)
+       ============================================================ -->
+  <div class="tab-content" id="tab-community">
+    <div class="tab-page-head">
+      <div class="small">▸ 커뮤니티</div>
+      <h1>감자 <em>커뮤니티</em></h1>
+    </div>
+
+    <!-- 운영 안내 -->
+    <div class="community-notice">
+      <div class="head">
+        <span>📢</span>
+        <span>커뮤니티 이용 안내</span>
+      </div>
+      <div class="body">
+        욕설·비방·허위정보·광고·홍보 등은 <strong>안내 없이 삭제</strong>되며, 반복 시 계정 제재가 적용될 수 있어요.
+      </div>
+    </div>
+
+    <!-- 카테고리 필터 (가로 스크롤) -->
+    <div class="filter-scroll" id="community-filter" style="padding-top:16px">
+      <button class="filter-chip active">전체</button>
+      <button class="filter-chip">📢 공지</button>
+      <button class="filter-chip">💡 정보 공유</button>
+      <button class="filter-chip">❓ 질문</button>
+      <button class="filter-chip">💬 소통</button>
+    </div>
+
+    <!-- 게시글 리스트 -->
+    <div class="post-list">
+
+      <a class="post-card" href="community-detail.html">
+        <div class="post-cat">📢 공지</div>
+        <div class="post-title">서비스 운영 시간 안내</div>
+        <div class="post-snippet">매일 오전 8시 / 오후 2시 / 오후 8시에 자동 매칭이 돌아가요. 매칭 카드는 7일 후 자동 만료...</div>
+        <div class="post-foot">
+          <span class="author">운영자</span>
+          <span class="dot">·</span>
+          <span class="time">5월 6일</span>
+          <span class="dot">·</span>
+          <span class="meta">💬 12</span>
+          <span class="meta">👁 312</span>
+        </div>
+      </a>
+
+      <a class="post-card" href="community-detail.html">
+        <div class="post-cat blue">💡 정보 공유</div>
+        <div class="post-title">자료구조 강의 자료 어디서 받나요?</div>
+        <div class="post-snippet">중간고사 끝나고 기말 대비하려는데 강의 자료가 안 모여있어서요. 도서관에 있는지, 선배들이 정리한 게 있는지 아시는 분?</div>
+        <div class="post-foot">
+          <span class="author">호빵맨</span>
+          <span class="dot">·</span>
+          <span class="time">2시간 전</span>
+          <span class="dot">·</span>
+          <span class="meta">💬 8</span>
+          <span class="meta">👁 47</span>
+        </div>
+      </a>
+
+      <a class="post-card" href="community-detail.html">
+        <div class="post-cat">💬 소통</div>
+        <div class="post-title">코딩테스트 스터디 후기 — 4명에서 시작했지만 지금은 셋이서 합니다</div>
+        <div class="post-snippet">한 분 거절하셨는데 그래도 셋이서 잘 진행 중이에요. 백준 골드 도전 시작 2주차 후기 남겨봐요.</div>
+        <div class="post-foot">
+          <span class="author">코드몬스터</span>
+          <span class="dot">·</span>
+          <span class="time">어제</span>
+          <span class="dot">·</span>
+          <span class="meta">💬 5</span>
+          <span class="meta">👁 89</span>
+        </div>
+      </a>
+
+      <a class="post-card" href="community-detail.html">
+        <div class="post-cat orange">❓ 질문</div>
+        <div class="post-title">매칭 카드 만든 지 3일째인데 매칭이 안 돼요</div>
+        <div class="post-snippet">희망 시간대를 너무 좁게 잡은 걸까요? 평일 저녁 + 대면만 골랐는데...</div>
+        <div class="post-foot">
+          <span class="author">감자소녀</span>
+          <span class="dot">·</span>
+          <span class="time">3일 전</span>
+          <span class="dot">·</span>
+          <span class="meta">💬 14</span>
+          <span class="meta">👁 156</span>
+        </div>
+      </a>
+
+      <a class="post-card" href="community-detail.html">
+        <div class="post-cat">💬 소통</div>
+        <div class="post-title">강원대 도서관 그룹스터디룸 예약 꿀팁</div>
+        <div class="post-snippet">매주 일요일 자정에 다음 주 예약 열려요. 인기 시간대는 30초 안에 마감됩니다...</div>
+        <div class="post-foot">
+          <span class="author">박수빈</span>
+          <span class="dot">·</span>
+          <span class="time">5일 전</span>
+          <span class="dot">·</span>
+          <span class="meta">💬 22</span>
+          <span class="meta">👁 401</span>
+        </div>
+      </a>
+
+    </div>
+
+    <!-- 글쓰기 플로팅 버튼 (FAB) -->
+    <button class="fab" onclick="location.href='community-write.html'">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+      </svg>
+    </button>
+  </div>
+
+  <div class="tab-content" id="tab-study">
+    <div class="tab-page-head">
+      <div class="small">▸ 내 스터디</div>
+      <h1>참여 중인 <em>스터디</em></h1>
+    </div>
+
+    <div class="study-list">
+
+      <!-- 스터디 1: 본인이 팀장 -->
+      <div class="study-card" data-team-id="t1" data-role="leader">
+        <div class="study-ended-badge">종료됨</div>
+        <span class="role-tag-big">👑 내가 팀장이에요</span>
+        <div class="study-card-head">
+          <div>
+            <span class="study-tag">시험 대비</span>
+            <div class="study-name">과탑 돌격대</div>
+            <div class="study-meta">4명 · 매칭 3일 전 · 매주 화/목 19시</div>
+          </div>
+          <button class="kakao-btn" onclick="showToast('카카오톡 오픈채팅으로 이동')">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 2C6.5 2 2 5.6 2 10c0 2.7 1.7 5.1 4.4 6.5L5 21l4.8-2.5c.7.1 1.5.2 2.2.2 5.5 0 10-3.6 10-8s-4.5-8.7-10-8.7z"/>
+            </svg>
+            오픈채팅
+          </button>
+        </div>
+
+        <div class="members-row">
+          <div class="member-chip leader">
+            <div class="member-avatar">재</div>
+            <span>재아 (나)</span>
+            <span class="leader-tag">팀장</span>
+          </div>
+          <div class="member-chip">
+            <div class="member-avatar">호</div>
+            <span>호빵맨</span>
+          </div>
+          <div class="member-chip">
+            <div class="member-avatar">박</div>
+            <span>박수빈</span>
+          </div>
+          <div class="member-chip">
+            <div class="member-avatar">감</div>
+            <span>감자소녀</span>
+          </div>
+        </div>
+
+        <!-- 팀장 액션: 자세히 / 끝내기 / No-Show 신고 -->
+        <div class="study-actions">
+          <button class="study-action-btn detail" onclick="location.href='team-detail.html?id=1&edit=1'">자세히 보기</button>
+          <button class="study-action-btn report" onclick="openReportModal('t1')">No-Show 신고</button>
+          <button class="study-action-btn" onclick="openEndModal('t1')">스터디 끝내기</button>
+        </div>
+      </div>
+
+      <!-- 스터디 2: 본인이 팀원 -->
+      <div class="study-card" data-team-id="t2" data-role="member">
+        <div class="study-ended-badge">나갔어요</div>
+        <span class="role-tag-big member">👥 내가 팀원이에요</span>
+        <div class="study-card-head">
+          <div>
+            <span class="study-tag orange">코딩테스트</span>
+            <div class="study-name">1등 정복단</div>
+            <div class="study-meta">5명 · 매칭 12일 전 · 매주 토 14시</div>
+          </div>
+          <button class="kakao-btn" onclick="showToast('카카오톡 오픈채팅으로 이동')">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 2C6.5 2 2 5.6 2 10c0 2.7 1.7 5.1 4.4 6.5L5 21l4.8-2.5c.7.1 1.5.2 2.2.2 5.5 0 10-3.6 10-8s-4.5-8.7-10-8.7z"/>
+            </svg>
+            오픈채팅
+          </button>
+        </div>
+
+        <div class="members-row">
+          <div class="member-chip">
+            <div class="member-avatar">재</div>
+            <span>재아 (나)</span>
+          </div>
+          <div class="member-chip leader">
+            <div class="member-avatar">알</div>
+            <span>알고리즘마스터</span>
+            <span class="leader-tag">팀장</span>
+          </div>
+          <div class="member-chip">
+            <div class="member-avatar">김</div>
+            <span>김서연</span>
+          </div>
+          <div class="member-chip">
+            <div class="member-avatar">코</div>
+            <span>코드냥이</span>
+          </div>
+          <div class="member-chip">
+            <div class="member-avatar">S</div>
+            <span>SQL장인</span>
+          </div>
+        </div>
+
+        <!-- 팀원 액션: 자세히 / 나가기 / No-Show 신고 -->
+        <div class="study-actions">
+          <button class="study-action-btn detail" onclick="location.href='team-detail.html?id=3'">자세히 보기</button>
+          <button class="study-action-btn report" onclick="openReportModal('t2')">No-Show 신고</button>
+          <button class="study-action-btn" onclick="openLeaveModal('t2')">팀에서 나가기</button>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- 동시 참여 안내 (작게) -->
+    <div class="study-limit-note">
+      ※ 스터디는 동시에 최대 3개까지 참여할 수 있어요.
+    </div>
+  </div>
+
+  <!-- PROFILE 탭 -->
+  <div class="tab-content" id="tab-profile">
+    <div class="tab-page-head">
+      <div class="small">▸ 내 정보</div>
+      <h1>내 <em>감자</em> 정보</h1>
+    </div>
+
+    <!-- 프로필 요약 -->
+    <div class="profile-summary">
+      <div class="profile-avatar">재</div>
+      <div class="profile-nick">재아</div>
+      <div class="profile-meta">컴퓨터공학과 · 2학년</div>
+    </div>
+
+    <!-- 가입 정보 -->
+    <div class="profile-info">
+      <div class="info-row">
+        <span class="k">강원대 웹메일</span>
+        <span class="v">202313564@kangwon.ac.kr</span>
+      </div>
+      <div class="info-row">
+        <span class="k">알림 받을 메일</span>
+        <span class="v">jaea@gmail.com</span>
+      </div>
+      <div class="info-row">
+        <span class="k">출생연도</span>
+        <span class="v">2005년</span>
+      </div>
+      <div class="info-row">
+        <span class="k">재학 상태</span>
+        <span class="v">재학 중</span>
+      </div>
+      <div class="info-row">
+        <span class="k">가입일</span>
+        <span class="v">2026.05.13</span>
+      </div>
+    </div>
+
+    <div class="menu-section-title">설정</div>
+    <div class="menu-list">
+      <button class="menu-item" onclick="location.href='profile-edit.html'">
+        <span>프로필 수정</span>
+        <span class="right">→</span>
+      </button>
+      <button class="menu-item" onclick="location.href='password-change.html'">
+        <span>비밀번호 변경</span>
+        <span class="right">→</span>
+      </button>
+      <button class="menu-item" onclick="location.href='notification-settings.html'">
+        <span>알림 설정</span>
+        <span class="right">→</span>
+      </button>
+    </div>
+
+    <div class="menu-section-title">서비스 안내</div>
+    <div class="menu-list">
+      <button class="menu-item" onclick="location.href='terms.html'">
+        <span>이용약관</span>
+        <span class="right">→</span>
+      </button>
+      <button class="menu-item" onclick="location.href='privacy.html'">
+        <span>개인정보 처리방침</span>
+        <span class="right">→</span>
+      </button>
+      <button class="menu-item" onclick="location.href='rules.html'">
+        <span>매칭 운영 규칙</span>
+        <span class="right">→</span>
+      </button>
+      <button class="menu-item" onclick="showToast('문의 화면')">
+        <span>문의하기</span>
+        <span class="right">v1.0.0</span>
+      </button>
+    </div>
+
+    <div class="menu-section-title">계정</div>
+    <div class="menu-list">
+      <button class="menu-item danger" onclick="if(confirm('로그아웃 하시겠어요?')) location.href='auth.html'">
+        <span>로그아웃</span>
+        <span class="right">→</span>
+      </button>
+      <button class="menu-item danger" onclick="showToast('회원 탈퇴')">
+        <span>회원 탈퇴</span>
+        <span class="right">→</span>
+      </button>
+    </div>
+
+    <div style="text-align: center; padding: 24px; font-family: var(--font-mono); font-size: 10px; color: var(--ink-mute); letter-spacing: 0.05em;">
+      © 2026 STUDY POTATO · MADE IN CHUNCHEON
+    </div>
+  </div>
+
+  <!-- 하단 탭바 -->
+  <nav class="tabbar">
+    <button class="tab-btn active" onclick="switchTab('home', this)">
+      <span class="ico">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3 12L12 3l9 9M5 10v11h14V10"/>
+        </svg>
+      </span>
+      <span class="label">홈</span>
+    </button>
+    <button class="tab-btn" onclick="switchTab('match', this)">
+      <span class="ico">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="9" cy="9" r="3.5"/>
+          <circle cx="17" cy="15" r="3.5"/>
+          <line x1="11" y1="11" x2="15" y2="13"/>
+        </svg>
+      </span>
+      <span class="label">매칭</span>
+    </button>
+    <button class="tab-btn" onclick="switchTab('community', this)">
+      <span class="ico">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/>
+        </svg>
+      </span>
+      <span class="label">커뮤니티</span>
+    </button>
+    <button class="tab-btn" onclick="switchTab('study', this)">
+      <span class="ico">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="8" cy="9" r="3"/>
+          <circle cx="16" cy="9" r="3"/>
+          <path d="M3 19c.5-2.5 2.5-4 5-4s4.5 1.5 5 4M13 19c.5-2.5 2.5-4 5-4s4.5 1.5 5 4"/>
+        </svg>
+      </span>
+      <span class="label">내 스터디</span>
+    </button>
+    <button class="tab-btn" onclick="switchTab('profile', this)">
+      <span class="ico">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="8" r="4"/>
+          <path d="M4 21c0-4 4-7 8-7s8 3 8 7"/>
+        </svg>
+      </span>
+      <span class="label">프로필</span>
+    </button>
+  </nav>
+
+</div>
+
+<!-- 토스트 -->
+<!-- ========== 모달: 스터디 끝내기 (팀장만) ========== -->
+<div class="modal-overlay" id="end-study-modal">
+  <div class="modal">
+    <h3>스터디를 끝내시겠어요?</h3>
+    <p>
+      <strong>모든 팀원에게 종료 처리</strong>가 적용돼요.
+      한 번 끝내면 같은 팀으로 다시 활성화할 수는 없어요.
+    </p>
+    <div class="notice">
+      💡 팀장과 팀원 모두에게 알림이 가요.<br>
+      정보는 삭제되지 않고 비활성 상태로 남아요.
+    </div>
+    <div class="modal-actions">
+      <button class="modal-btn cancel" onclick="closeEndModal()">취소</button>
+      <button class="modal-btn confirm" onclick="confirmEndStudy()">끝내기</button>
+    </div>
+  </div>
+</div>
+
+<!-- ========== 모달: 팀에서 나가기 (팀원) ========== -->
+<div class="modal-overlay" id="leave-study-modal">
+  <div class="modal">
+    <h3>이 팀에서 나가시겠어요?</h3>
+    <p>
+      한 번 나가면 같은 팀으로 다시 합류할 수는 없어요.
+      나가신 후에도 매칭 카드는 그대로 두어 다른 팀으로 매칭될 수 있어요.
+    </p>
+    <div class="notice">
+      💡 팀장과 다른 팀원 모두에게 알림이 가요.<br>
+      잦은 이탈은 페널티 대상이 될 수 있어요.
+    </div>
+    <div class="modal-actions">
+      <button class="modal-btn cancel" onclick="closeLeaveModal()">취소</button>
+      <button class="modal-btn confirm" onclick="confirmLeaveStudy()">나가기</button>
+    </div>
+  </div>
+</div>
+
+<!-- ========== 모달: No-Show 신고 ========== -->
+<div class="modal-overlay" id="report-study-modal">
+  <div class="modal">
+    <h3>No-Show 신고</h3>
+    <p>
+      신고 내용은 운영진이 확인 후 처리해요.
+      신고 1건만으로 바로 제재되지 않으니 <strong>부담 없이 사실대로</strong> 알려주세요.
+    </p>
+    <div class="notice">
+      💡 운영진이 양측을 확인한 뒤 페널티 여부를 결정해요.
+    </div>
+    <div class="modal-actions">
+      <button class="modal-btn cancel" onclick="closeReportModal()">취소</button>
+      <button class="modal-btn confirm" onclick="confirmReport()">신고 접수</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  /* 상태 전환 (개발용) */
+  function setState(state, btn){
+    document.querySelectorAll('#tab-home .state-content').forEach(s => s.classList.remove('active'));
+    document.getElementById('state-' + state).classList.add('active');
+    document.querySelectorAll('#tab-home .dev-toggle button').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+
+    if(state === 'waiting'){
+      startCountdown('countdown');
+    } else {
+      stopCountdown('countdown');
+    }
+  }
+
+  /* 매칭 탭 모드 전환 (자동 매칭 / 직접 찾아보기) */
+  function switchMode(mode, btn){
+    document.querySelectorAll('.mode-content').forEach(m => m.classList.remove('active'));
+    document.getElementById('mode-' + mode).classList.add('active');
+    document.querySelectorAll('.segment-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+  }
+
+  /* 매칭 카드 상태 전환 (자동 매칭 모드 내부) */
+  function setMatchState(state, btn){
+    document.querySelectorAll('.match-state-content').forEach(s => s.classList.remove('active'));
+    document.getElementById('match-' + state).classList.add('active');
+    document.querySelectorAll('#mode-ai .dev-toggle button').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+
+    if(state === 'waiting'){
+      startCountdown('countdown-match');
+    } else {
+      stopCountdown('countdown-match');
+    }
+  }
+
+  /* ============================================================
+     팀 찾기: 검색 + 필터 + 정렬 시스템
+     ------------------------------------------------------------
+     검색 키워드 매칭 대상: 팀 이름 / 주제(topic) / 과목(subject) / 설명(bio)
+     (팀장 이름, 시간대 등은 필터에서 처리)
+     ============================================================ */
+
+  // 더미 방 데이터 (실제는 서버에서 받아옴)
+  // members.min = 매칭 확정 최소 인원 (이 인원 이상 수락 시 무산되지 않음)
+  const ROOMS = [
+    {
+      id: 1, name: '자료구조 트리 정복단', category: '시험 대비', emoji: '📚',
+      topic: '트리, 백준 문제풀이', subject: '자료구조', level: '중급',
+      leader: {nick: '호빵맨', college: 'IT대학', grade: '3학년'},
+      bio: '트리 챕터에서 막힌 분들 같이 풀어요. 백준 문제 같이 분석하고 토론하는 방식이에요.',
+      members: {cur: 2, min: 3, max: 5},
+      times: ['평일 저녁'], mode: ['대면'], style: ['문제풀이', '개념토론'],
+      deadlineDays: 5, isNew: false
+    },
+    {
+      id: 2, name: 'TOEIC 800 클럽', category: '어학', emoji: '🌏',
+      topic: '토익 800 목표', subject: '영어', level: '기본',
+      leader: {nick: '김서연', college: '인문대학', grade: '2학년'},
+      bio: '6주 안에 800점 목표. 매주 모의고사 풀고 오답 정리 같이 해요. 비대면 위주.',
+      members: {cur: 3, min: 4, max: 6},
+      times: ['주말 오후'], mode: ['비대면'], style: ['문제풀이', '복습형'],
+      deadlineDays: 3, isNew: false
+    },
+    {
+      id: 3, name: '백준 골드 도전', category: '코딩테스트', emoji: '💻',
+      topic: '백준 실버→골드', subject: '알고리즘', level: '중급',
+      leader: {nick: '코드몬스터', college: 'IT대학', grade: '4학년'},
+      bio: '실버에서 골드 올리는 게 목표. 매주 가상 대회 1세트씩 돌리고 같이 풀이 공유.',
+      members: {cur: 4, min: 3, max: 5},
+      times: ['평일 밤'], mode: ['비대면'], style: ['문제풀이'],
+      deadlineDays: 1, isNew: false  // 마감 임박
+    },
+    {
+      id: 4, name: '웹 사이드 프로젝트', category: '프로젝트', emoji: '🚀',
+      topic: '리액트, 학과 행사 관리', subject: '웹개발', level: '기본',
+      leader: {nick: '박지호', college: 'IT대학', grade: '2학년'},
+      bio: '리액트로 학과 행사 관리 서비스 만들어보고 싶어요. 디자이너 1, 백엔드 1, 프론트 2 모집.',
+      members: {cur: 1, min: 3, max: 4},
+      times: ['주말 오후', '주말 저녁'], mode: ['비대면'], style: ['프로젝트'],
+      deadlineDays: 7, isNew: false
+    },
+    {
+      id: 5, name: '정처기 필기 단기완성', category: '자격증', emoji: '📜',
+      topic: '정보처리기사 필기', subject: '자격증', level: '기본',
+      leader: {nick: '감자소녀', college: '공과대학', grade: '3학년'},
+      bio: '6주 단기 합격 목표. 매일 30문제씩 풀고 단톡방에서 모르는 거 공유.',
+      members: {cur: 2, min: 2, max: 4},
+      times: ['평일 오전'], mode: ['비대면'], style: ['문제풀이', '복습형'],
+      deadlineDays: 4, isNew: false
+    },
+    {
+      id: 6, name: '영어회화 친구들', category: '어학', emoji: '🌏',
+      topic: '프리토킹', subject: '영어회화', level: '기본',
+      leader: {nick: '이하은', college: '사범대학', grade: '2학년'},
+      bio: '편하게 영어로 떠드는 게 목표예요. 주제 정해서 1시간 토킹, 끝나고 짧게 피드백.',
+      members: {cur: 2, min: 3, max: 5},
+      times: ['평일 저녁'], mode: ['대면'], style: ['개념토론'],
+      deadlineDays: 10, isNew: false
+    },
+    {
+      id: 7, name: '알고리즘 면접 대비', category: '코딩테스트', emoji: '💻',
+      topic: '코딩 면접, 알고리즘', subject: '알고리즘', level: '고급',
+      leader: {nick: '알고리즘마스터', college: 'IT대학', grade: '4학년'},
+      bio: '하반기 공채 대비. 매주 모의 면접 1회, 알고리즘 2문제 풀고 라이브 코딩 리뷰.',
+      members: {cur: 4, min: 4, max: 5},  // 거의 다 찼음
+      times: ['주말 오전'], mode: ['비대면'], style: ['문제풀이', '개념토론'],
+      deadlineDays: 2, isNew: false
+    },
+    {
+      id: 8, name: '미적분학 같이 풀어요', category: '시험 대비', emoji: '📚',
+      topic: '미분, 적분, 기말고사', subject: '미적분학', level: '기본',
+      leader: {nick: '수학천재', college: '자연과학대학', grade: '2학년'},
+      bio: '기말 대비. 교재 연습문제 같이 풀고 막히는 부분 서로 설명해주는 방식.',
+      members: {cur: 5, min: 4, max: 6},  // 거의 다 찼음
+      times: ['평일 오후'], mode: ['대면'], style: ['문제풀이', '예습형'],
+      deadlineDays: 6, isNew: false
+    },
+    {
+      id: 9, name: '머신러닝 입문 책 모임', category: '자율 학습', emoji: '📖',
+      topic: '핸즈온 머신러닝, ML', subject: '머신러닝', level: '초보',
+      leader: {nick: '최소은', college: 'IT대학', grade: '3학년'},
+      bio: '"핸즈온 머신러닝" 책 같이 읽어요. 매주 2챕터씩 발제 + 코드 실습.',
+      members: {cur: 1, min: 2, max: 4},
+      times: ['주말 저녁'], mode: ['비대면'], style: ['예습형', '개념토론'],
+      deadlineDays: 14, isNew: false
+    },
+    {
+      id: 10, name: 'SQL 실전 프로젝트', category: '자격증', emoji: '📜',
+      topic: 'SQLD 자격증, MySQL', subject: 'SQL', level: '기본',
+      leader: {nick: 'SQL장인', college: 'IT대학', grade: '3학년'},
+      bio: '실제 DB 만들고 쿼리 짜는 실습. SQLD 자격증도 같이 준비. 주 2회 모임.',
+      members: {cur: 1, min: 2, max: 3},
+      times: ['평일 밤'], mode: ['비대면'], style: ['프로젝트', '문제풀이'],
+      deadlineDays: 3, isNew: true  // NEW
+    }
+  ];
+
+  // 내가 만든 방 (방장 모집 진행 상황 — 핸드오프 D)
+  const MY_ROOMS = [
+    {
+      id: 'm1', name: '컴공 자료구조 같이 정리해요', category: '시험 대비', emoji: '📚',
+      applicants: 3, members: {cur: 1, min: 3, max: 4}, deadlineDays: 4
+    }
+  ];
+
+  // 검색/필터/정렬 상태
+  const browseState = {
+    search: '',
+    category: '전체',       // 단일 선택
+    mode: [], time: [], style: [], people: [], level: [],  // 다중 선택
+    sort: 'urgent'
+  };
+
+  const STORAGE_KEY = 'studyPotato.browseState.v1';
+
+  /* ---- 유틸 ---- */
+  function escapeHtml(str){
+    return String(str)
+      .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+      .replace(/"/g,'&quot;').replace(/'/g,'&#039;');
+  }
+  // 검색어 하이라이트 (escape된 텍스트에 적용)
+  function highlight(text, keyword){
+    if(!keyword) return escapeHtml(text);
+    const esc = escapeHtml(text);
+    const k = escapeHtml(keyword);
+    // 대소문자 무시, 특수문자 escape
+    const re = new RegExp(k.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi');
+    return esc.replace(re, m => `<mark>${m}</mark>`);
+  }
+
+  /* ---- localStorage 저장/복원 ---- */
+  function saveBrowseState(){
+    try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(browseState)); }
+    catch(e){ /* 무시 (사파리 시크릿 모드 등) */ }
+  }
+  function loadBrowseState(){
+    try{
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if(!raw) return;
+      const saved = JSON.parse(raw);
+      Object.assign(browseState, saved);
+    } catch(e){ /* 무시 */ }
+  }
+
+  /* ---- 검색 (디바운스) ---- */
+  let searchTimer = null;
+  function onSearchInput(value){
+    document.getElementById('search-clear').classList.toggle('show', value.length > 0);
+    clearTimeout(searchTimer);
+    searchTimer = setTimeout(() => {
+      browseState.search = value.trim();
+      saveBrowseState();
+      applyFilters();
+    }, 200);
+  }
+  function clearSearch(){
+    const input = document.getElementById('room-search');
+    input.value = '';
+    document.getElementById('search-clear').classList.remove('show');
+    browseState.search = '';
+    saveBrowseState();
+    applyFilters();
+    input.focus();
+  }
+  // ESC: 검색어 지움 / Enter: 디바운스 무시하고 즉시 검색
+  function onSearchKeydown(e){
+    if(e.key === 'Escape' && e.target.value){
+      clearSearch();
+      e.preventDefault();
+    } else if(e.key === 'Enter'){
+      clearTimeout(searchTimer);
+      browseState.search = e.target.value.trim();
+      saveBrowseState();
+      applyFilters();
+      e.target.blur();
+    }
+  }
+
+  /* ---- 카테고리 칩 (단일 선택) ---- */
+  function setCategoryFilter(btn){
+    document.querySelectorAll('#category-filter .filter-chip').forEach(c => c.classList.remove('active'));
+    btn.classList.add('active');
+    browseState.category = btn.dataset.cat;
+    saveBrowseState();
+    applyFilters();
+  }
+
+  /* ---- 추가 필터 미니 칩 (다중 선택) ---- */
+  function toggleMiniChip(btn){
+    const group = btn.parentElement.dataset.group;  // mode/time/style/people/level
+    const val = btn.dataset.value;
+    const arr = browseState[group];
+    const idx = arr.indexOf(val);
+    if(idx >= 0){ arr.splice(idx, 1); btn.classList.remove('active'); }
+    else{ arr.push(val); btn.classList.add('active'); }
+    saveBrowseState();
+    applyFilters();
+  }
+
+  /* ---- 필터 패널 펼침/접힘 ---- */
+  function toggleFilterPanel(){
+    const panel = document.getElementById('filter-panel');
+    panel.classList.toggle('open');
+  }
+
+  /* ---- 추가 필터 초기화 (카테고리/검색은 유지) ---- */
+  function resetExtraFilters(){
+    ['mode','time','style','people','level'].forEach(g => browseState[g] = []);
+    document.querySelectorAll('.filter-mini-chip').forEach(c => c.classList.remove('active'));
+    saveBrowseState();
+    applyFilters();
+  }
+
+  /* ---- 모든 검색/필터 초기화 (빈 결과 화면에서 호출) ---- */
+  function resetAllBrowseFilters(){
+    browseState.search = '';
+    browseState.category = '전체';
+    ['mode','time','style','people','level'].forEach(g => browseState[g] = []);
+    // UI 동기화
+    document.getElementById('room-search').value = '';
+    document.getElementById('search-clear').classList.remove('show');
+    document.querySelectorAll('#category-filter .filter-chip').forEach(c => {
+      c.classList.toggle('active', c.dataset.cat === '전체');
+    });
+    document.querySelectorAll('.filter-mini-chip').forEach(c => c.classList.remove('active'));
+    saveBrowseState();
+    applyFilters();
+  }
+
+  /* ---- 필터 적용 + 정렬 + 렌더 ---- */
+  function applyFilters(){
+    const kw = browseState.search.toLowerCase();
+    const cat = browseState.category;
+
+    let filtered = ROOMS.filter(r => {
+      // 검색 (방 이름/주제/과목/설명)
+      if(kw){
+        const haystack = (r.name + ' ' + r.topic + ' ' + r.subject + ' ' + r.bio).toLowerCase();
+        if(!haystack.includes(kw)) return false;
+      }
+      // 카테고리
+      if(cat !== '전체' && r.category !== cat) return false;
+      // 모임 방식
+      if(browseState.mode.length && !browseState.mode.some(v => r.mode.includes(v))) return false;
+      // 시간대 (어느 하나라도 매칭되면 OK)
+      if(browseState.time.length && !browseState.time.some(v => r.times.includes(v))) return false;
+      // 학습 스타일
+      if(browseState.style.length && !browseState.style.some(v => r.style.includes(v))) return false;
+      // 모집 인원 (총 모집 정원 기준 = max)
+      if(browseState.people.length && !browseState.people.includes(String(r.members.max))) return false;
+      // 최소 인원 미충족 (cur < min)인 방도 그대로 노출 — 사용자가 지원하면 충족 도움
+      // 수준
+      if(browseState.level.length && !browseState.level.includes(r.level)) return false;
+      return true;
+    });
+
+    // 정렬
+    const sortMap = {
+      urgent:  (a,b) => a.deadlineDays - b.deadlineDays,
+      newest:  (a,b) => (b.isNew - a.isNew) || (b.id - a.id),
+      filling: (a,b) => (b.members.cur / b.members.max) - (a.members.cur / a.members.max),
+      empty:   (a,b) => (a.members.cur / a.members.max) - (b.members.cur / b.members.max)
+    };
+    filtered.sort(sortMap[browseState.sort] || sortMap.urgent);
+
+    renderRooms(filtered);
+    updateFilterCount();
+  }
+
+  /* ---- 활성 필터 개수 표시 ---- */
+  function updateFilterCount(){
+    const cnt = browseState.mode.length + browseState.time.length
+              + browseState.style.length + browseState.people.length + browseState.level.length;
+    const btn = document.getElementById('filter-toggle');
+    const badge = document.getElementById('filter-count');
+    if(cnt > 0){
+      btn.classList.add('has-active');
+      badge.style.display = '';
+      badge.textContent = cnt;
+    } else {
+      btn.classList.remove('has-active');
+      badge.style.display = 'none';
+    }
+  }
+
+  /* ---- 방 카드 렌더링 ---- */
+  function renderRooms(rooms){
+    const list = document.getElementById('room-list');
+    const empty = document.getElementById('empty-rooms');
+    const countEl = document.getElementById('result-count');
+
+    countEl.innerHTML = `총 <strong>${rooms.length}</strong>개 방`;
+
+    if(rooms.length === 0){
+      list.innerHTML = '';
+      empty.style.display = '';
+      return;
+    }
+    empty.style.display = 'none';
+
+    const kw = browseState.search;
+    list.innerHTML = rooms.map(r => {
+      const isOrange = ['어학','프로젝트','자율 학습'].includes(r.category);
+      const isFull = r.members.cur >= r.members.max;
+      const almostFull = !isFull && (r.members.max - r.members.cur) <= 1;
+      const minMet = r.members.cur >= r.members.min;  // 최소 인원 충족 여부
+
+      // 배지들
+      const badges = [];
+      if(r.deadlineDays <= 1) badges.push('<span class="room-badge urgent">마감 D-' + r.deadlineDays + '</span>');
+      if(almostFull) badges.push('<span class="room-badge almost-full">거의 다 찼어요</span>');
+      if(r.isNew) badges.push('<span class="room-badge new">NEW</span>');
+      if(minMet && !isFull) badges.push('<span class="room-badge min-met">최소 인원 충족</span>');
+
+      const timeText = r.times.join(' / ');
+      const modeText = r.mode.join('/');
+
+      return `
+        <div class="room-card" onclick="openTeamDetail(${r.id})">
+          ${badges.length ? `<div class="room-badges">${badges.join('')}</div>` : ''}
+          <div class="room-card-head">
+            <span class="room-tag${isOrange ? ' orange' : ''}">${r.emoji} ${escapeHtml(r.category)}</span>
+            <span class="room-recruiting">${r.members.cur} / ${r.members.max} · 최소 ${r.members.min}</span>
+          </div>
+          <div class="room-name">${highlight(r.name, kw)}</div>
+          <div class="room-leader">팀장 · ${escapeHtml(r.leader.nick)} · ${escapeHtml(r.leader.college)} · ${escapeHtml(r.leader.grade)}</div>
+          <div class="room-bio">"${highlight(r.bio, kw)}"</div>
+          <div class="room-foot">
+            <span class="room-meta">${escapeHtml(timeText)} · ${escapeHtml(modeText)} · D-${r.deadlineDays}</span>
+            <button class="room-apply-btn${isFull ? ' full' : ''}"
+                    onclick="event.stopPropagation(); ${isFull ? '' : `applyToRoom(${r.id})`}"
+                    ${isFull ? 'disabled' : ''}>
+              ${isFull ? '마감' : '지원하기'}
+            </button>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  // 카드 전체 클릭 → 상세 화면
+  function openTeamDetail(roomId){
+    window.location.href = `team-detail.html?id=${roomId}`;
+  }
+
+  // 지원하기 버튼 → 상세 화면 + 자동 지원 모달
+  function applyToRoom(roomId){
+    window.location.href = `team-detail.html?id=${roomId}&support=1`;
+  }
+
+  /* ---- 내가 만든 방 (방장) 렌더링 ---- */
+  function renderMyRooms(){
+    const section = document.getElementById('my-rooms-section');
+    if(!MY_ROOMS || MY_ROOMS.length === 0){ section.innerHTML = ''; return; }
+
+    section.innerHTML = `
+      <div class="my-rooms-head">
+        <div class="my-rooms-title">내가 만든 팀 <em>${MY_ROOMS.length}</em></div>
+      </div>
+      ${MY_ROOMS.map(m => `
+        <div class="my-room-card">
+          <div class="my-room-card-head">
+            <span class="my-room-leader-tag">팀장</span>
+            <span class="my-room-deadline">마감까지 <strong>D-${m.deadlineDays}</strong></span>
+          </div>
+          <div class="my-room-name">${escapeHtml(m.name)}</div>
+          <div class="my-room-stats">
+            <span><strong>${m.applicants}</strong> 지원자</span>
+            <span><strong>${m.members.cur}/${m.members.max}</strong> 확정</span>
+            <span>최소 <strong>${m.members.min}</strong>명</span>
+          </div>
+          <div class="my-room-actions">
+            <button class="my-room-btn" onclick="showToast('지원자 보기 (예정)')">지원자 보기</button>
+            <button class="my-room-btn" onclick="showToast('팀 수정 (예정)')">팀 수정</button>
+            <button class="my-room-btn danger" onclick="confirmCloseRoom('${m.id}')">모집 마감</button>
+          </div>
+        </div>
+      `).join('')}
+    `;
+  }
+
+  function confirmCloseRoom(myRoomId){
+    if(confirm('정말 모집을 마감하시겠어요?\n현재 지원자들에게 알림이 가요.')){
+      showToast('모집이 마감되었어요');
+    }
+  }
+
+  /* ---- 정렬 변경 (HTML onchange에서 호출) ---- */
+  function onSortChange(value){
+    browseState.sort = value;
+    saveBrowseState();
+    applyFilters();
+  }
+
+  /* ---- 저장된 상태를 UI에 적용 ---- */
+  function restoreBrowseUI(){
+    // 검색 input
+    const input = document.getElementById('room-search');
+    if(input && browseState.search){
+      input.value = browseState.search;
+      document.getElementById('search-clear').classList.add('show');
+    }
+    // 카테고리
+    document.querySelectorAll('#category-filter .filter-chip').forEach(c => {
+      c.classList.toggle('active', c.dataset.cat === browseState.category);
+    });
+    // 추가 필터
+    ['mode','time','style','people','level'].forEach(g => {
+      document.querySelectorAll(`[data-group="${g}"] .filter-mini-chip`).forEach(c => {
+        c.classList.toggle('active', browseState[g].includes(c.dataset.value));
+      });
+    });
+    // 정렬 (programmatic 설정은 change 이벤트 트리거 안 함 → 별도 호출 불필요)
+    const sortEl = document.getElementById('sort-select');
+    if(sortEl) sortEl.value = browseState.sort;
+  }
+
+  /* ---- 초기화 ---- */
+  function initBrowse(){
+    loadBrowseState();
+    restoreBrowseUI();
+    renderMyRooms();
+    applyFilters();
+  }
+
+  /* 탭 전환 */
+  function switchTab(tab, btn){
+    document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+    document.getElementById('tab-' + tab).classList.add('active');
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    window.scrollTo(0, 0);
+  }
+
+  /* 카운트다운: 카드 만료까지 (7일 기준) */
+  let countdownTimers = {};
+
+  // 더미: 현재로부터 5일 13시간 24분 후를 만료 시간으로 설정
+  // 실제: 서버에서 카드 생성 시각 받아서 + 7일 계산
+  const cardExpiry = new Date();
+  cardExpiry.setDate(cardExpiry.getDate() + 5);
+  cardExpiry.setHours(cardExpiry.getHours() + 13);
+  cardExpiry.setMinutes(cardExpiry.getMinutes() + 24);
+
+  function updateCountdown(elementId){
+    const el = document.getElementById(elementId);
+    if(!el) return;
+
+    const now = new Date();
+    const diff = cardExpiry - now;
+
+    if(diff <= 0){
+      el.textContent = '만료됨';
+      stopCountdown(elementId);
+      return;
+    }
+
+    const days = Math.floor(diff / (24 * 3600 * 1000));
+    const hours = Math.floor((diff % (24 * 3600 * 1000)) / 3600000);
+    const minutes = Math.floor((diff % 3600000) / 60000);
+    const seconds = Math.floor((diff % 60000) / 1000);
+
+    if(days > 0){
+      el.innerHTML =
+        `${days}<span class="unit">일</span> ` +
+        `${String(hours).padStart(2,'0')}<span class="unit">:</span>` +
+        `${String(minutes).padStart(2,'0')}<span class="unit">:</span>` +
+        `${String(seconds).padStart(2,'0')}`;
+    } else {
+      el.innerHTML =
+        `${String(hours).padStart(2,'0')}<span class="unit">:</span>` +
+        `${String(minutes).padStart(2,'0')}<span class="unit">:</span>` +
+        `${String(seconds).padStart(2,'0')}`;
+    }
+  }
+
+  function startCountdown(elementId){
+    stopCountdown(elementId);
+    updateCountdown(elementId);
+    countdownTimers[elementId] = setInterval(() => updateCountdown(elementId), 1000);
+  }
+
+  function stopCountdown(elementId){
+    if(countdownTimers[elementId]){
+      clearInterval(countdownTimers[elementId]);
+      delete countdownTimers[elementId];
+    }
+  }
+
+  /* 액션 */
+  function goMatchCard(){
+    // 매칭 카드 만들기 화면으로 이동 (수정 시에도 같은 화면 사용)
+    window.location.href = 'matchcard.html';
+  }
+
+  function cancelMatch(){
+    if(confirm('매칭을 취소하시겠어요?\n카드는 삭제되고 다시 만들 수 있어요.')){
+      showToast('매칭이 취소되었어요');
+      setState('empty', document.querySelector('.dev-toggle button:first-child'));
+    }
+  }
+
+  function confirmDelete(){
+    if(confirm('이 매칭 카드를 영구적으로 삭제하시겠어요?\n삭제된 카드는 복구할 수 없어요.')){
+      showToast('카드가 삭제되었어요');
+    }
+  }
+
+  /* 토스트 */
+  let toastTimer = null;
+  function showToast(message){
+    const toast = document.getElementById('toast');
+    toast.textContent = message;
+    toast.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => toast.classList.remove('show'), 2400);
+  }
+
+  /* ============================================================
+     스터디 끝내기 / 나가기 / No-Show 신고
+     ============================================================ */
+  let pendingTeamId = null;  // 모달이 작업할 팀 ID
+
+  function openEndModal(teamId){
+    pendingTeamId = teamId;
+    document.getElementById('end-study-modal').classList.add('show');
+  }
+  function closeEndModal(){
+    pendingTeamId = null;
+    document.getElementById('end-study-modal').classList.remove('show');
+  }
+  function confirmEndStudy(){
+    const card = document.querySelector(`[data-team-id="${pendingTeamId}"]`);
+    if(card){
+      card.classList.add('ended');
+      card.querySelector('.study-ended-badge').textContent = '종료됨';
+    }
+    closeEndModal();
+    showToast('스터디가 종료됐어요. 팀원들에게 알림이 가요.');
+  }
+
+  function openLeaveModal(teamId){
+    pendingTeamId = teamId;
+    document.getElementById('leave-study-modal').classList.add('show');
+  }
+  function closeLeaveModal(){
+    pendingTeamId = null;
+    document.getElementById('leave-study-modal').classList.remove('show');
+  }
+  function confirmLeaveStudy(){
+    const card = document.querySelector(`[data-team-id="${pendingTeamId}"]`);
+    if(card){
+      card.classList.add('ended', 'left');
+      card.querySelector('.study-ended-badge').textContent = '나갔어요';
+    }
+    closeLeaveModal();
+    showToast('팀에서 나왔어요. 팀장과 팀원들에게 알림이 가요.');
+  }
+
+  function openReportModal(teamId){
+    pendingTeamId = teamId;
+    document.getElementById('report-study-modal').classList.add('show');
+  }
+  function closeReportModal(){
+    pendingTeamId = null;
+    document.getElementById('report-study-modal').classList.remove('show');
+  }
+  function confirmReport(){
+    closeReportModal();
+    showToast('신고가 접수됐어요. 확인 후 처리해드릴게요.');
+  }
+
+  /* ============================================================
+     사용자 상태 자동 판단
+     ------------------------------------------------------------
+     실제 서비스: 서버에서 사용자의 매칭 카드 / 매칭 진행 상태 fetch
+     데모: localStorage에 'studyPotato.userMatchCard' 가 있으면 'waiting'
+     URL ?preview=1 일 때만 dev-toggle/상태 수동 전환 가능 (디자인 검토용)
+     ============================================================ */
+  const USER_CARD_KEY = 'studyPotato.userMatchCard';
+
+  function detectUserHomeState(){
+    // 실제: API 호출. 데모: localStorage 확인
+    try{
+      const raw = localStorage.getItem(USER_CARD_KEY);
+      if(!raw) return 'empty';
+      const data = JSON.parse(raw);
+      if(data && data.status === 'waiting') return 'waiting';
+      if(data && data.status === 'paused') return 'paused';
+      return 'waiting';
+    } catch(e){
+      return 'empty';
+    }
+  }
+
+  function autoApplyUserState(){
+    const homeState = detectUserHomeState();
+    // 홈 탭의 상태 영역
+    document.querySelectorAll('#tab-home .state-content').forEach(s => s.classList.remove('active'));
+    const homeEl = document.getElementById('state-' + homeState);
+    if(homeEl) homeEl.classList.add('active');
+    // dev-toggle 버튼도 동기화 (preview 모드에서)
+    document.querySelectorAll('#tab-home .dev-toggle button').forEach((b, i) => {
+      const map = ['empty','waiting'];
+      b.classList.toggle('active', map[i] === homeState);
+    });
+
+    // 매칭 탭 AI 모드 (state-empty/state-waiting/state-paused 와 같은 분기)
+    const matchState = homeState; // 같은 상태 공유
+    document.querySelectorAll('.match-state-content').forEach(s => s.classList.remove('active'));
+    const matchEl = document.getElementById('match-' + matchState);
+    if(matchEl){
+      matchEl.classList.add('active');
+      if(matchState === 'waiting') startCountdown('countdown-match');
+    } else {
+      // 매칭 탭에 해당 상태 없으면 empty fallback
+      const fallback = document.getElementById('match-empty');
+      if(fallback) fallback.classList.add('active');
+    }
+    document.querySelectorAll('#mode-ai .dev-toggle button').forEach((b, i) => {
+      const map = ['empty','waiting','paused'];
+      b.classList.toggle('active', map[i] === matchState);
+    });
+  }
+
+  /* preview 모드 활성화 — URL ?preview=1 또는 localStorage 'studyPotato.previewMode' */
+  function checkPreviewMode(){
+    const params = new URLSearchParams(location.search);
+    const isPreview = params.get('preview') === '1'
+                   || localStorage.getItem('studyPotato.previewMode') === '1';
+    if(isPreview){
+      document.body.classList.add('preview-mode');
+    }
+  }
+
+  /* ============================================================
+     페이지 로드 후 초기화
+     ============================================================ */
+  document.addEventListener('DOMContentLoaded', () => {
+    checkPreviewMode();
+    autoApplyUserState();
+    initBrowse();
+  });
+</script>
+</body>
+</html>

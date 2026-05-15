@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<title>공부하는 감자 — 글쓰기</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/variable/pretendardvariable.css" />
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --knu-blue: #0047BB; --knu-blue-deep: #00347E; --knu-blue-soft: #E5ECF8;
+    --knu-orange: #FE5000; --knu-orange-soft: #FFE8DD;
+    --cream: #F7F3EC; --paper: #FFFFFF; --paper-warm: #FBF8F2;
+    --ink: #1A1A1A; --ink-soft: #555E68; --ink-mute: #8B95A4;
+    --line: #E8E2D4; --line-soft: #F0EBDF;
+    --error: #DC3545; --success: #2D7A3E;
+    --font-kr: 'Pretendard Variable', Pretendard, sans-serif;
+    --font-mono: 'JetBrains Mono', monospace;
+    --radius-s: 10px; --radius-m: 16px; --radius-l: 22px;
+  }
+  *{ margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color: transparent; }
+  button{ background:none; border:none; cursor:pointer; font-family: inherit; }
+  body{ font-family: var(--font-kr); background: var(--line); color: var(--ink); overflow-x: hidden; word-break: keep-all; line-height: 1.5; }
+  .app{ max-width: 480px; margin: 0 auto; background: var(--cream); min-height: 100vh; padding-bottom: 100px; position: relative; }
+
+  .topbar{
+    display: flex; align-items: center; gap: 8px;
+    padding: 14px 20px 16px;
+    background: var(--cream);
+    position: sticky; top: 0; z-index: 10;
+    border-bottom: 1px solid var(--line-soft);
+  }
+  .back-btn{
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--ink-soft);
+  }
+  .back-btn:active{ background: var(--line-soft); }
+  .top-title{ font-size: 16px; font-weight: 800; flex: 1; }
+  .top-action{
+    background: var(--knu-orange);
+    color: white;
+    font-size: 13px;
+    font-weight: 700;
+    padding: 8px 16px;
+    border-radius: 999px;
+  }
+  .top-action:active{ transform: scale(0.96); background: #CC4000; }
+  .top-action:disabled{
+    background: var(--line);
+    color: var(--ink-mute);
+  }
+
+  .notice{
+    margin: 14px 24px 0;
+    padding: 12px 14px;
+    background: var(--knu-orange-soft);
+    border: 1px solid var(--knu-orange);
+    border-radius: var(--radius-s);
+    font-size: 11.5px;
+    color: var(--knu-orange);
+    line-height: 1.6;
+  }
+  .notice strong{ font-weight: 700; }
+
+  .form-block{ padding: 18px 24px 0; }
+  .form-label{
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--ink-soft);
+    margin-bottom: 8px;
+    font-family: var(--font-mono);
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+
+  /* 카테고리 칩 */
+  .cat-chips{
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .cat-chip{
+    background: var(--paper);
+    border: 1px solid var(--line);
+    padding: 8px 14px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--ink-soft);
+    transition: all 0.15s;
+  }
+  .cat-chip:active{ transform: scale(0.96); }
+  .cat-chip.active{
+    background: var(--ink);
+    color: var(--cream);
+    border-color: var(--ink);
+    font-weight: 700;
+  }
+
+  /* 인풋 / 텍스트영역 */
+  .input-title{
+    width: 100%;
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-s);
+    padding: 14px 16px;
+    font-family: var(--font-kr);
+    font-size: 17px;
+    font-weight: 700;
+    color: var(--ink);
+    outline: none;
+  }
+  .input-title:focus{ border-color: var(--knu-blue); }
+  .input-title::placeholder{ color: var(--ink-mute); font-weight: 500; }
+
+  .input-body{
+    width: 100%;
+    min-height: 240px;
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-s);
+    padding: 14px 16px;
+    font-family: var(--font-kr);
+    font-size: 14px;
+    color: var(--ink);
+    line-height: 1.7;
+    outline: none;
+    resize: vertical;
+  }
+  .input-body:focus{ border-color: var(--knu-blue); }
+  .input-body::placeholder{ color: var(--ink-mute); }
+
+  .char-counter{
+    text-align: right;
+    margin-top: 6px;
+    font-size: 11px;
+    color: var(--ink-mute);
+    font-family: var(--font-mono);
+  }
+
+  /* 작성 가이드 */
+  .write-guide{
+    margin: 20px 24px 0;
+    padding: 14px 16px;
+    background: var(--paper-warm);
+    border-radius: var(--radius-s);
+    font-size: 12px;
+    color: var(--ink-soft);
+    line-height: 1.7;
+  }
+  .write-guide h4{
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--ink);
+    margin-bottom: 6px;
+    font-family: var(--font-mono);
+    letter-spacing: 0.05em;
+  }
+  .write-guide ul{ padding-left: 16px; }
+  .write-guide li{ margin-bottom: 3px; }
+
+  /* 토스트 */
+  .toast{
+    position: fixed; bottom: 32px; left: 50%;
+    transform: translateX(-50%) translateY(60px);
+    background: var(--ink); color: var(--cream);
+    padding: 11px 18px; border-radius: 999px;
+    font-size: 13px; font-weight: 600;
+    opacity: 0; pointer-events: none;
+    transition: all 0.25s; z-index: 100;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+  }
+  .toast.show{ opacity: 1; transform: translateX(-50%) translateY(0); }
+</style>
+</head>
+<body>
+
+<div class="app">
+
+  <div class="topbar">
+    <button class="back-btn" onclick="confirmLeave()" aria-label="뒤로가기">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+    </button>
+    <div class="top-title">글쓰기</div>
+    <button class="top-action" id="submit-btn" disabled onclick="submitPost()">등록</button>
+  </div>
+
+  <!-- 운영 안내 -->
+  <div class="notice">
+    📢 욕설·비방·허위정보·광고·홍보 글은 <strong>안내 없이 삭제</strong>되며 반복 시 계정이 제재될 수 있어요.
+  </div>
+
+  <!-- 카테고리 -->
+  <div class="form-block">
+    <div class="form-label">▸ 카테고리</div>
+    <div class="cat-chips" id="cat-chips">
+      <button class="cat-chip" onclick="selectCat(this, '정보 공유')">💡 정보 공유</button>
+      <button class="cat-chip" onclick="selectCat(this, '질문')">❓ 질문</button>
+      <button class="cat-chip" onclick="selectCat(this, '소통')">💬 소통</button>
+    </div>
+    <div class="form-sub" style="margin-top:8px;font-size:11px;color:var(--ink-mute)">※ "공지"는 운영자만 작성할 수 있어요.</div>
+  </div>
+
+  <!-- 제목 -->
+  <div class="form-block">
+    <div class="form-label">▸ 제목</div>
+    <input class="input-title" id="title-input" type="text"
+           placeholder="제목을 입력해주세요"
+           maxlength="50"
+           oninput="onChange()" />
+    <div class="char-counter"><span id="title-count">0</span> / 50</div>
+  </div>
+
+  <!-- 내용 -->
+  <div class="form-block">
+    <div class="form-label">▸ 내용</div>
+    <textarea class="input-body" id="body-input"
+              placeholder="자유롭게 이야기해주세요. 다른 감자들에게 도움이 되는 내용이면 더 좋아요!"
+              maxlength="2000"
+              oninput="onChange()"></textarea>
+    <div class="char-counter"><span id="body-count">0</span> / 2,000</div>
+  </div>
+
+  <!-- 작성 가이드 -->
+  <div class="write-guide">
+    <h4>▸ 작성 시 유의사항</h4>
+    <ul>
+      <li>다른 이용자를 비방하거나 모욕하는 표현은 안 돼요.</li>
+      <li>허위 정보, 사실과 다른 내용은 삭제될 수 있어요.</li>
+      <li>광고, 홍보, 외부 서비스 권유는 금지예요.</li>
+      <li>스터디 모집은 <strong>"팀 만들기"</strong> 또는 <strong>"매칭 카드 생성"</strong> 기능을 이용해주세요.</li>
+    </ul>
+  </div>
+
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  const form = { category: '', title: '', body: '' };
+
+  function selectCat(btn, value){
+    document.querySelectorAll('.cat-chip').forEach(c => c.classList.remove('active'));
+    btn.classList.add('active');
+    form.category = value;
+    onChange();
+  }
+
+  function onChange(){
+    form.title = document.getElementById('title-input').value;
+    form.body = document.getElementById('body-input').value;
+    document.getElementById('title-count').textContent = form.title.length;
+    document.getElementById('body-count').textContent = form.body.length.toLocaleString();
+    const ok = form.category && form.title.trim().length >= 2 && form.body.trim().length >= 10;
+    document.getElementById('submit-btn').disabled = !ok;
+  }
+
+  function submitPost(){
+    showToast('게시글이 등록됐어요');
+    setTimeout(() => { window.location.href = 'dashboard.html'; }, 1200);
+  }
+
+  function confirmLeave(){
+    const dirty = form.category || form.title.trim() || form.body.trim();
+    if(dirty){
+      if(!confirm('작성 중인 글이 있어요.\n그래도 나가시겠어요?')) return;
+    }
+    history.back();
+  }
+
+  let toastTimer = null;
+  function showToast(message){
+    const toast = document.getElementById('toast');
+    toast.textContent = message;
+    toast.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => toast.classList.remove('show'), 2400);
+  }
+</script>
+</body>
+</html>

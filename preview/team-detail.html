@@ -1,0 +1,868 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<title>공부하는 감자 — 팀 상세</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/variable/pretendardvariable.css" />
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --knu-blue: #0047BB; --knu-blue-deep: #00347E; --knu-blue-soft: #E5ECF8;
+    --knu-orange: #FE5000; --knu-orange-soft: #FFE8DD;
+    --cream: #F7F3EC; --paper: #FFFFFF; --paper-warm: #FBF8F2;
+    --ink: #1A1A1A; --ink-soft: #555E68; --ink-mute: #8B95A4;
+    --line: #E8E2D4; --line-soft: #F0EBDF;
+    --error: #DC3545; --success: #2D7A3E;
+    --font-kr: 'Pretendard Variable', Pretendard, sans-serif;
+    --font-mono: 'JetBrains Mono', monospace;
+    --radius-s: 10px; --radius-m: 16px; --radius-l: 22px;
+  }
+  *{ margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color: transparent; }
+  button{ background:none; border:none; cursor:pointer; font-family: inherit; }
+  body{ font-family: var(--font-kr); background: var(--line); color: var(--ink); overflow-x: hidden; word-break: keep-all; line-height: 1.5; }
+  .app{ max-width: 480px; margin: 0 auto; background: var(--cream); min-height: 100vh; padding-bottom: 100px; position: relative; }
+
+  /* 상단 바 */
+  .topbar{
+    display: flex; align-items: center; gap: 8px;
+    padding: 14px 20px 14px;
+    background: var(--cream);
+    position: sticky; top: 0; z-index: 10;
+    border-bottom: 1px solid var(--line-soft);
+  }
+  .back-btn{
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--ink-soft);
+  }
+  .back-btn:active{ background: var(--line-soft); }
+  .top-title{
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--ink-soft);
+    flex: 1;
+    font-family: var(--font-mono);
+    letter-spacing: 0.03em;
+  }
+  .top-action{
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--ink-mute);
+  }
+  .top-action:active{ background: var(--line-soft); }
+
+  /* ===== 히어로 (팀명 + 카테고리) ===== */
+  .hero{
+    padding: 20px 24px 8px;
+  }
+  .hero-tag{
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    background: var(--knu-blue-soft);
+    color: var(--knu-blue);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 700;
+    padding: 5px 11px;
+    border-radius: 999px;
+    margin-bottom: 12px;
+  }
+  .hero-tag.orange{
+    background: var(--knu-orange-soft);
+    color: var(--knu-orange);
+  }
+  .hero-name{
+    font-size: 26px;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    line-height: 1.25;
+    margin-bottom: 8px;
+  }
+  .hero-leader{
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--ink-mute);
+  }
+  .hero-leader strong{ color: var(--ink); font-weight: 600; }
+
+  /* ===== 배지 ===== */
+  .badges{
+    display: flex;
+    gap: 5px;
+    flex-wrap: wrap;
+    padding: 14px 24px 0;
+  }
+  .badge{
+    font-family: var(--font-mono);
+    font-size: 10px;
+    font-weight: 700;
+    padding: 4px 9px;
+    border-radius: 4px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+  .badge.urgent{ background: var(--knu-orange); color: white; }
+  .badge.min-met{ background: var(--knu-blue-soft); color: var(--knu-blue); border: 1px solid var(--knu-blue); }
+  .badge.almost-full{ background: var(--knu-blue); color: white; }
+  .badge.new{ background: var(--success); color: white; }
+
+  /* ===== 모집 현황 카드 (어두운 카드) ===== */
+  .status-card{
+    background: var(--ink);
+    color: var(--cream);
+    border-radius: var(--radius-l);
+    margin: 14px 24px 0;
+    padding: 18px 22px;
+    position: relative;
+    overflow: hidden;
+  }
+  .status-card::before{
+    content: '';
+    position: absolute;
+    top: -40px; right: -40px;
+    width: 120px; height: 120px;
+    background: radial-gradient(circle, var(--knu-orange) 0%, transparent 70%);
+    opacity: 0.18;
+    pointer-events: none;
+  }
+  .status-row{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    border-bottom: 1px dashed rgba(247,243,236,0.12);
+    font-family: var(--font-mono);
+  }
+  .status-row:first-child{ padding-top: 0; }
+  .status-row:last-child{ border-bottom: 0; padding-bottom: 0; }
+  .status-row .k{
+    font-size: 11px;
+    color: rgba(247,243,236,0.6);
+    letter-spacing: 0.05em;
+  }
+  .status-row .v{
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--cream);
+  }
+  .status-row .v .num{
+    color: var(--knu-orange);
+    font-size: 17px;
+    font-weight: 800;
+  }
+
+  /* ===== 팀 소개 ===== */
+  .bio-card{
+    margin: 14px 24px 0;
+    padding: 16px 18px;
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-m);
+    position: relative;
+  }
+  .bio-card::before{
+    content: '"';
+    position: absolute;
+    top: 4px; left: 12px;
+    font-size: 36px;
+    color: var(--knu-orange-soft);
+    font-weight: 800;
+    font-family: Georgia, serif;
+    line-height: 1;
+  }
+  .bio-text{
+    padding-left: 16px;
+    font-size: 13.5px;
+    color: var(--ink);
+    line-height: 1.7;
+  }
+
+  /* ===== 정보 섹션 ===== */
+  .section{
+    padding: 22px 24px 0;
+  }
+  .section-title{
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--ink-soft);
+    font-family: var(--font-mono);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+
+  .info-card{
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-m);
+    overflow: hidden;
+  }
+  .info-row{
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--line-soft);
+  }
+  .info-row:last-child{ border-bottom: 0; }
+  .info-k{
+    flex-shrink: 0;
+    width: 80px;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--ink-mute);
+    font-family: var(--font-mono);
+    padding-top: 2px;
+    letter-spacing: 0.03em;
+  }
+  .info-v{
+    flex: 1;
+    font-size: 13.5px;
+    color: var(--ink);
+    line-height: 1.55;
+  }
+  .info-tags{
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+  }
+  .info-tag{
+    background: var(--paper-warm);
+    border: 1px solid var(--line);
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 11.5px;
+    color: var(--ink-soft);
+    font-family: var(--font-mono);
+  }
+  .info-tag.highlight{
+    background: var(--knu-orange-soft);
+    color: var(--knu-orange);
+    border-color: var(--knu-orange);
+    font-weight: 700;
+  }
+
+  /* ===== 비슷한 팀 (옵션) ===== */
+  .related-hint{
+    margin: 24px 24px 0;
+    padding: 14px 16px;
+    background: var(--paper-warm);
+    border-radius: var(--radius-m);
+    text-align: center;
+    font-size: 12px;
+    color: var(--ink-mute);
+    line-height: 1.5;
+  }
+
+  /* ===== 하단 고정 바 (지원 버튼) ===== */
+  .bottom-bar{
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    z-index: 50;
+    pointer-events: none;
+  }
+  .bottom-inner{
+    max-width: 480px;
+    margin: 0 auto;
+    padding: 12px 24px 18px;
+    background: linear-gradient(to top, var(--cream) 70%, transparent);
+    pointer-events: auto;
+  }
+  .apply-btn{
+    width: 100%;
+    background: var(--knu-orange);
+    color: white;
+    padding: 15px;
+    border-radius: var(--radius-s);
+    font-size: 14px;
+    font-weight: 700;
+    transition: all 0.15s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+  .apply-btn:active{ transform: scale(0.99); background: #CC4000; }
+  .apply-btn.applied,
+  .apply-btn:disabled{
+    background: var(--line);
+    color: var(--ink-mute);
+    cursor: not-allowed;
+  }
+
+  /* 팀장 모드 안내 배지 */
+  .leader-mode-badge{
+    position: fixed;
+    top: 12px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--knu-orange);
+    color: white;
+    font-size: 11.5px;
+    font-weight: 700;
+    padding: 7px 14px;
+    border-radius: 999px;
+    z-index: 90;
+    box-shadow: 0 4px 14px rgba(254,80,0,0.3);
+    pointer-events: none;
+  }
+
+  /* 수정 모달 input */
+  .edit-input{
+    width: 100%;
+    padding: 12px 14px;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-s);
+    background: var(--paper-warm);
+    font-size: 14px;
+    font-family: var(--font-kr);
+    font-weight: 600;
+    color: var(--ink);
+    outline: none;
+    transition: border-color 0.15s;
+  }
+  .edit-input:focus{ border-color: var(--knu-blue); border-style: solid; }
+
+  /* ===== 지원 모달 ===== */
+  .modal-overlay{
+    display: none;
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.5);
+    z-index: 200;
+    align-items: flex-end;
+    justify-content: center;
+  }
+  .modal-overlay.show{ display: flex; }
+  .modal-sheet{
+    background: var(--paper);
+    width: 100%;
+    max-width: 480px;
+    border-radius: var(--radius-l) var(--radius-l) 0 0;
+    padding: 26px 24px 24px;
+    transform: translateY(100%);
+    animation: slideUp 0.25s forwards;
+  }
+  @keyframes slideUp{
+    to{ transform: translateY(0); }
+  }
+  .modal-handle{
+    width: 40px; height: 4px;
+    background: var(--line);
+    border-radius: 999px;
+    margin: -10px auto 18px;
+  }
+  .modal-sheet h3{
+    font-size: 18px;
+    font-weight: 800;
+    margin-bottom: 6px;
+  }
+  .modal-sheet h3 em{
+    font-style: normal;
+    color: var(--knu-orange);
+  }
+  .modal-sheet .modal-sub{
+    font-size: 12.5px;
+    color: var(--ink-soft);
+    line-height: 1.6;
+    margin-bottom: 16px;
+  }
+
+  .form-label{
+    font-size: 12.5px;
+    font-weight: 700;
+    color: var(--ink);
+    margin-bottom: 8px;
+  }
+  .form-label .required{ color: var(--knu-orange); margin-left: 2px; }
+
+  .textarea-wrap{
+    background: var(--paper-warm);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-s);
+    padding: 12px 14px;
+    transition: border-color 0.15s;
+  }
+  .textarea-wrap:focus-within{ border-color: var(--knu-blue); }
+  .form-textarea{
+    width: 100%;
+    border: 0;
+    background: transparent;
+    font-family: var(--font-kr);
+    font-size: 13.5px;
+    color: var(--ink);
+    line-height: 1.55;
+    outline: none;
+    resize: none;
+    min-height: 70px;
+  }
+  .form-textarea::placeholder{ color: var(--ink-mute); }
+  .char-counter{
+    text-align: right;
+    margin-top: 6px;
+    font-size: 11px;
+    color: var(--ink-mute);
+    font-family: var(--font-mono);
+  }
+  .char-counter.warn{ color: var(--knu-orange); }
+
+  .modal-tip{
+    margin-top: 12px;
+    padding: 10px 12px;
+    background: var(--knu-blue-soft);
+    border-radius: var(--radius-s);
+    font-size: 11.5px;
+    color: var(--knu-blue);
+    line-height: 1.55;
+  }
+
+  .modal-actions{
+    display: flex;
+    gap: 8px;
+    margin-top: 18px;
+  }
+  .modal-btn{
+    flex: 1;
+    padding: 13px;
+    border-radius: var(--radius-s);
+    font-size: 14px;
+    font-weight: 700;
+  }
+  .modal-btn.cancel{
+    background: var(--line-soft);
+    color: var(--ink-soft);
+  }
+  .modal-btn.confirm{
+    background: var(--knu-orange);
+    color: white;
+  }
+  .modal-btn.confirm:disabled{
+    background: var(--line);
+    color: var(--ink-mute);
+    cursor: not-allowed;
+  }
+
+  /* 토스트 */
+  .toast{
+    position: fixed; bottom: 84px; left: 50%;
+    transform: translateX(-50%) translateY(60px);
+    background: var(--ink); color: var(--cream);
+    padding: 11px 18px; border-radius: 999px;
+    font-size: 13px; font-weight: 600;
+    opacity: 0; pointer-events: none;
+    transition: all 0.25s; z-index: 100;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+  }
+  .toast.show{ opacity: 1; transform: translateX(-50%) translateY(0); }
+</style>
+</head>
+<body>
+
+<div class="app">
+
+  <!-- 상단 바 -->
+  <div class="topbar">
+    <button class="back-btn" onclick="history.back()" aria-label="뒤로가기">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+    </button>
+    <div class="top-title">팀 상세</div>
+    <button class="top-action" onclick="showToast('신고 화면 (예정)')" aria-label="신고">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+    </button>
+  </div>
+
+  <!-- 히어로 -->
+  <section class="hero">
+    <span class="hero-tag" id="hero-tag">📚 시험 대비</span>
+    <h1 class="hero-name" id="hero-name">자료구조 트리 정복단</h1>
+    <div class="hero-leader" id="hero-leader">팀장 · <strong>호빵맨</strong> · IT대학 · 3학년</div>
+  </section>
+
+  <!-- 배지 -->
+  <div class="badges" id="badges">
+    <!-- JS로 렌더 -->
+  </div>
+
+  <!-- 모집 현황 -->
+  <div class="status-card">
+    <div class="status-row">
+      <span class="k">▸ 현재 / 모집 인원</span>
+      <span class="v"><span class="num" id="current">2</span> / <span id="max">5</span> 명</span>
+    </div>
+    <div class="status-row">
+      <span class="k">▸ 최소 인원</span>
+      <span class="v"><span id="min-num">3</span> 명 이상 수락 시 확정</span>
+    </div>
+    <div class="status-row">
+      <span class="k">▸ 모집 마감</span>
+      <span class="v">D-<span id="deadline">5</span></span>
+    </div>
+  </div>
+
+  <!-- 팀 소개 -->
+  <div class="bio-card">
+    <div class="bio-text" id="bio-text">트리 챕터에서 막힌 분들 같이 풀어요. 백준 문제 같이 분석하고 토론하는 방식이에요.</div>
+  </div>
+
+  <!-- 상세 정보 -->
+  <section class="section">
+    <div class="section-title">▸ 상세 정보</div>
+    <div class="info-card">
+      <div class="info-row">
+        <div class="info-k">카테고리</div>
+        <div class="info-v" id="info-category">📚 시험 대비</div>
+      </div>
+      <div class="info-row">
+        <div class="info-k">세부 주제</div>
+        <div class="info-v" id="info-topic">트리, 백준 문제풀이</div>
+      </div>
+      <div class="info-row">
+        <div class="info-k">과목</div>
+        <div class="info-v" id="info-subject">자료구조</div>
+      </div>
+      <div class="info-row">
+        <div class="info-k">수준</div>
+        <div class="info-v">
+          <div class="info-tags">
+            <span class="info-tag highlight" id="info-level">중급</span>
+          </div>
+        </div>
+      </div>
+      <div class="info-row">
+        <div class="info-k">전공 범위</div>
+        <div class="info-v" id="info-major">같은 학과</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 일정 / 운영 -->
+  <section class="section">
+    <div class="section-title">▸ 일정 / 운영</div>
+    <div class="info-card">
+      <div class="info-row">
+        <div class="info-k">시간대</div>
+        <div class="info-v">
+          <div class="info-tags" id="info-times"></div>
+        </div>
+      </div>
+      <div class="info-row">
+        <div class="info-k">학습 스타일</div>
+        <div class="info-v">
+          <div class="info-tags" id="info-styles"></div>
+        </div>
+      </div>
+      <div class="info-row">
+        <div class="info-k">모임 방식</div>
+        <div class="info-v">
+          <div class="info-tags" id="info-modes"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 안내 -->
+  <div class="related-hint">
+    💡 지원하시면 <strong>팀장과 모든 팀원에게 한 줄 소개가 보여요.</strong><br>
+    잘 어울리는 팀이 되도록 솔직하게 적어주세요.
+  </div>
+
+</div>
+
+<!-- 하단 고정 액션 버튼 (지원 / 팀장 모드 수정) -->
+<div class="bottom-bar">
+  <div class="bottom-inner">
+    <button class="apply-btn" id="apply-btn" onclick="openApplyModal()">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+      <span>이 팀에 지원하기</span>
+    </button>
+  </div>
+</div>
+
+<!-- ============================================================
+     팀장 모드 안내 배지 (?edit=1 일 때만 노출)
+     ============================================================ -->
+<div class="leader-mode-badge" id="leader-mode-badge" style="display:none">
+  👑 팀장 모드 — 팀 정보를 수정할 수 있어요
+</div>
+
+<!-- ============================================================
+     팀 정보 수정 모달 (바텀 시트)
+     ============================================================ -->
+<div class="modal-overlay" id="edit-modal">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <h3>팀 정보 <em>수정</em></h3>
+    <p class="modal-sub">
+      변경 내용은 <strong>모든 팀원에게 알림</strong>이 가요.
+      매칭 확정 시점과 지금 상황이 달라졌으면 함께 정리해주세요.
+    </p>
+
+    <div class="form-label">팀명</div>
+    <input type="text" id="edit-name" class="edit-input" maxlength="15" />
+
+    <div class="form-label" style="margin-top:14px">팀 소개</div>
+    <div class="textarea-wrap">
+      <textarea class="form-textarea" id="edit-bio" maxlength="120" rows="4"></textarea>
+    </div>
+
+    <div class="modal-tip">
+      💡 자세한 시간대·장소·운영 규칙은 카카오톡 오픈채팅에서 정해주세요.
+    </div>
+
+    <div class="modal-actions">
+      <button class="modal-btn cancel" onclick="closeEditModal()">취소</button>
+      <button class="modal-btn confirm" onclick="saveEdit()">저장</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     지원 모달 (바텀 시트)
+     ============================================================ -->
+<div class="modal-overlay" id="apply-modal">
+  <div class="modal-sheet" id="apply-sheet">
+    <div class="modal-handle"></div>
+    <h3>이 팀에 <em>지원</em>하시겠어요?</h3>
+    <p class="modal-sub">
+      한 줄 소개를 작성해주세요. 팀장과 다른 팀원에게 보여져요.
+    </p>
+
+    <div class="form-label">
+      한 줄 소개<span class="required">*</span>
+    </div>
+    <div class="textarea-wrap">
+      <textarea class="form-textarea" id="apply-bio"
+                placeholder="예: 트리 챕터에서 막혔어요. 같이 헤쳐나가요."
+                maxlength="30"
+                oninput="onBioInput()"></textarea>
+    </div>
+    <div class="char-counter" id="bio-counter">0 / 30</div>
+
+    <div class="modal-tip">
+      💡 한 번 지원하면 팀장 응답을 기다리는 동안 같은 팀에 다시 지원할 수 없어요.
+    </div>
+
+    <div class="modal-actions">
+      <button class="modal-btn cancel" onclick="closeApplyModal()">취소</button>
+      <button class="modal-btn confirm" id="apply-confirm" disabled onclick="submitApply()">지원하기</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  /* ============================================================
+     더미 팀 데이터 (실제는 ?id 받아 서버에서 fetch)
+     dashboard.html의 ROOMS와 같은 구조 — 데모용 단일 팀
+     ============================================================ */
+  const TEAMS = {
+    '1': {
+      name: '자료구조 트리 정복단', category: '시험 대비', emoji: '📚', orange: false,
+      topic: '트리, 백준 문제풀이', subject: '자료구조', level: '중급',
+      majorRange: '같은 학과',
+      leader: {nick: '호빵맨', college: 'IT대학', grade: '3학년'},
+      bio: '트리 챕터에서 막힌 분들 같이 풀어요. 백준 문제 같이 분석하고 토론하는 방식이에요. 결석은 최소화해서 매주 꾸준히 진행하고 싶어요.',
+      members: {cur: 2, min: 3, max: 5},
+      times: ['평일 저녁'], modes: ['대면'], styles: ['문제풀이', '개념토론'],
+      deadlineDays: 5, isNew: false
+    },
+    '3': {
+      name: '백준 골드 도전', category: '코딩테스트', emoji: '💻', orange: false,
+      topic: '백준 실버→골드', subject: '알고리즘', level: '중급',
+      majorRange: '같은 단과대학',
+      leader: {nick: '코드몬스터', college: 'IT대학', grade: '4학년'},
+      bio: '실버에서 골드 올리는 게 목표. 매주 가상 대회 1세트씩 돌리고 같이 풀이 공유. 모르는 거 부담 없이 물어볼 수 있는 분위기를 만들고 싶어요.',
+      members: {cur: 4, min: 3, max: 5},
+      times: ['평일 밤'], modes: ['비대면'], styles: ['문제풀이'],
+      deadlineDays: 1, isNew: false
+    },
+    '10': {
+      name: 'SQL 실전 프로젝트', category: '자격증', emoji: '📜', orange: false,
+      topic: 'SQLD 자격증, MySQL', subject: 'SQL', level: '기본',
+      majorRange: '상관없음',
+      leader: {nick: 'SQL장인', college: 'IT대학', grade: '3학년'},
+      bio: '실제 DB 만들고 쿼리 짜는 실습. SQLD 자격증도 같이 준비. 주 2회 모임으로 가볍게 시작해서 본격적으로 진행해봐요.',
+      members: {cur: 1, min: 2, max: 3},
+      times: ['평일 밤'], modes: ['비대면'], styles: ['프로젝트', '문제풀이'],
+      deadlineDays: 3, isNew: true
+    }
+  };
+
+  // URL ?id로 팀 식별, 없으면 1번
+  function getTeamId(){
+    const p = new URLSearchParams(location.search);
+    return p.get('id') || '1';
+  }
+
+  /* ============================================================
+     렌더링
+     ============================================================ */
+  function render(){
+    const team = TEAMS[getTeamId()] || TEAMS['1'];
+    const isOrange = ['어학','프로젝트','자율 학습'].includes(team.category);
+    const isFull = team.members.cur >= team.members.max;
+    const almostFull = !isFull && (team.members.max - team.members.cur) <= 1;
+    const minMet = team.members.cur >= team.members.min;
+
+    // 히어로
+    const tagEl = document.getElementById('hero-tag');
+    tagEl.textContent = `${team.emoji} ${team.category}`;
+    tagEl.classList.toggle('orange', isOrange);
+    document.getElementById('hero-name').textContent = team.name;
+    document.getElementById('hero-leader').innerHTML =
+      `팀장 · <strong>${escape(team.leader.nick)}</strong> · ${escape(team.leader.college)} · ${escape(team.leader.grade)}`;
+
+    // 배지
+    const badges = [];
+    if(team.deadlineDays <= 1) badges.push(`<span class="badge urgent">마감 D-${team.deadlineDays}</span>`);
+    if(almostFull && !isFull) badges.push('<span class="badge almost-full">거의 다 찼어요</span>');
+    if(minMet && !isFull) badges.push('<span class="badge min-met">최소 인원 충족</span>');
+    if(team.isNew) badges.push('<span class="badge new">NEW</span>');
+    document.getElementById('badges').innerHTML = badges.join('');
+
+    // 상태 카드
+    document.getElementById('current').textContent = team.members.cur;
+    document.getElementById('max').textContent = team.members.max;
+    document.getElementById('min-num').textContent = team.members.min;
+    document.getElementById('deadline').textContent = team.deadlineDays;
+
+    // 팀 소개
+    document.getElementById('bio-text').textContent = team.bio;
+
+    // 상세
+    document.getElementById('info-category').textContent = `${team.emoji} ${team.category}`;
+    document.getElementById('info-topic').textContent = team.topic || '—';
+    document.getElementById('info-subject').textContent = team.subject || '—';
+    document.getElementById('info-level').textContent = team.level || '—';
+    document.getElementById('info-major').textContent = team.majorRange || '—';
+
+    // 태그 그룹
+    renderTags('info-times', team.times);
+    renderTags('info-styles', team.styles);
+    renderTags('info-modes', team.modes);
+
+    // 마감 상태 처리
+    const applyBtn = document.getElementById('apply-btn');
+    if(isFull){
+      applyBtn.classList.add('applied');
+      applyBtn.disabled = true;
+      applyBtn.innerHTML = '<span>모집이 마감됐어요</span>';
+    }
+
+    // URL ?support=1 이면 자동 모달 오픈
+    const p = new URLSearchParams(location.search);
+    if(p.get('support') === '1' && !isFull){
+      setTimeout(() => openApplyModal(), 250);
+    }
+
+    // URL ?edit=1 이면 팀장 모드 — 하단 버튼을 "팀 정보 수정"으로 변경
+    if(p.get('edit') === '1'){
+      const applyBtn = document.getElementById('apply-btn');
+      applyBtn.classList.remove('applied');
+      applyBtn.disabled = false;
+      applyBtn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg><span>팀 정보 수정하기</span>';
+      applyBtn.onclick = openEditModal;
+
+      // 팀장 안내 배지
+      document.getElementById('leader-mode-badge').style.display = 'block';
+
+      // 수정 모달 input에 현재 값 채워두기
+      document.getElementById('edit-name').value = team.name;
+      document.getElementById('edit-bio').value = team.bio;
+    }
+  }
+
+  function renderTags(containerId, list){
+    const el = document.getElementById(containerId);
+    el.innerHTML = (list || []).map(v => `<span class="info-tag">${escape(v)}</span>`).join('') || '<span class="info-tag">—</span>';
+  }
+
+  function escape(s){
+    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  /* ============================================================
+     지원 모달
+     ============================================================ */
+  function openApplyModal(){
+    document.getElementById('apply-modal').classList.add('show');
+    setTimeout(() => document.getElementById('apply-bio').focus(), 250);
+  }
+  function closeApplyModal(){
+    document.getElementById('apply-modal').classList.remove('show');
+  }
+
+  function onBioInput(){
+    const v = document.getElementById('apply-bio').value;
+    const len = v.length;
+    const counter = document.getElementById('bio-counter');
+    counter.textContent = `${len} / 30`;
+    counter.classList.toggle('warn', len >= 28);
+    document.getElementById('apply-confirm').disabled = (v.trim().length === 0);
+  }
+
+  function submitApply(){
+    const bio = document.getElementById('apply-bio').value.trim();
+    if(!bio) return;
+    closeApplyModal();
+    showToast('지원이 완료됐어요. 팀장이 확인하면 알림으로 안내해드릴게요.');
+
+    // 지원 버튼을 "지원 완료" 상태로 변경
+    const btn = document.getElementById('apply-btn');
+    btn.classList.add('applied');
+    btn.disabled = true;
+    btn.innerHTML = '<span>지원 완료 — 응답 대기 중</span>';
+
+    // 데모: 일정 시간 후 대시보드로 이동 (필요시)
+    // setTimeout(() => { window.location.href = 'dashboard.html'; }, 1800);
+  }
+
+  /* ============================================================
+     팀장 모드: 팀 정보 수정 모달
+     ============================================================ */
+  function openEditModal(){
+    document.getElementById('edit-modal').classList.add('show');
+    setTimeout(() => document.getElementById('edit-name').focus(), 250);
+  }
+  function closeEditModal(){
+    document.getElementById('edit-modal').classList.remove('show');
+  }
+  function saveEdit(){
+    const newName = document.getElementById('edit-name').value.trim();
+    const newBio = document.getElementById('edit-bio').value.trim();
+    if(!newName || newName.length < 4){
+      showToast('팀명은 4자 이상이어야 해요');
+      return;
+    }
+    if(!newBio){
+      showToast('팀 소개를 입력해주세요');
+      return;
+    }
+    // 화면에 즉시 반영
+    document.getElementById('hero-name').textContent = newName;
+    document.getElementById('bio-text').textContent = newBio;
+    closeEditModal();
+    showToast('팀 정보가 저장됐어요. 팀원들에게 알림이 갑니다.');
+  }
+
+  /* 토스트 */
+  let toastTimer = null;
+  function showToast(message){
+    const toast = document.getElementById('toast');
+    toast.textContent = message;
+    toast.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => toast.classList.remove('show'), 2600);
+  }
+
+  /* 초기화 */
+  document.addEventListener('DOMContentLoaded', render);
+</script>
+</body>
+</html>

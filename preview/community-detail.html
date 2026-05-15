@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<title>공부하는 감자 — 게시글</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/variable/pretendardvariable.css" />
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --knu-blue: #0047BB; --knu-blue-deep: #00347E; --knu-blue-soft: #E5ECF8;
+    --knu-orange: #FE5000; --knu-orange-soft: #FFE8DD;
+    --cream: #F7F3EC; --paper: #FFFFFF; --paper-warm: #FBF8F2;
+    --ink: #1A1A1A; --ink-soft: #555E68; --ink-mute: #8B95A4;
+    --line: #E8E2D4; --line-soft: #F0EBDF;
+    --error: #DC3545; --success: #2D7A3E;
+    --font-kr: 'Pretendard Variable', Pretendard, sans-serif;
+    --font-mono: 'JetBrains Mono', monospace;
+    --radius-s: 10px; --radius-m: 16px; --radius-l: 22px;
+  }
+  *{ margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color: transparent; }
+  button{ background:none; border:none; cursor:pointer; font-family: inherit; }
+  body{ font-family: var(--font-kr); background: var(--line); color: var(--ink); overflow-x: hidden; word-break: keep-all; line-height: 1.6; }
+  .app{ max-width: 480px; margin: 0 auto; background: var(--cream); min-height: 100vh; padding-bottom: 100px; position: relative; }
+
+  .topbar{
+    display: flex; align-items: center; gap: 8px;
+    padding: 14px 20px 14px;
+    background: var(--cream);
+    position: sticky; top: 0; z-index: 10;
+    border-bottom: 1px solid var(--line-soft);
+  }
+  .back-btn{
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--ink-soft);
+  }
+  .back-btn:active{ background: var(--line-soft); }
+  .top-title{ font-size: 14px; font-weight: 700; color: var(--ink-soft); flex: 1; font-family: var(--font-mono); letter-spacing: 0.03em; }
+  .top-action{
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--ink-mute);
+  }
+  .top-action:active{ background: var(--line-soft); }
+
+  /* 게시글 헤드 */
+  .post-head{
+    padding: 20px 24px 14px;
+    border-bottom: 1px solid var(--line);
+  }
+  .post-cat{
+    display: inline-block;
+    background: var(--knu-blue-soft);
+    color: var(--knu-blue);
+    padding: 4px 10px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 700;
+    font-family: var(--font-mono);
+    margin-bottom: 12px;
+  }
+  .post-title{
+    font-size: 22px;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    line-height: 1.3;
+    margin-bottom: 14px;
+  }
+  .author-row{
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .author-avatar{
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    background: var(--knu-blue);
+    color: white;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px;
+    font-weight: 700;
+  }
+  .author-info{ flex: 1; }
+  .author-name{
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--ink);
+  }
+  .author-meta{
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--ink-mute);
+    margin-top: 2px;
+  }
+
+  /* 본문 */
+  .post-body{
+    padding: 24px;
+    font-size: 14.5px;
+    color: var(--ink);
+    line-height: 1.85;
+    white-space: pre-wrap;
+    border-bottom: 1px solid var(--line);
+  }
+
+  /* 액션 바 */
+  .post-actions{
+    display: flex;
+    gap: 6px;
+    padding: 14px 24px;
+    border-bottom: 1px solid var(--line);
+  }
+  .post-action-btn{
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--paper);
+    border: 1px solid var(--line);
+    padding: 8px 14px;
+    border-radius: 999px;
+    font-size: 12px;
+    color: var(--ink-soft);
+    font-weight: 600;
+  }
+  .post-action-btn:active{ background: var(--paper-warm); }
+  .post-action-btn.active{
+    background: var(--knu-orange-soft);
+    color: var(--knu-orange);
+    border-color: var(--knu-orange);
+  }
+  .post-action-btn.danger{ color: var(--error); margin-left: auto; }
+
+  /* 댓글 섹션 */
+  .comments{
+    padding: 18px 24px 0;
+  }
+  .comments-head{
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--ink);
+    margin-bottom: 14px;
+  }
+  .comments-head em{
+    font-style: normal;
+    color: var(--knu-orange);
+    margin-left: 4px;
+    font-family: var(--font-mono);
+  }
+
+  .comment{
+    padding: 14px 0;
+    border-bottom: 1px dashed var(--line);
+  }
+  .comment:last-child{ border-bottom: 0; }
+  .comment-head{
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 6px;
+  }
+  .comment-avatar{
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    background: var(--knu-blue-soft);
+    color: var(--knu-blue);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px;
+    font-weight: 700;
+  }
+  .comment-avatar.op{
+    background: var(--knu-orange);
+    color: white;
+  }
+  .comment-author{
+    font-size: 12.5px;
+    font-weight: 700;
+  }
+  .comment-author-tag{
+    background: var(--knu-orange);
+    color: white;
+    font-family: var(--font-mono);
+    font-size: 9px;
+    font-weight: 700;
+    padding: 2px 6px;
+    border-radius: 3px;
+    letter-spacing: 0.05em;
+    margin-left: 4px;
+  }
+  .comment-time{
+    margin-left: auto;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--ink-mute);
+  }
+  .comment-body{
+    padding-left: 36px;
+    font-size: 13px;
+    color: var(--ink);
+    line-height: 1.65;
+    margin-bottom: 6px;
+  }
+  .comment-actions{
+    padding-left: 36px;
+    display: flex;
+    gap: 12px;
+  }
+  .comment-action{
+    background: transparent;
+    color: var(--ink-mute);
+    font-size: 11px;
+    font-weight: 500;
+  }
+  .comment-action:active{ color: var(--ink); }
+
+  /* 대댓글 */
+  .reply{
+    margin-left: 36px;
+    margin-top: 10px;
+    padding: 10px 12px;
+    background: var(--paper-warm);
+    border-radius: var(--radius-s);
+  }
+  .reply .comment-body,
+  .reply .comment-actions{ padding-left: 0; }
+
+  /* 댓글 입력 (하단 고정) */
+  .comment-input-bar{
+    position: fixed;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100%;
+    max-width: 480px;
+    padding: 10px 16px 16px;
+    background: var(--cream);
+    border-top: 1px solid var(--line);
+    display: flex;
+    gap: 8px;
+    align-items: flex-end;
+    z-index: 30;
+  }
+  .comment-input{
+    flex: 1;
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: 22px;
+    padding: 10px 16px;
+    font-family: var(--font-kr);
+    font-size: 13px;
+    color: var(--ink);
+    outline: none;
+    resize: none;
+    max-height: 100px;
+    line-height: 1.4;
+  }
+  .comment-input:focus{ border-color: var(--knu-blue); }
+  .comment-input::placeholder{ color: var(--ink-mute); }
+  .comment-submit{
+    background: var(--knu-orange);
+    color: white;
+    width: 40px; height: 40px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .comment-submit:disabled{
+    background: var(--line);
+    color: var(--ink-mute);
+  }
+
+  /* 안내 카피 */
+  .footer-notice{
+    margin: 20px 24px 0;
+    padding: 10px 12px;
+    font-size: 10.5px;
+    color: var(--ink-mute);
+    font-family: var(--font-mono);
+    text-align: center;
+    line-height: 1.6;
+  }
+
+  /* 토스트 */
+  .toast{
+    position: fixed; bottom: 84px; left: 50%;
+    transform: translateX(-50%) translateY(60px);
+    background: var(--ink); color: var(--cream);
+    padding: 11px 18px; border-radius: 999px;
+    font-size: 13px; font-weight: 600;
+    opacity: 0; pointer-events: none;
+    transition: all 0.25s; z-index: 100;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+  }
+  .toast.show{ opacity: 1; transform: translateX(-50%) translateY(0); }
+</style>
+</head>
+<body>
+
+<div class="app">
+
+  <div class="topbar">
+    <button class="back-btn" onclick="history.back()" aria-label="뒤로가기">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+    </button>
+    <div class="top-title">게시글</div>
+    <button class="top-action" onclick="showToast('신고가 접수됐어요')" aria-label="신고">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+    </button>
+  </div>
+
+  <!-- 게시글 헤드 -->
+  <div class="post-head">
+    <span class="post-cat">💡 정보 공유</span>
+    <h1 class="post-title">자료구조 강의 자료 어디서 받나요?</h1>
+    <div class="author-row">
+      <div class="author-avatar">호</div>
+      <div class="author-info">
+        <div class="author-name">호빵맨</div>
+        <div class="author-meta">IT대학 · 3학년 · 2시간 전 · 조회 47</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 본문 -->
+  <div class="post-body">중간고사 끝나고 기말 대비하려는데 강의 자료가 안 모여있어서요.
+
+도서관에 있는지, 선배들이 정리한 게 있는지 아시는 분?
+
+특히 트리/그래프 챕터 정리된 거 있으면 진짜 감사하겠습니다 🥔</div>
+
+  <!-- 액션 -->
+  <div class="post-actions">
+    <button class="post-action-btn" id="like-btn" onclick="toggleLike()">
+      <span id="like-ico">🤍</span>
+      <span id="like-count">12</span>
+    </button>
+    <button class="post-action-btn">
+      💬 <span>8</span>
+    </button>
+    <button class="post-action-btn">
+      🔖 저장
+    </button>
+    <button class="post-action-btn danger" onclick="showToast('신고가 접수됐어요')">신고</button>
+  </div>
+
+  <!-- 댓글 -->
+  <div class="comments">
+    <div class="comments-head">댓글 <em>8</em></div>
+
+    <div class="comment">
+      <div class="comment-head">
+        <div class="comment-avatar">감</div>
+        <div class="comment-author">감자소녀</div>
+        <div class="comment-time">1시간 전</div>
+      </div>
+      <div class="comment-body">중앙도서관 3층 자료실에 정리된 거 있어요. 검색대에서 "자료구조 정리"로 찾으시면 PDF로도 받을 수 있을 거예요.</div>
+      <div class="comment-actions">
+        <button class="comment-action">답글</button>
+        <button class="comment-action">🤍 5</button>
+      </div>
+
+      <!-- 대댓글 -->
+      <div class="reply">
+        <div class="comment-head">
+          <div class="comment-avatar op">호</div>
+          <div class="comment-author">호빵맨 <span class="comment-author-tag">작성자</span></div>
+          <div class="comment-time">50분 전</div>
+        </div>
+        <div class="comment-body">감사합니다! 바로 가보겠습니다 🥔</div>
+        <div class="comment-actions">
+          <button class="comment-action">🤍 0</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="comment">
+      <div class="comment-head">
+        <div class="comment-avatar">코</div>
+        <div class="comment-author">코드몬스터</div>
+        <div class="comment-time">40분 전</div>
+      </div>
+      <div class="comment-body">선배 노트는 IT대 학생회 단톡방에 가끔 올라와요. 학생회 인스타도 확인해보세요.</div>
+      <div class="comment-actions">
+        <button class="comment-action">답글</button>
+        <button class="comment-action">🤍 3</button>
+      </div>
+    </div>
+
+    <div class="comment">
+      <div class="comment-head">
+        <div class="comment-avatar">박</div>
+        <div class="comment-author">박수빈</div>
+        <div class="comment-time">20분 전</div>
+      </div>
+      <div class="comment-body">저도 같이 받고 싶네요. 자료 받으시면 공유 부탁드려요!</div>
+      <div class="comment-actions">
+        <button class="comment-action">답글</button>
+        <button class="comment-action">🤍 1</button>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- 운영 안내 -->
+  <div class="footer-notice">
+    ※ 욕설·비방·허위정보·광고성 댓글은 안내 없이 삭제됩니다.
+  </div>
+
+</div>
+
+<!-- 댓글 입력 바 (하단 고정) -->
+<div class="comment-input-bar">
+  <textarea class="comment-input" id="comment-input"
+            placeholder="댓글을 남겨보세요"
+            rows="1"
+            oninput="onCommentInput()"></textarea>
+  <button class="comment-submit" id="comment-submit" disabled onclick="submitComment()" aria-label="등록">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+      <line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/>
+    </svg>
+  </button>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  let liked = false;
+  function toggleLike(){
+    const btn = document.getElementById('like-btn');
+    const ico = document.getElementById('like-ico');
+    const count = document.getElementById('like-count');
+    liked = !liked;
+    btn.classList.toggle('active', liked);
+    ico.textContent = liked ? '❤️' : '🤍';
+    count.textContent = liked ? 13 : 12;
+  }
+
+  function onCommentInput(){
+    const v = document.getElementById('comment-input').value.trim();
+    document.getElementById('comment-submit').disabled = v.length === 0;
+  }
+
+  function submitComment(){
+    const input = document.getElementById('comment-input');
+    const v = input.value.trim();
+    if(!v) return;
+    input.value = '';
+    onCommentInput();
+    showToast('댓글이 등록됐어요');
+  }
+
+  let toastTimer = null;
+  function showToast(message){
+    const toast = document.getElementById('toast');
+    toast.textContent = message;
+    toast.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => toast.classList.remove('show'), 2400);
+  }
+</script>
+</body>
+</html>

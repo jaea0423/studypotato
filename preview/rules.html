@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<title>공부하는 감자 — 매칭 운영 규칙</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/variable/pretendardvariable.css" />
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --knu-blue: #0047BB; --knu-blue-deep: #00347E; --knu-blue-soft: #E5ECF8;
+    --knu-orange: #FE5000; --knu-orange-soft: #FFE8DD;
+    --cream: #F7F3EC; --paper: #FFFFFF; --paper-warm: #FBF8F2;
+    --ink: #1A1A1A; --ink-soft: #555E68; --ink-mute: #8B95A4;
+    --line: #E8E2D4; --line-soft: #F0EBDF;
+    --error: #DC3545; --success: #2D7A3E;
+    --font-kr: 'Pretendard Variable', Pretendard, sans-serif;
+    --font-mono: 'JetBrains Mono', monospace;
+    --radius-s: 10px; --radius-m: 16px; --radius-l: 22px;
+  }
+  *{ margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color: transparent; }
+  button{ background:none; border:none; cursor:pointer; font-family: inherit; }
+  body{ font-family: var(--font-kr); background: var(--line); color: var(--ink); overflow-x: hidden; word-break: keep-all; line-height: 1.6; }
+  .app{ max-width: 480px; margin: 0 auto; background: var(--cream); min-height: 100vh; padding-bottom: 60px; }
+
+  .topbar{
+    display: flex; align-items: center; gap: 8px;
+    padding: 14px 20px 16px; background: var(--cream);
+    position: sticky; top: 0; z-index: 10;
+    border-bottom: 1px solid var(--line-soft);
+  }
+  .back-btn{
+    width: 36px; height: 36px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--ink-soft);
+  }
+  .back-btn:active{ background: var(--line-soft); }
+  .top-title{ font-size: 16px; font-weight: 800; }
+
+  .doc-meta{
+    padding: 18px 24px 8px;
+    font-family: var(--font-mono);
+    font-size: 11px; color: var(--ink-mute);
+    line-height: 1.7;
+  }
+  .doc-meta .k{ color: var(--ink-soft); margin-right: 6px; }
+
+  .doc-body{ padding: 0 24px; }
+  .doc-body h1{
+    font-size: 24px; font-weight: 800;
+    letter-spacing: -0.02em; margin: 8px 0 18px;
+    line-height: 1.25;
+  }
+  .doc-body h1 .sub{
+    display: block;
+    margin-top: 6px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--ink-soft);
+    font-family: var(--font-mono);
+    letter-spacing: 0.02em;
+  }
+  .doc-body h2{
+    font-size: 15px; font-weight: 800;
+    color: var(--knu-blue);
+    margin: 22px 0 10px;
+    padding-top: 14px;
+    border-top: 1px solid var(--line-soft);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .doc-body h2:first-of-type{ border-top: 0; padding-top: 0; margin-top: 8px; }
+  .doc-body h2 .ico{ font-size: 18px; }
+  .doc-body p{
+    font-size: 13px; color: var(--ink-soft);
+    margin-bottom: 10px; line-height: 1.7;
+  }
+
+  /* 규칙 카드 (key-value) */
+  .rule-card{
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-m);
+    padding: 14px 16px;
+    margin-bottom: 10px;
+  }
+  .rule-row{
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 8px 0;
+    border-bottom: 1px dashed var(--line);
+  }
+  .rule-row:last-child{ border-bottom: 0; }
+  .rule-k{
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--ink-soft);
+    font-family: var(--font-mono);
+    flex-shrink: 0;
+    width: 95px;
+    letter-spacing: 0.02em;
+  }
+  .rule-v{
+    font-size: 13px;
+    color: var(--ink);
+    line-height: 1.55;
+    flex: 1;
+  }
+  .rule-v strong{
+    color: var(--knu-orange);
+    font-weight: 700;
+  }
+
+  /* 페널티 표 */
+  .penalty-table{
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-m);
+    overflow: hidden;
+    margin: 8px 0 12px;
+  }
+  .penalty-row{
+    display: flex;
+    align-items: center;
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--line-soft);
+  }
+  .penalty-row:last-child{ border-bottom: 0; }
+  .penalty-step{
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    background: var(--knu-blue-soft);
+    color: var(--knu-blue);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 800;
+    font-family: var(--font-mono);
+    margin-right: 14px;
+    flex-shrink: 0;
+  }
+  .penalty-row.warn .penalty-step{ background: var(--knu-orange-soft); color: var(--knu-orange); }
+  .penalty-row.severe .penalty-step{ background: var(--knu-orange); color: white; }
+  .penalty-body .t{
+    font-size: 13px;
+    font-weight: 700;
+    margin-bottom: 2px;
+  }
+  .penalty-body .d{
+    font-size: 11.5px;
+    color: var(--ink-mute);
+    font-family: var(--font-mono);
+  }
+
+  /* 콜아웃 */
+  .callout{
+    background: var(--knu-blue-soft);
+    border-left: 4px solid var(--knu-blue);
+    padding: 12px 16px;
+    border-radius: var(--radius-s);
+    margin: 10px 0;
+    font-size: 12.5px;
+    color: var(--ink);
+    line-height: 1.6;
+  }
+  .callout strong{ color: var(--knu-blue); }
+
+  .footer-note{
+    margin-top: 28px; padding: 14px;
+    background: var(--paper-warm); border-radius: var(--radius-s);
+    font-size: 11.5px; color: var(--ink-mute);
+    line-height: 1.6; text-align: center;
+    font-family: var(--font-mono);
+  }
+</style>
+</head>
+<body>
+
+<div class="app">
+
+  <div class="topbar">
+    <button class="back-btn" onclick="history.back()" aria-label="뒤로가기">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+    </button>
+    <div class="top-title">매칭 운영 규칙</div>
+  </div>
+
+  <div class="doc-meta">
+    <div><span class="k">시행일</span>2026년 7월 1일 (예정)</div>
+    <div><span class="k">버전</span>v0.1</div>
+  </div>
+
+  <div class="doc-body">
+
+    <h1>
+      매칭 운영 규칙
+      <span class="sub">공부하는 감자가 어떻게 돌아가는지 한눈에</span>
+    </h1>
+
+    <h2><span class="ico">🤝</span>자동 매칭</h2>
+    <div class="rule-card">
+      <div class="rule-row">
+        <div class="rule-k">매칭 시간</div>
+        <div class="rule-v">매일 <strong>오전 8시 / 오후 2시 / 오후 8시</strong> (1일 3회)</div>
+      </div>
+      <div class="rule-row">
+        <div class="rule-k">팀 인원</div>
+        <div class="rule-v">한 팀당 <strong>4~6명</strong></div>
+      </div>
+      <div class="rule-row">
+        <div class="rule-k">응답 시간</div>
+        <div class="rule-v">매칭 도착 후 <strong>24시간</strong></div>
+      </div>
+      <div class="rule-row">
+        <div class="rule-k">확정 기준</div>
+        <div class="rule-v"><strong>4명 이상</strong> 수락 시 확정</div>
+      </div>
+      <div class="rule-row">
+        <div class="rule-k">즉시 확정</div>
+        <div class="rule-v">모든 인원이 수락하면 <strong>1분 후 확정</strong></div>
+      </div>
+      <div class="rule-row">
+        <div class="rule-k">카드 만료</div>
+        <div class="rule-v">매칭 카드는 생성 후 <strong>7일</strong>이 지나면 자동 보류</div>
+      </div>
+    </div>
+
+    <div class="callout">
+      💡 매칭 알고리즘은 과목·시간대·전공 범위·학습 스타일·학년·장소 등을 점수화해 <strong>60점 이상</strong>일 때만 매칭해요. 잘 안 맞는 그룹이 묶이지 않게 막아주는 안전선이에요.
+    </div>
+
+    <h2><span class="ico">📋</span>직접 모집 (팀 만들기)</h2>
+    <div class="rule-card">
+      <div class="rule-row">
+        <div class="rule-k">모집 인원</div>
+        <div class="rule-v">팀장 본인 포함 <strong>2~6명</strong></div>
+      </div>
+      <div class="rule-row">
+        <div class="rule-k">최소 인원</div>
+        <div class="rule-v">팀 확정 기준. <strong>이 인원 이상 수락하면 확정</strong>됩니다.</div>
+      </div>
+      <div class="rule-row">
+        <div class="rule-k">모집 마감일</div>
+        <div class="rule-v"><strong>3일 / 5일 / 7일 / 14일</strong> 중 선택 (기본 7일)</div>
+      </div>
+      <div class="rule-row">
+        <div class="rule-k">응답 시간</div>
+        <div class="rule-v">인원 충족 후 <strong>24시간</strong> 내 응답</div>
+      </div>
+      <div class="rule-row">
+        <div class="rule-k">팀장 의무</div>
+        <div class="rule-v">매칭 확정 후 <strong>24시간 내 카카오톡 오픈채팅 등록</strong>. 미등록 시 자동 무산.</div>
+      </div>
+    </div>
+
+    <h2><span class="ico">🎯</span>팀장 배정</h2>
+    <p>매칭된 팀의 팀장은 다음 우선순위로 배정됩니다.</p>
+    <div class="rule-card">
+      <div class="rule-row">
+        <div class="rule-k">1순위</div>
+        <div class="rule-v">매칭 카드에서 <strong>팀장 희망</strong>에 체크한 사람</div>
+      </div>
+      <div class="rule-row">
+        <div class="rule-k">2순위</div>
+        <div class="rule-v">희망자가 여러 명이면 <strong>랜덤</strong></div>
+      </div>
+      <div class="rule-row">
+        <div class="rule-k">3순위</div>
+        <div class="rule-v">희망자 없으면 팀원 중 <strong>랜덤 지명</strong></div>
+      </div>
+    </div>
+    <div class="callout">
+      💡 팀장이 모든 걸 결정할 필요는 없어요. 채팅방을 만들고 첫 대화의 물꼬를 트는 역할이에요.
+    </div>
+
+    <h2><span class="ico">⏱</span>페널티 정책</h2>
+    <p>매칭 무응답이 반복되면 다른 감자들의 매칭 기회가 줄어요. 점진적 페널티가 적용됩니다.</p>
+    <div class="penalty-table">
+      <div class="penalty-row">
+        <div class="penalty-step">1</div>
+        <div class="penalty-body">
+          <div class="t">매칭 무응답 1회</div>
+          <div class="d">경고 알림 발송</div>
+        </div>
+      </div>
+      <div class="penalty-row warn">
+        <div class="penalty-step">2</div>
+        <div class="penalty-body">
+          <div class="t">매칭 무응답 2회</div>
+          <div class="d">3일간 매칭 참여 정지</div>
+        </div>
+      </div>
+      <div class="penalty-row severe">
+        <div class="penalty-step">3</div>
+        <div class="penalty-body">
+          <div class="t">매칭 무응답 3회</div>
+          <div class="d">1주일간 매칭 참여 정지</div>
+        </div>
+      </div>
+    </div>
+    <p style="font-size:12px; color:var(--ink-mute); margin-top:8px;">※ 거절은 페널티가 없어요. "맞지 않은 것 같아요"는 의사 표현이라 자유롭게 사용하실 수 있어요.</p>
+
+    <h2><span class="ico">🚫</span>No-Show / 분쟁</h2>
+    <p>매칭 확정 후 정당한 사유 없이 약속을 지키지 않거나 채팅방에 나타나지 않는 행위는 <strong>No-Show</strong>로 간주해요.</p>
+    <div class="rule-card">
+      <div class="rule-row">
+        <div class="rule-k">신고 방법</div>
+        <div class="rule-v">팀 확정 화면 또는 "내 스터디"에서 <strong>No-Show 신고</strong> 버튼</div>
+      </div>
+      <div class="rule-row">
+        <div class="rule-k">처리 절차</div>
+        <div class="rule-v">운영진 확인 → 양측 확인 → 사실 확인 시 페널티 적용</div>
+      </div>
+      <div class="rule-row">
+        <div class="rule-k">차단</div>
+        <div class="rule-v">차단한 사람과는 향후 매칭되지 않아요</div>
+      </div>
+    </div>
+
+    <h2><span class="ico">🥔</span>운영진</h2>
+    <p>본 서비스는 강원대학교 재학생이 비영리로 운영하며, 광고도 없습니다. 서버 비용은 운영자 본인이 부담해요.</p>
+    <div class="callout">
+      💡 본 서비스는 강원대학교의 <strong>공식 서비스가 아닙니다.</strong> 강원대학교 재학생이 운영·배포 중인 서비스입니다.
+    </div>
+
+    <div class="footer-note">
+      운영 문의: jaea0423@gmail.com<br>
+      변경된 규칙은 알림으로 안내해드려요
+    </div>
+
+  </div>
+</div>
+
+</body>
+</html>
