@@ -229,6 +229,68 @@
     gap: 10px;
     margin-bottom: 14px;
   }
+  /* ===== 내 매칭 카드 목록 (Step 4-1) ===== */
+  #my-cards-section{ display: none; padding: 0 20px; margin-bottom: 24px; }
+  .my-cards-head{
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 12px;
+  }
+  .my-cards-head h2{
+    font-size: 17px; font-weight: 800; letter-spacing: -0.02em;
+  }
+  .my-cards-head .count{
+    font-family: var(--font-mono); font-size: 12px; color: var(--ink-mute);
+    font-weight: 600;
+  }
+  .my-card{
+    background: var(--paper);
+    border: 1.5px solid var(--line);
+    border-radius: var(--radius-m);
+    padding: 14px 16px;
+    margin-bottom: 10px;
+    transition: border-color 0.15s;
+  }
+  .my-card.active-card{
+    border-color: var(--knu-orange);
+    background: linear-gradient(180deg, #FFF7F0 0%, var(--paper) 60%);
+  }
+  .my-card-head{
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 8px;
+    gap: 8px;
+  }
+  .my-card-cat{
+    font-size: 14px; font-weight: 700; color: var(--ink);
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    flex: 1; min-width: 0;
+  }
+  .my-card-status{
+    font-size: 10px; font-weight: 700; padding: 3px 8px; border-radius: 999px;
+    font-family: var(--font-mono); flex-shrink: 0;
+  }
+  .my-card-status.active{ background: var(--knu-orange-soft); color: var(--knu-orange); }
+  .my-card-status.draft{ background: var(--line-soft); color: var(--ink-mute); }
+  .my-card-intro{
+    font-size: 13px; color: var(--ink-soft); line-height: 1.5;
+    margin-bottom: 8px;
+    overflow: hidden; text-overflow: ellipsis;
+    display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+  }
+  .my-card-meta{
+    font-size: 11px; color: var(--ink-mute); margin-bottom: 10px;
+    font-family: var(--font-mono);
+  }
+  .my-card-meta .anon{ color: var(--admin-purple, #6B46C1); margin-right: 4px; }
+  .my-card-actions{ display: flex; gap: 6px; }
+  .my-card-btn{
+    flex: 1; padding: 8px; border-radius: var(--radius-s);
+    font-size: 12px; font-weight: 700; transition: all 0.15s;
+  }
+  .my-card-btn:active{ transform: scale(0.97); }
+  .my-card-btn.activate{ background: var(--knu-orange); color: white; }
+  .my-card-btn.deactivate{ background: var(--paper-warm); color: var(--ink-soft); border: 1.5px solid var(--line); }
+  .my-card-btn.delete{ background: var(--paper-warm); color: var(--error); border: 1.5px solid var(--line); flex: 0 0 60px; }
+
   .stat-card{
     background: var(--paper);
     border: 1px solid var(--line);
@@ -1685,6 +1747,21 @@
       <button onclick="setState('waiting', this)">매칭 대기 중</button>
     </div>
 
+    <!-- ========== 내 매칭 카드 목록 (실데이터, Step 4-1) ==========
+         카드 1개 이상 있을 때만 표시. 0개면 아래 state-empty 보임 -->
+    <div id="my-cards-section">
+      <div class="my-cards-head">
+        <h2>🃏 내 매칭 카드</h2>
+        <span class="count" id="my-cards-count">0 / 3</span>
+      </div>
+      <div id="my-cards-list"></div>
+      <button class="btn-primary orange" style="width: 100%; margin-top: 6px;"
+              id="my-cards-create-btn"
+              onclick="goMatchCard()">
+        + 새 매칭 카드 만들기
+      </button>
+    </div>
+
     <!-- 상태 A: 매칭 카드 없음 -->
     <div class="state-content active" id="state-empty">
 
@@ -2596,8 +2673,147 @@
     currentProfile = profile;
     fillUserInfo();
 
+    // 본인 매칭 카드 로드 (Step 4-1)
+    await loadMyCards();
+
     // 인증+프로필 모두 통과 → 콘텐츠 표시
     document.body.classList.add('ready');
+  }
+
+  /* ============================================================
+     Step 4-1: 내 매칭 카드 목록 로딩 + 렌더 + 액션
+     ============================================================ */
+  const CAT_LABELS = { major:'📚 전공', language:'🌏 어학', cert:'📜 자격증', career:'💼 취업·진로', etc:'✨ 기타' };
+  const DAY_LABELS = { mon:'월', tue:'화', wed:'수', thu:'목', fri:'금', sat:'토', sun:'일' };
+  const PERIOD_LABELS = { morning:'오전', afternoon:'오후', evening:'저녁' };
+
+  async function loadMyCards(){
+    if(!supabaseClient || !currentUser) return;
+    const { data, error } = await supabaseClient
+      .from('match_cards')
+      .select('*')
+      .eq('user_id', currentUser.id)
+      .not('status', 'in', '(expired,archived)')
+      .order('created_at', { ascending: false });
+
+    const section = document.getElementById('my-cards-section');
+    const empty = document.getElementById('state-empty');
+    const countEl = document.getElementById('my-cards-count');
+    const listEl = document.getElementById('my-cards-list');
+    const createBtn = document.getElementById('my-cards-create-btn');
+
+    if(error){
+      console.error('카드 조회 실패:', error);
+      return;
+    }
+
+    const cards = data || [];
+    countEl.textContent = `${cards.length} / 3`;
+
+    if(cards.length === 0){
+      // 0개 → state-empty 그대로
+      section.style.display = 'none';
+      if(empty) empty.style.display = '';
+      return;
+    }
+
+    // 1개 이상 → 카드 목록 표시, state-empty 숨김
+    if(empty) empty.style.display = 'none';
+    section.style.display = 'block';
+
+    listEl.innerHTML = cards.map(renderCardHtml).join('');
+
+    // 3개 도달 시 새 카드 만들기 버튼 비활성화
+    if(cards.length >= 3){
+      createBtn.disabled = true;
+      createBtn.textContent = '카드 3개 도달 (기존 카드 정리 필요)';
+      createBtn.style.opacity = '0.5';
+    }
+  }
+
+  function renderCardHtml(c){
+    const cat = CAT_LABELS[c.category] || c.category;
+    const days = (c.schedule?.days || []).map(d => DAY_LABELS[d] || d).join('·');
+    const periods = (c.schedule?.periods || []).map(p => PERIOD_LABELS[p] || p).join('·');
+    const isActive = c.status === 'active';
+    const anonBadge = c.is_anonymous ? '<span class="anon">🎭 익명</span>' : '';
+    return `
+      <div class="my-card ${isActive ? 'active-card' : ''}" data-id="${c.id}">
+        <div class="my-card-head">
+          <span class="my-card-cat">${cat} · ${escapeHtml(c.subject)}</span>
+          <span class="my-card-status ${isActive ? 'active' : 'draft'}">${isActive ? '🔥 자동매칭 중' : '💾 저장됨'}</span>
+        </div>
+        <div class="my-card-intro">${escapeHtml(c.intro || '')}</div>
+        <div class="my-card-meta">${anonBadge}${days || '-'} · ${periods || '-'}</div>
+        <div class="my-card-actions">
+          ${isActive
+            ? `<button class="my-card-btn deactivate" onclick="toggleCardActive('${c.id}', false)">자동매칭 해제</button>`
+            : `<button class="my-card-btn activate" onclick="toggleCardActive('${c.id}', true)">자동매칭 등록</button>`}
+          <button class="my-card-btn delete" onclick="deleteMyCard('${c.id}')">삭제</button>
+        </div>
+      </div>
+    `;
+  }
+
+  // active 토글 — true로 만들 때 다른 active 카드가 있으면 confirm
+  async function toggleCardActive(cardId, makeActive){
+    if(!supabaseClient) return;
+
+    if(makeActive){
+      // 다른 active 카드 있는지 확인
+      const { data: activeCards } = await supabaseClient
+        .from('match_cards')
+        .select('id, subject')
+        .eq('user_id', currentUser.id)
+        .eq('status', 'active')
+        .neq('id', cardId);
+
+      if(activeCards && activeCards.length > 0){
+        const other = activeCards[0];
+        if(!confirm(`현재 자동매칭 중인 카드(${other.subject})가 있어요.\n해제하고 이 카드를 등록할까요?`)) return;
+
+        // 기존 active를 draft로
+        await supabaseClient
+          .from('match_cards')
+          .update({ status: 'draft' })
+          .eq('id', other.id);
+      }
+    }
+
+    const { error } = await supabaseClient
+      .from('match_cards')
+      .update({ status: makeActive ? 'active' : 'draft' })
+      .eq('id', cardId);
+
+    if(error){
+      console.error('상태 변경 실패:', error);
+      alert('변경에 실패했어요. 잠시 후 다시 시도해주세요.');
+      return;
+    }
+    showToast(makeActive ? '🚀 자동매칭에 등록됐어요!' : '💾 자동매칭에서 해제했어요');
+    await loadMyCards();
+  }
+
+  async function deleteMyCard(cardId){
+    if(!confirm('이 매칭 카드를 삭제하시겠어요?\n복구할 수 없어요.')) return;
+    const { error } = await supabaseClient
+      .from('match_cards')
+      .delete()
+      .eq('id', cardId);
+    if(error){
+      console.error('삭제 실패:', error);
+      alert('삭제에 실패했어요.');
+      return;
+    }
+    showToast('카드를 삭제했어요');
+    await loadMyCards();
+  }
+
+  // dashboard에 showToast가 없을 수도 있어서 fallback
+  if(typeof showToast === 'undefined'){
+    window.showToast = function(msg){
+      alert(msg);
+    };
   }
 
   // 화면 곳곳에 본인 정보 채우기
