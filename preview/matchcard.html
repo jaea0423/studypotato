@@ -385,19 +385,7 @@
   <!--                     [필수 4개]                                -->
   <!-- ============================================================ -->
 
-  <!-- 1. 제목 -->
-  <div class="form-block">
-    <div class="form-label">
-      <span>▸ 제목 <span class="required">[필수]</span></span>
-      <span class="char-count" id="title-count">0 / 50</span>
-    </div>
-    <input class="form-input" id="title-input" type="text"
-           placeholder="예) 자료구조 같이 공부할 사람"
-           maxlength="50"
-           oninput="onTitleChange()">
-  </div>
-
-  <!-- 2. 카테고리 -->
+  <!-- 1. 카테고리 -->
   <div class="form-block">
     <div class="form-label"><span>▸ 카테고리 <span class="required">[필수]</span></span></div>
     <div class="chip-group" id="category-chips">
@@ -421,7 +409,7 @@
            oninput="onSubjectChange()">
   </div>
 
-  <!-- 4. 시간대 -->
+  <!-- 3. 시간대 -->
   <div class="form-block">
     <div class="form-label"><span>▸ 시간대 <span class="required">[필수]</span></span></div>
     <div class="form-sub">요일과 시간대 모두 1개 이상 선택해주세요.</div>
@@ -447,6 +435,19 @@
         </div>
       </div>
     </div>
+  </div>
+
+  <!-- 4. 한 줄 소개 (필수, 본인 어필) -->
+  <div class="form-block">
+    <div class="form-label">
+      <span>▸ 한 줄 소개 <span class="required">[필수]</span></span>
+      <span class="char-count" id="intro-count">0 / 100</span>
+    </div>
+    <div class="form-sub">매칭 알림 시 다른 감자가 보고 "함께할까요?"를 결정해요. 본인을 자유롭게 소개해주세요. (5자 이상)</div>
+    <textarea class="form-textarea" id="intro-input"
+              placeholder="예) 매주 평일 저녁에 도서관에서 같이 자료구조 풀어요. 백준 골드 도전 중! 부담 없이 같이 해요."
+              maxlength="100"
+              oninput="onIntroChange()"></textarea>
   </div>
 
   <!-- ============================================================ -->
@@ -531,18 +532,6 @@
         </div>
       </div>
 
-      <!-- 한 줄 소개 -->
-      <div class="form-block" style="padding-bottom: 4px;">
-        <div class="form-label">
-          <span>▸ 한 줄 소개</span>
-          <span class="char-count" id="intro-count">0 / 100</span>
-        </div>
-        <textarea class="form-textarea" id="intro-input"
-                  placeholder="어떤 분과 함께하고 싶은지, 어떤 분위기를 원하는지 자유롭게 적어주세요. (적게 써도 OK)"
-                  maxlength="100"
-                  oninput="onIntroChange()"></textarea>
-      </div>
-
     </div>
   </div>
 
@@ -550,8 +539,8 @@
 
 <!-- 하단 고정 버튼 -->
 <div class="bottom-bar">
-  <button class="btn-secondary" id="save-draft-btn" onclick="saveDraft()">임시 저장</button>
-  <button class="btn-primary" id="activate-btn" disabled onclick="saveAndActivate()">자동매칭에 등록</button>
+  <button class="btn-secondary" id="save-draft-btn" onclick="saveDraft()">저장하기</button>
+  <button class="btn-primary" id="activate-btn" disabled onclick="saveAndActivate()">자동매칭 바로 등록하기</button>
 </div>
 
 <div class="toast" id="toast"></div>
@@ -588,9 +577,10 @@
     document.getElementById('card-count').textContent = `${cardCount} / 3`;
 
     if(cardCount >= 3){
-      document.getElementById('save-draft-btn').disabled = true;
-      document.getElementById('activate-btn').disabled = true;
-      showToast('카드는 최대 3개까지 보유할 수 있어요. 기존 카드를 정리해주세요.');
+      // 3개 초과 → 만들기 화면 자체 차단, 안내만 보여주고 dashboard로
+      alert('카드는 최대 3개까지 보유할 수 있어요.\n기존 카드를 정리하고 다시 시도해주세요.');
+      location.replace('dashboard.html');
+      return;
     }
 
     document.body.classList.add('ready');
@@ -601,25 +591,18 @@
      폼 상태 관리
      ============================================================ */
   const form = {
-    title: '',
     category: '',
     subject: '',
     schedule: { days: [], periods: [] },
+    intro: '',                            // 필수로 승격
     level: 'basic',
     mode: ['offline', 'online'],
     frequency: 'free',
     duration: 'semester',
-    is_anonymous: false,
-    intro: ''
+    is_anonymous: false
   };
 
   /* ========== 입력 핸들러 ========== */
-  function onTitleChange(){
-    form.title = document.getElementById('title-input').value.trim();
-    document.getElementById('title-count').textContent = `${form.title.length} / 50`;
-    updateActivateBtn();
-  }
-
   function onSubjectChange(){
     form.subject = document.getElementById('subject-input').value.trim();
     document.getElementById('subject-count').textContent = `${form.subject.length} / 30`;
@@ -629,6 +612,7 @@
   function onIntroChange(){
     form.intro = document.getElementById('intro-input').value.trim();
     document.getElementById('intro-count').textContent = `${form.intro.length} / 100`;
+    updateActivateBtn();
   }
 
   /* ========== 단일 선택 칩 ========== */
@@ -696,13 +680,13 @@
     document.getElementById('more-accordion').classList.toggle('open');
   }
 
-  /* ========== 자동매칭 등록 버튼 활성화 (필수 4개 모두 채워졌나) ========== */
+  /* ========== 등록 버튼 활성화 (필수 4개 모두 채워졌나) ========== */
   function updateActivateBtn(){
-    const ok = form.title.length >= 2
-      && form.category
+    const ok = form.category
       && form.subject.length >= 1
       && form.schedule.days.length >= 1
-      && form.schedule.periods.length >= 1;
+      && form.schedule.periods.length >= 1
+      && form.intro.length >= 5;
     document.getElementById('activate-btn').disabled = !ok;
   }
 
@@ -716,16 +700,16 @@
     }
     // 필수 4개 검증 (활성화일 때만 엄격하게)
     if(asActive){
-      if(form.title.length < 2){ showToast('제목은 2자 이상 입력해주세요.'); return; }
       if(!form.category){ showToast('카테고리를 선택해주세요.'); return; }
       if(form.subject.length < 1){ showToast('과목·분야를 입력해주세요.'); return; }
       if(form.schedule.days.length === 0 || form.schedule.periods.length === 0){
         showToast('요일과 시간대 모두 1개 이상 선택해주세요.');
         return;
       }
+      if(form.intro.length < 5){ showToast('한 줄 소개는 5자 이상 입력해주세요.'); return; }
     } else {
-      // 임시 저장도 최소 제목은 있어야 함
-      if(form.title.length < 2){ showToast('제목은 최소 2자 이상이어야 임시 저장 가능해요.'); return; }
+      // 저장하기도 최소 한 줄 소개는 있어야 함 (DB가 NOT NULL)
+      if(form.intro.length < 5){ showToast('한 줄 소개는 5자 이상이어야 저장 가능해요.'); return; }
     }
 
     // 버튼 잠금
@@ -737,20 +721,19 @@
     const origText = targetBtn.textContent;
     targetBtn.textContent = '저장 중...';
 
-    // payload — 임시 저장은 빈 값도 허용해야 하지만 필수 필드는 NOT NULL이라 기본값 채움
+    // payload — 저장하기도 NOT NULL 필드는 기본값 채움
     const payload = {
       user_id: currentUser.id,
-      title: form.title || '제목 없음',
       category: form.category || 'etc',
       subject: form.subject || '미정',
       schedule: form.schedule.days.length > 0 && form.schedule.periods.length > 0
-        ? form.schedule : { days: ['mon'], periods: ['evening'] },  // 임시 기본값
+        ? form.schedule : { days: ['mon'], periods: ['evening'] },
+      intro: form.intro,
       level: form.level,
       mode: form.mode,
       frequency: form.frequency,
       duration: form.duration,
       is_anonymous: form.is_anonymous,
-      intro: form.intro || null,
       status: asActive ? 'active' : 'draft'
     };
 
@@ -791,8 +774,8 @@
   function saveAndActivate(){ saveCard(true); }
 
   function confirmLeave(){
-    const hasInput = form.title || form.category || form.subject
-      || form.schedule.days.length > 0;
+    const hasInput = form.category || form.subject
+      || form.schedule.days.length > 0 || form.intro.length > 0;
     if(hasInput && !confirm('입력 중인 내용이 사라져요. 나가시겠어요?')) return;
     history.back();
   }
