@@ -11,15 +11,22 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/variable/pretendardvariable.css" />
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 
+<!-- Supabase JS SDK -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+
+<!-- 인증 확인 전 콘텐츠 숨김 -->
 <style>
-  /* ========== 디자인 토큰 ========== */
+  body { visibility: hidden; }
+  body.ready { visibility: visible; }
+</style>
+
+<style>
   :root{
     --knu-blue: #0047BB;
     --knu-blue-deep: #00347E;
     --knu-blue-soft: #E5ECF8;
     --knu-orange: #FE5000;
     --knu-orange-soft: #FFE8DD;
-
     --cream: #F7F3EC;
     --paper: #FFFFFF;
     --paper-warm: #FBF8F2;
@@ -30,167 +37,173 @@
     --line-soft: #F0EBDF;
     --error: #DC3545;
     --success: #2D7A3E;
-
     --font-kr: 'Pretendard Variable', Pretendard, -apple-system, sans-serif;
     --font-mono: 'JetBrains Mono', monospace;
-
     --radius-s: 10px;
     --radius-m: 16px;
     --radius-l: 22px;
   }
 
-  /* ========== 리셋 ========== */
-  *, *::before, *::after{ margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  *, *::before, *::after{ margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color: transparent; }
   html, body{ overflow-x: hidden; max-width: 100%; width: 100%; }
-  html{ font-size: 16px; -webkit-text-size-adjust: 100%; }
   body{
     font-family: var(--font-kr);
     background: var(--paper-warm);
     color: var(--ink);
     line-height: 1.5;
-    min-height: 100vh;
     word-break: keep-all;
-    overflow-wrap: break-word;
   }
   button{ font-family: inherit; cursor: pointer; border: 0; background: none; color: inherit; }
-  input, textarea, select{ font-family: inherit; color: inherit; border: 0; outline: none; background: none; }
+  input, textarea{ font-family: inherit; color: inherit; border: 0; outline: none; background: none; }
 
-  /* ========== 모바일 컨테이너 ========== */
   .app{
     max-width: 480px;
     min-height: 100vh;
     margin: 0 auto;
     background: var(--cream);
-    position: relative;
-    box-shadow: 0 0 40px rgba(0,0,0,0.06);
+    padding-bottom: 100px;
   }
   @media (min-width: 481px){ body{ background: #E8E2D4; } }
 
-  /* ========== 단계 화면 ========== */
-  .step-screen{
-    display: none;
-    min-height: 100vh;
-    flex-direction: column;
-    padding: 24px 24px 32px;
-    animation: slideIn 0.35s cubic-bezier(0.16, 1, 0.3, 1);
-  }
-  .step-screen.active{ display: flex; }
-  @keyframes slideIn{
-    from{ opacity: 0; transform: translateY(12px); }
-    to{ opacity: 1; transform: translateY(0); }
-  }
-
-  /* ========== 상단 (뒤로가기 + 진행률) ========== */
+  /* 상단 바 */
   .topbar{
     display: flex;
     align-items: center;
-    gap: 16px;
-    margin-bottom: 28px;
-    min-height: 36px;
+    gap: 12px;
+    padding: 14px 20px 12px;
+    background: var(--cream);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    border-bottom: 1px solid var(--line-soft);
   }
   .back-btn{
     width: 36px; height: 36px;
     border-radius: 50%;
     display: flex; align-items: center; justify-content: center;
-    flex-shrink: 0;
+    color: var(--ink-soft);
   }
   .back-btn:active{ background: var(--line-soft); }
-  .progress-track{
-    flex: 1;
-    height: 4px;
-    background: var(--line-soft);
-    border-radius: 999px;
-    overflow: hidden;
-  }
-  .progress-fill{
-    height: 100%;
-    background: var(--knu-orange);
-    border-radius: 999px;
-    transition: width 0.4s ease;
-  }
-  .step-text{
-    font-family: var(--font-mono);
-    font-size: 12px;
+  .topbar-title{ font-size: 15px; font-weight: 700; flex: 1; }
+  .topbar-meta{
+    font-size: 11px;
     color: var(--ink-mute);
-    flex-shrink: 0;
+    font-family: var(--font-mono);
+    font-weight: 600;
   }
 
-  /* ========== 헤드 ========== */
-  .step-head{
-    margin-bottom: 28px;
+  /* 페이지 헤더 */
+  .page-head{
+    padding: 16px 24px 8px;
   }
-  .step-head h1{
-    font-size: 26px;
+  .page-head h1{
+    font-size: 22px;
     font-weight: 800;
-    letter-spacing: -0.03em;
-    line-height: 1.2;
-    margin-bottom: 10px;
-  }
-  .step-head h1 em{ color: var(--knu-orange); font-style: normal; }
-  .step-head p{
-    font-size: 14px;
-    color: var(--ink-soft);
-    line-height: 1.6;
-  }
-
-  /* ========== 폼 블록 ========== */
-  .form-block{
-    background: var(--paper);
-    border: 1px solid var(--line);
-    border-radius: var(--radius-l);
-    padding: 22px 20px;
-    margin-bottom: 12px;
-  }
-  .form-label-row{
-    display: flex;
-    align-items: center;
-    gap: 10px;
+    letter-spacing: -0.025em;
     margin-bottom: 6px;
   }
-  .form-num{
-    font-family: var(--font-mono);
-    font-size: 11px;
-    font-weight: 600;
-    color: var(--knu-orange);
-    background: var(--knu-orange-soft);
-    padding: 3px 8px;
-    border-radius: 6px;
-    letter-spacing: 0.05em;
-  }
-  .form-label{
-    font-size: 16px;
-    font-weight: 700;
-    color: var(--ink);
-    letter-spacing: -0.015em;
-  }
-  .form-label .opt{
-    font-size: 11px;
-    color: var(--ink-mute);
-    font-weight: 500;
-    margin-left: 4px;
-  }
-  .form-sub{
-    font-size: 12px;
-    color: var(--ink-mute);
-    margin-bottom: 14px;
+  .page-head .sub{
+    font-size: 13px;
+    color: var(--ink-soft);
     line-height: 1.5;
-    padding-left: 2px;
   }
 
-  /* ========== 칩 ========== */
+  /* 안내 박스 */
+  .info-box{
+    margin: 14px 24px 0;
+    background: var(--knu-blue-soft);
+    color: var(--knu-blue-deep);
+    border-radius: var(--radius-m);
+    padding: 12px 14px;
+    font-size: 12px;
+    line-height: 1.6;
+  }
+  .info-box strong{ font-weight: 700; }
+
+  /* 폼 블록 */
+  .form-block{ padding: 20px 24px 0; }
+  .form-label{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--ink-soft);
+    margin-bottom: 8px;
+    font-family: var(--font-mono);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+  .form-label .required{
+    color: var(--knu-orange);
+    font-size: 10px;
+  }
+  .form-label .optional{
+    color: var(--ink-mute);
+    font-size: 10px;
+    font-family: var(--font-kr);
+    font-weight: 500;
+    text-transform: none;
+  }
+  .form-sub{
+    font-size: 11px;
+    color: var(--ink-mute);
+    margin-bottom: 10px;
+    line-height: 1.5;
+  }
+
+  /* 인풋 */
+  .form-input{
+    width: 100%;
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-s);
+    padding: 12px 14px;
+    font-size: 14px;
+    color: var(--ink);
+    transition: border-color 0.15s;
+  }
+  .form-input:focus{ border-color: var(--knu-blue); outline: none; }
+  .form-input::placeholder{ color: var(--ink-mute); }
+
+  .form-textarea{
+    width: 100%;
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-s);
+    padding: 12px 14px;
+    font-size: 14px;
+    color: var(--ink);
+    resize: vertical;
+    min-height: 80px;
+    line-height: 1.55;
+    transition: border-color 0.15s;
+  }
+  .form-textarea:focus{ border-color: var(--knu-blue); outline: none; }
+
+  .input-hint{
+    font-size: 11px;
+    color: var(--ink-mute);
+    margin-top: 6px;
+    display: flex;
+    justify-content: space-between;
+  }
+  .char-count{ font-family: var(--font-mono); }
+
+  /* 칩 그룹 */
   .chip-group{
     display: flex;
     flex-wrap: wrap;
-    gap: 7px;
+    gap: 6px;
   }
   .chip{
-    background: var(--paper-warm);
-    border: 1.5px solid var(--line);
+    background: var(--paper);
+    border: 1px solid var(--line);
     padding: 9px 14px;
     border-radius: 999px;
     font-size: 13px;
     font-weight: 500;
-    color: var(--ink);
+    color: var(--ink-soft);
     transition: all 0.15s;
   }
   .chip:active{ transform: scale(0.96); }
@@ -198,899 +211,531 @@
     background: var(--ink);
     color: var(--cream);
     border-color: var(--ink);
-  }
-
-  /* 큰 카드형 칩 */
-  .big-chip-group{
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 10px;
-  }
-  .big-chip{
-    background: var(--paper-warm);
-    border: 1.5px solid var(--line);
-    padding: 18px 12px;
-    border-radius: var(--radius-m);
-    text-align: center;
-    transition: all 0.2s;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 6px;
-  }
-  .big-chip:active{ transform: scale(0.96); }
-  .big-chip.active{
-    background: var(--knu-blue-soft);
-    border-color: var(--knu-blue);
-  }
-  .big-chip-emoji{ font-size: 28px; line-height: 1; }
-  .big-chip-title{ font-size: 14px; font-weight: 700; color: var(--ink); }
-  .big-chip.active .big-chip-title{ color: var(--knu-blue); }
-  .big-chip-desc{ font-size: 10px; color: var(--ink-mute); font-weight: 500; }
-
-  /* 시간대 2×5 그리드 (평일/주말 × 시간대) */
-  .time-grid{
-    display: grid;
-    grid-template-columns: auto 1fr;
-    gap: 10px 14px;
-    align-items: center;
-  }
-  .time-row-label{
-    font-family: var(--font-mono);
-    font-size: 12px;
     font-weight: 600;
-    color: var(--ink-mute);
-    letter-spacing: 0.04em;
   }
-  .time-row{
-    display: grid;
-    grid-template-columns: repeat(5, 1fr);
-    gap: 6px;
-  }
-  .time-cell{
-    background: var(--paper-warm);
-    border: 1.5px solid var(--line);
-    padding: 8px 4px;
+
+  /* 시간대 매트릭스 */
+  .schedule-matrix{
+    background: var(--paper);
+    border: 1px solid var(--line);
     border-radius: var(--radius-s);
-    font-size: 12px;
-    font-weight: 500;
-    color: var(--ink);
-    transition: all 0.15s;
-    text-align: center;
+    padding: 12px;
   }
-  .time-cell:active{ transform: scale(0.95); }
-  .time-cell.active{
-    background: var(--ink);
-    color: var(--cream);
-    border-color: var(--ink);
+  .schedule-matrix .row{
+    margin-bottom: 10px;
   }
-
-  /* ========== 셀렉트 (전공) ========== */
-  .select-wrap{
-    position: relative;
-    background: var(--paper-warm);
-    border: 1.5px solid var(--line);
-    border-radius: var(--radius-m);
-    transition: border-color 0.2s;
-  }
-  .select-wrap:focus-within{ border-color: var(--knu-blue); }
-  .form-select{
-    width: 100%;
-    padding: 16px 44px 16px 18px;
-    font-size: 15px;
-    font-weight: 500;
-    background: transparent;
-    appearance: none;
-    -webkit-appearance: none;
-    color: var(--ink);
-    cursor: pointer;
-  }
-  .form-select option[value=""]{ color: var(--ink-mute); }
-  .select-arrow{
-    position: absolute;
-    right: 16px;
-    top: 50%;
-    transform: translateY(-50%);
-    pointer-events: none;
-    color: var(--ink-mute);
-  }
-
-  /* ========== 텍스트 입력 ========== */
-  .input-wrap, .textarea-wrap{
-    position: relative;
-    background: var(--paper-warm);
-    border: 1.5px solid var(--line);
-    border-radius: var(--radius-m);
-    transition: border-color 0.2s;
-  }
-  .input-wrap:focus-within, .textarea-wrap:focus-within{ border-color: var(--knu-blue); }
-  .form-input{
-    width: 100%;
-    padding: 14px 16px;
-    font-size: 14px;
-    font-weight: 500;
-    background: transparent;
-  }
-  .form-textarea{
-    width: 100%;
-    padding: 14px 16px;
-    font-size: 14px;
-    font-weight: 500;
-    background: transparent;
-    resize: none;
-    min-height: 70px;
-    line-height: 1.5;
-  }
-  .char-counter{
-    text-align: right;
-    padding: 0 4px;
+  .schedule-matrix .row:last-child{ margin-bottom: 0; }
+  .schedule-matrix .row-label{
     font-size: 11px;
     color: var(--ink-mute);
-    font-family: var(--font-mono);
-    margin-top: 6px;
+    margin-bottom: 6px;
+    font-weight: 600;
   }
-  .char-counter.warn{ color: var(--knu-orange); }
 
-  /* ========== 팀장 희망 체크 ========== */
-  .leader-check{
+  /* 토글 */
+  .toggle-row{
     display: flex;
-    align-items: flex-start;
-    gap: 12px;
-    padding: 14px 16px;
-    background: var(--paper-warm);
-    border: 1px solid var(--line);
-    border-radius: var(--radius-m);
-    cursor: pointer;
-    transition: all 0.15s;
-  }
-  .leader-check:active{ transform: scale(0.99); }
-  .leader-check input{
-    position: absolute;
-    opacity: 0;
-    pointer-events: none;
-  }
-  .leader-check-box{
-    width: 22px; height: 22px;
-    flex-shrink: 0;
-    border: 2px solid var(--line);
-    border-radius: 6px;
+    align-items: center;
+    justify-content: space-between;
     background: var(--paper);
-    margin-top: 1px;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-s);
+    padding: 12px 14px;
+  }
+  .toggle-row .label{ font-size: 13px; font-weight: 600; }
+  .toggle-row .desc{ font-size: 11px; color: var(--ink-mute); margin-top: 2px; }
+  .toggle{
+    width: 42px; height: 24px;
+    background: var(--line);
+    border-radius: 999px;
     position: relative;
-    transition: all 0.15s;
+    transition: background 0.2s;
+    flex-shrink: 0;
   }
-  .leader-check input:checked ~ .leader-check-box{
-    background: var(--knu-orange);
-    border-color: var(--knu-orange);
-  }
-  .leader-check input:checked ~ .leader-check-box::after{
+  .toggle::after{
     content: '';
     position: absolute;
-    left: 6px; top: 2px;
-    width: 5px; height: 11px;
-    border: solid white;
-    border-width: 0 2.5px 2.5px 0;
-    transform: rotate(45deg);
+    top: 2px; left: 2px;
+    width: 20px; height: 20px;
+    background: white;
+    border-radius: 50%;
+    transition: left 0.2s;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.2);
   }
-  .leader-check input:checked + .leader-check-box ~ .leader-check-text strong{
-    color: var(--knu-orange);
-  }
-  .leader-check-text{
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-    line-height: 1.5;
-  }
-  .leader-check-text strong{
-    font-size: 14px;
-    color: var(--ink);
-    font-weight: 700;
-  }
-  .leader-check-sub{
-    font-size: 12px;
-    color: var(--ink-soft);
-    line-height: 1.55;
-  }
+  .toggle.on{ background: var(--knu-blue); }
+  .toggle.on::after{ left: 20px; }
 
-  /* ========== 안내 박스 ========== */
-  .info-tip{
-    background: var(--knu-blue-soft);
+  /* 펼치기 영역 */
+  .accordion{
+    margin: 24px 24px 0;
+    background: var(--paper-warm);
+    border: 1px dashed var(--line);
     border-radius: var(--radius-m);
-    padding: 12px 14px;
-    font-size: 12px;
-    color: var(--knu-blue);
-    line-height: 1.55;
-    margin-top: 12px;
-    margin-bottom: 16px;
-    display: flex;
-    gap: 8px;
-    align-items: flex-start;
-  }
-  .info-tip .ico{ flex-shrink: 0; }
-
-  /* ========== 요약 카드 (Step 4) ========== */
-  .summary-card{
-    background: var(--ink);
-    color: var(--cream);
-    border-radius: var(--radius-l);
-    padding: 24px;
-    margin-bottom: 16px;
-    position: relative;
     overflow: hidden;
   }
-  .summary-card::before{
-    content: '';
-    position: absolute;
-    right: -50px; top: -50px;
-    width: 180px; height: 180px;
-    border-radius: 50%;
-    background: radial-gradient(circle, rgba(238,124,0,0.25), transparent 70%);
-  }
-  .summary-emoji{
-    font-size: 32px;
-    margin-bottom: 8px;
-    position: relative;
-  }
-  .summary-title{
-    font-family: var(--font-mono);
-    font-size: 11px;
-    color: var(--knu-orange);
-    letter-spacing: 0.1em;
-    margin-bottom: 14px;
-    position: relative;
-  }
-  .summary-grid{
-    display: flex;
-    flex-direction: column;
-    gap: 11px;
-    position: relative;
-  }
-  .summary-row{
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    font-size: 13px;
-    gap: 12px;
-  }
-  .summary-row .k{
-    color: rgba(247,243,236,0.5);
-    flex-shrink: 0;
-    font-weight: 500;
-  }
-  .summary-row .v{
-    color: var(--cream);
-    font-weight: 600;
-    text-align: right;
-    line-height: 1.4;
-  }
-  .summary-row .v.empty{ color: rgba(247,243,236,0.3); font-weight: 400; }
-
-  /* ========== 하단 CTA ========== */
-  .bottom-area{
-    margin-top: auto;
-    padding-top: 16px;
-  }
-  .btn-primary{
-    width: 100%;
-    background: var(--knu-blue);
-    color: white;
-    padding: 17px;
-    border-radius: var(--radius-m);
-    font-size: 16px;
-    font-weight: 700;
-    letter-spacing: -0.01em;
-    transition: all 0.2s;
+  .accordion-head{
+    padding: 14px 16px;
     display: flex;
     align-items: center;
-    justify-content: center;
+    justify-content: space-between;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 700;
+  }
+  .accordion-head:active{ background: var(--line-soft); }
+  .accordion-head .arrow{
+    transition: transform 0.2s;
+    color: var(--ink-mute);
+    font-size: 12px;
+  }
+  .accordion.open .accordion-head .arrow{ transform: rotate(180deg); }
+  .accordion-body{
+    display: none;
+    padding: 4px 0 16px;
+  }
+  .accordion.open .accordion-body{ display: block; }
+  .accordion-body .form-block{ padding: 16px 16px 0; }
+
+  /* 하단 고정 버튼 */
+  .bottom-bar{
+    position: fixed;
+    bottom: 0; left: 50%;
+    transform: translateX(-50%);
+    width: 100%;
+    max-width: 480px;
+    background: var(--paper);
+    border-top: 1px solid var(--line);
+    padding: 12px 20px 16px;
+    display: flex;
     gap: 8px;
+    z-index: 50;
+  }
+  .btn-secondary{
+    flex: 1;
+    background: var(--paper);
+    border: 1.5px solid var(--line);
+    color: var(--ink);
+    padding: 14px;
+    border-radius: var(--radius-m);
+    font-size: 14px;
+    font-weight: 700;
+    transition: all 0.15s;
+  }
+  .btn-secondary:active{ transform: scale(0.98); background: var(--line-soft); }
+  .btn-primary{
+    flex: 2;
+    background: var(--knu-blue);
+    color: white;
+    padding: 14px;
+    border-radius: var(--radius-m);
+    font-size: 14px;
+    font-weight: 700;
+    transition: all 0.15s;
   }
   .btn-primary:active{ transform: scale(0.98); background: var(--knu-blue-deep); }
-  .btn-primary.orange{
-    background: var(--knu-orange);
-  }
-  .btn-primary.orange:active{ background: #CC4000; }
+  .btn-primary:disabled{ background: var(--line); color: var(--ink-mute); cursor: not-allowed; }
 
-  /* ========== 토스트 ========== */
+  /* 토스트 */
   .toast{
     position: fixed;
-    bottom: 32px;
-    left: 50%;
+    bottom: 90px; left: 50%;
     transform: translateX(-50%) translateY(20px);
     background: var(--ink);
-    color: var(--cream);
-    padding: 12px 22px;
-    border-radius: 999px;
-    font-size: 14px;
+    color: white;
+    padding: 12px 18px;
+    border-radius: var(--radius-m);
+    font-size: 13px;
     font-weight: 600;
     opacity: 0;
     pointer-events: none;
-    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-    z-index: 2000;
-    box-shadow: 0 12px 28px rgba(14,26,43,0.3);
+    transition: all 0.25s;
+    z-index: 200;
     white-space: nowrap;
-    max-width: calc(100% - 48px);
+    max-width: 90%;
   }
-  .toast.show{
-    opacity: 1;
-    transform: translateX(-50%) translateY(0);
-  }
-</style>
-
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
-<style>
-  body { visibility: hidden; }
-  body.ready { visibility: visible; }
+  .toast.show{ opacity: 1; transform: translateX(-50%) translateY(0); }
 </style>
 </head>
 <body>
 
 <div class="app">
 
-  <!-- ========== STEP 1: 어떤 스터디? ========== -->
-  <section class="step-screen active" id="step-1">
-    <div class="topbar">
-      <button class="back-btn" onclick="history.back()">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
-      </button>
-      <div class="progress-track"><div class="progress-fill" style="width: 25%;"></div></div>
-      <span class="step-text">1 / 4</span>
-    </div>
+  <!-- 상단 바 -->
+  <div class="topbar">
+    <button class="back-btn" onclick="confirmLeave()" aria-label="뒤로가기">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+    </button>
+    <div class="topbar-title">매칭 카드 만들기</div>
+    <div class="topbar-meta" id="card-count">0 / 3</div>
+  </div>
 
-    <div class="step-head">
-      <h1>어떤 <em>스터디</em>를<br>찾고 계세요?</h1>
-      <p>스터디 종류와 수준을 알려주세요.</p>
-    </div>
+  <!-- 페이지 헤더 -->
+  <div class="page-head">
+    <h1>같이 공부할 <em style="font-style:normal;color:var(--knu-orange)">감자</em>를 찾아요</h1>
+    <div class="sub">필수 4개만 입력해도 카드를 만들 수 있어요.</div>
+  </div>
 
-    <!-- 01. 카테고리 -->
-    <div class="form-block">
-      <div class="form-label-row">
-        <span class="form-num">01</span>
-        <span class="form-label">어떤 종류의 스터디인가요?</span>
-      </div>
-      <p class="form-sub">단일 선택.</p>
-      <div class="chip-group" id="category-chips">
-        <button class="chip" onclick="selectSingle(this, 'category', '시험 대비')">📚 시험 대비</button>
-        <button class="chip" onclick="selectSingle(this, 'category', '자격증')">📜 자격증</button>
-        <button class="chip" onclick="selectSingle(this, 'category', '코딩테스트')">💻 코딩테스트</button>
-        <button class="chip" onclick="selectSingle(this, 'category', '어학')">🌏 어학</button>
-        <button class="chip" onclick="selectSingle(this, 'category', '프로젝트')">🚀 프로젝트</button>
-        <button class="chip" onclick="selectSingle(this, 'category', '자율 학습')">📖 자율 학습</button>
-        <button class="chip" onclick="selectSingle(this, 'category', '기타')">✨ 기타</button>
-      </div>
-    </div>
+  <!-- 안내 박스 -->
+  <div class="info-box">
+    💡 <strong>최대 3개</strong>까지 보관할 수 있고, 자동매칭에는 <strong>1개만 등록</strong>돼요.<br>
+    카드는 만든 지 <strong>7일 후 자동 만료</strong>되며, 다시 올리시면 됩니다.
+  </div>
 
-    <!-- 02. 세부 주제 -->
-    <div class="form-block">
-      <div class="form-label-row">
-        <span class="form-num">02</span>
-        <span class="form-label">세부 주제 <span class="opt">선택</span></span>
-      </div>
-      <p class="form-sub">구체적으로 어떤 걸 공부할까요? 30자 이내.</p>
-      <div class="input-wrap">
-        <input type="text" id="input-topic" class="form-input" placeholder="예: 자료구조 시험 대비, TOEIC 800점" maxlength="30">
-      </div>
-    </div>
+  <!-- ============================================================ -->
+  <!--                     [필수 4개]                                -->
+  <!-- ============================================================ -->
 
-    <!-- 03. 수준 -->
-    <div class="form-block">
-      <div class="form-label-row">
-        <span class="form-num">03</span>
-        <span class="form-label">어느 정도 수준이세요?</span>
-      </div>
-      <p class="form-sub">비슷한 수준의 감자와 매칭됩니다.</p>
-      <div class="chip-group" id="level-chips">
-        <button class="chip" onclick="selectSingle(this, 'level', '초보')">🌱 초보</button>
-        <button class="chip" onclick="selectSingle(this, 'level', '기본')">🌿 기본</button>
-        <button class="chip" onclick="selectSingle(this, 'level', '중급')">🌳 중급</button>
-        <button class="chip" onclick="selectSingle(this, 'level', '고급')">🏆 고급</button>
-      </div>
+  <!-- 1. 제목 -->
+  <div class="form-block">
+    <div class="form-label">
+      <span>▸ 제목 <span class="required">[필수]</span></span>
+      <span class="char-count" id="title-count">0 / 50</span>
     </div>
+    <input class="form-input" id="title-input" type="text"
+           placeholder="예) 자료구조 같이 공부할 사람"
+           maxlength="50"
+           oninput="onTitleChange()">
+  </div>
 
-    <div class="bottom-area">
-      <button class="btn-primary" onclick="nextStep(1)">
-        다음으로
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-      </button>
+  <!-- 2. 카테고리 -->
+  <div class="form-block">
+    <div class="form-label"><span>▸ 카테고리 <span class="required">[필수]</span></span></div>
+    <div class="chip-group" id="category-chips">
+      <button class="chip" data-value="major" onclick="selectCategory(this)">📚 전공</button>
+      <button class="chip" data-value="language" onclick="selectCategory(this)">🌏 어학</button>
+      <button class="chip" data-value="cert" onclick="selectCategory(this)">📜 자격증</button>
+      <button class="chip" data-value="career" onclick="selectCategory(this)">💼 취업·진로</button>
+      <button class="chip" data-value="etc" onclick="selectCategory(this)">✨ 기타</button>
     </div>
-  </section>
+  </div>
 
-  <!-- ========== STEP 2: 누구와? ========== -->
-  <section class="step-screen" id="step-2">
-    <div class="topbar">
-      <button class="back-btn" onclick="goStep(1)">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
-      </button>
-      <div class="progress-track"><div class="progress-fill" style="width: 50%;"></div></div>
-      <span class="step-text">2 / 4</span>
+  <!-- 3. 과목·분야 -->
+  <div class="form-block">
+    <div class="form-label">
+      <span>▸ 과목·분야 <span class="required">[필수]</span></span>
+      <span class="char-count" id="subject-count">0 / 30</span>
     </div>
+    <input class="form-input" id="subject-input" type="text"
+           placeholder="예) 자료구조, TOEIC, 정보처리기사"
+           maxlength="30"
+           oninput="onSubjectChange()">
+  </div>
 
-    <div class="step-head">
-      <h1>어떤 <em>감자</em>와<br>함께하고 싶으세요?</h1>
-      <p>전공 정보로 잘 맞는 사람을 찾아드릴게요.</p>
-    </div>
-
-    <!-- 04. 내 전공 -->
-    <div class="form-block">
-      <div class="form-label-row">
-        <span class="form-num">04</span>
-        <span class="form-label">내 전공</span>
-      </div>
-      <p class="form-sub">강원대학교 춘천캠퍼스 학과를 선택해주세요.</p>
-      <div class="select-wrap">
-        <select class="form-select" id="select-major">
-          <option value="">전공을 선택해주세요</option>
-          <optgroup label="인문대학">
-            <option>국어국문학과</option>
-            <option>영어영문학과</option>
-            <option>독어독문학과</option>
-            <option>불어불문학과</option>
-            <option>중어중문학과</option>
-            <option>일본학과</option>
-            <option>사학과</option>
-            <option>철학과</option>
-          </optgroup>
-          <optgroup label="사회과학대학">
-            <option>정치외교학과</option>
-            <option>행정학과</option>
-            <option>사회학과</option>
-            <option>심리학과</option>
-            <option>신문방송학과</option>
-            <option>문화인류학과</option>
-            <option>부동산학과</option>
-          </optgroup>
-          <optgroup label="자연과학대학">
-            <option>수학과</option>
-            <option>물리학과</option>
-            <option>화학과</option>
-            <option>생명과학과</option>
-            <option>지구물리학과</option>
-            <option>환경융합학부</option>
-          </optgroup>
-          <optgroup label="공과대학">
-            <option>건축공학전공</option>
-            <option>토목공학전공</option>
-            <option>환경공학전공</option>
-            <option>기계의용공학전공</option>
-            <option>메카트로닉스공학전공</option>
-            <option>재료공학전공</option>
-            <option>에너지자원공학전공</option>
-            <option>산업공학전공</option>
-            <option>화학공학전공</option>
-            <option>생물공학전공</option>
-          </optgroup>
-          <optgroup label="IT대학">
-            <option>전기전자공학과</option>
-            <option>전자공학과</option>
-            <option>컴퓨터공학과</option>
-            <option>AI융합학과</option>
-            <option>디지털밀리터리학과</option>
-          </optgroup>
-          <optgroup label="사범대학">
-            <option>교육학과</option>
-            <option>국어교육과</option>
-            <option>영어교육과</option>
-            <option>일반사회교육과</option>
-            <option>윤리교육과</option>
-            <option>역사교육과</option>
-            <option>지리교육과</option>
-            <option>수학교육과</option>
-            <option>가정교육과</option>
-            <option>체육교육과</option>
-            <option>유아교육과</option>
-          </optgroup>
-          <optgroup label="경영대학">
-            <option>경영학과</option>
-            <option>회계학과</option>
-            <option>경제·정보통계학부</option>
-          </optgroup>
-          <optgroup label="농업생명과학대학">
-            <option>식물생명공학과</option>
-            <option>식물자원응용공학과</option>
-            <option>원예학과</option>
-            <option>식품생명공학과</option>
-            <option>식품영양학과</option>
-            <option>지역건설공학과</option>
-            <option>바이오자원환경학과</option>
-          </optgroup>
-          <optgroup label="동물생명과학대학">
-            <option>동물자원과학과</option>
-            <option>동물응용과학과</option>
-            <option>동물식품응용과학과</option>
-          </optgroup>
-          <optgroup label="산림환경과학대학">
-            <option>산림자원학과</option>
-            <option>산림환경시스템학과</option>
-            <option>산림응용공학과</option>
-            <option>임산생명공학과</option>
-            <option>조경학과</option>
-          </optgroup>
-          <optgroup label="의생명과학대학">
-            <option>분자생명과학과</option>
-            <option>생화학과</option>
-            <option>생명공학과</option>
-            <option>시스템면역과학과</option>
-          </optgroup>
-          <optgroup label="수의과대학">
-            <option>수의예과</option>
-            <option>수의학과</option>
-          </optgroup>
-          <optgroup label="약학대학">
-            <option>약학과</option>
-          </optgroup>
-          <optgroup label="의과대학">
-            <option>의예과</option>
-            <option>의학과</option>
-          </optgroup>
-          <optgroup label="간호대학">
-            <option>간호학과</option>
-          </optgroup>
-          <optgroup label="문화예술공과대학">
-            <option>디자인학과</option>
-            <option>미술학과</option>
-            <option>음악학과</option>
-          </optgroup>
-        </select>
-        <svg class="select-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
-      </div>
-    </div>
-
-    <!-- 05. 원하는 전공 범위 -->
-    <div class="form-block">
-      <div class="form-label-row">
-        <span class="form-num">05</span>
-        <span class="form-label">어떤 전공의 감자와 만날까요?</span>
-      </div>
-      <p class="form-sub">매칭 범위를 정해주세요. 단일 선택.</p>
-      <div class="chip-group" id="major-range-chips">
-        <button class="chip" onclick="selectSingle(this, 'majorRange', '상관없음')">상관없음</button>
-        <button class="chip" onclick="selectSingle(this, 'majorRange', '같은 학과')">같은 학과</button>
-        <button class="chip" onclick="selectSingle(this, 'majorRange', '같은 단과대학')">같은 단과대학</button>
-        <button class="chip" onclick="selectSingle(this, 'majorRange', '같은 계열')">같은 계열</button>
-      </div>
-      <div class="info-tip">
-        <span class="ico">💡</span>
-        <span><strong>같은 계열</strong>: 이공계 / 의약학 / 인문사회 / 예체능 4개로 구분돼요.</span>
-      </div>
-    </div>
-
-    <div class="bottom-area">
-      <button class="btn-primary" onclick="nextStep(2)">
-        다음으로
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-      </button>
-    </div>
-  </section>
-
-  <!-- ========== STEP 3: 언제, 어떻게? ========== -->
-  <section class="step-screen" id="step-3">
-    <div class="topbar">
-      <button class="back-btn" onclick="goStep(2)">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
-      </button>
-      <div class="progress-track"><div class="progress-fill" style="width: 75%;"></div></div>
-      <span class="step-text">3 / 4</span>
-    </div>
-
-    <div class="step-head">
-      <h1>언제, <em>어떻게</em><br>함께할까요?</h1>
-      <p>시간과 방식을 알려주세요.</p>
-    </div>
-
-    <!-- 06. 시간대 -->
-    <div class="form-block">
-      <div class="form-label-row">
-        <span class="form-num">06</span>
-        <span class="form-label">언제 함께 공부할까요?</span>
-      </div>
-      <p class="form-sub">가능한 시간을 모두 선택해주세요.</p>
-      <div class="time-grid">
-        <div class="time-row-label">평일</div>
-        <div class="time-row">
-          <button class="time-cell" onclick="toggleMulti(this, 'times', '평일 아침')">아침</button>
-          <button class="time-cell" onclick="toggleMulti(this, 'times', '평일 오전')">오전</button>
-          <button class="time-cell" onclick="toggleMulti(this, 'times', '평일 오후')">오후</button>
-          <button class="time-cell" onclick="toggleMulti(this, 'times', '평일 저녁')">저녁</button>
-          <button class="time-cell" onclick="toggleMulti(this, 'times', '평일 밤')">밤</button>
+  <!-- 4. 시간대 -->
+  <div class="form-block">
+    <div class="form-label"><span>▸ 시간대 <span class="required">[필수]</span></span></div>
+    <div class="form-sub">요일과 시간대 모두 1개 이상 선택해주세요.</div>
+    <div class="schedule-matrix">
+      <div class="row">
+        <div class="row-label">요일</div>
+        <div class="chip-group" id="day-chips">
+          <button class="chip" data-value="mon" onclick="toggleChip(this)">월</button>
+          <button class="chip" data-value="tue" onclick="toggleChip(this)">화</button>
+          <button class="chip" data-value="wed" onclick="toggleChip(this)">수</button>
+          <button class="chip" data-value="thu" onclick="toggleChip(this)">목</button>
+          <button class="chip" data-value="fri" onclick="toggleChip(this)">금</button>
+          <button class="chip" data-value="sat" onclick="toggleChip(this)">토</button>
+          <button class="chip" data-value="sun" onclick="toggleChip(this)">일</button>
         </div>
-        <div class="time-row-label">주말</div>
-        <div class="time-row">
-          <button class="time-cell" onclick="toggleMulti(this, 'times', '주말 아침')">아침</button>
-          <button class="time-cell" onclick="toggleMulti(this, 'times', '주말 오전')">오전</button>
-          <button class="time-cell" onclick="toggleMulti(this, 'times', '주말 오후')">오후</button>
-          <button class="time-cell" onclick="toggleMulti(this, 'times', '주말 저녁')">저녁</button>
-          <button class="time-cell" onclick="toggleMulti(this, 'times', '주말 밤')">밤</button>
+      </div>
+      <div class="row">
+        <div class="row-label">시간대</div>
+        <div class="chip-group" id="period-chips">
+          <button class="chip" data-value="morning" onclick="toggleChip(this)">🌅 오전</button>
+          <button class="chip" data-value="afternoon" onclick="toggleChip(this)">☀️ 오후</button>
+          <button class="chip" data-value="evening" onclick="toggleChip(this)">🌙 저녁</button>
         </div>
       </div>
     </div>
+  </div>
 
-    <!-- 07. 학습 스타일 -->
-    <div class="form-block">
-      <div class="form-label-row">
-        <span class="form-num">07</span>
-        <span class="form-label">어떻게 공부하는 게 편한가요?</span>
-      </div>
-      <p class="form-sub">복수 선택 가능.</p>
-      <div class="chip-group" id="style-chips">
-        <button class="chip" onclick="toggleMulti(this, 'style', '예습형')">예습형</button>
-        <button class="chip" onclick="toggleMulti(this, 'style', '복습형')">복습형</button>
-        <button class="chip" onclick="toggleMulti(this, 'style', '문제풀이')">문제풀이</button>
-        <button class="chip" onclick="toggleMulti(this, 'style', '개념토론')">개념토론</button>
-        <button class="chip" onclick="toggleMulti(this, 'style', '프로젝트')">프로젝트</button>
-      </div>
+  <!-- ============================================================ -->
+  <!--                  [선택 5개 — 펼치기]                          -->
+  <!-- ============================================================ -->
+
+  <div class="accordion" id="more-accordion">
+    <div class="accordion-head" onclick="toggleAccordion()">
+      <span>⚙️ 더 자세히 설정 (선택)</span>
+      <span class="arrow">▼</span>
     </div>
+    <div class="accordion-body">
 
-    <!-- 08. 모임 방식 -->
-    <div class="form-block">
-      <div class="form-label-row">
-        <span class="form-num">08</span>
-        <span class="form-label">어떻게 모이는 게 좋으세요?</span>
-      </div>
-      <p class="form-sub">둘 다 괜찮으면 모두 선택해주세요.</p>
-      <div class="big-chip-group" id="meet-chips">
-        <button class="big-chip" onclick="toggleMultiBig(this, 'meet', '대면')">
-          <div class="big-chip-emoji">☕</div>
-          <div class="big-chip-title">대면</div>
-          <div class="big-chip-desc">직접 만나서</div>
-        </button>
-        <button class="big-chip" onclick="toggleMultiBig(this, 'meet', '비대면')">
-          <div class="big-chip-emoji">💻</div>
-          <div class="big-chip-title">비대면</div>
-          <div class="big-chip-desc">디스코드/줌</div>
-        </button>
-      </div>
-    </div>
-
-    <div class="bottom-area">
-      <button class="btn-primary" onclick="nextStep(3)">
-        다음으로
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-      </button>
-    </div>
-  </section>
-
-  <!-- ========== STEP 4: 마지막 한 줄 ========== -->
-  <section class="step-screen" id="step-4">
-    <div class="topbar">
-      <button class="back-btn" onclick="goStep(3)">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
-      </button>
-      <div class="progress-track"><div class="progress-fill" style="width: 100%;"></div></div>
-      <span class="step-text">4 / 4</span>
-    </div>
-
-    <div class="step-head">
-      <h1>마지막 <em>한 줄</em>이면<br>매칭 시작이에요</h1>
-      <p>작성한 카드를 확인하고 자기소개를 적어주세요.</p>
-    </div>
-
-    <!-- 작성 요약 카드 -->
-    <div class="summary-card">
-      <div class="summary-emoji">🥔</div>
-      <div class="summary-title">▸ 내 매칭 카드</div>
-      <div class="summary-grid">
-        <div class="summary-row">
-          <span class="k">카테고리</span>
-          <span class="v" id="sum-category">—</span>
+      <!-- 5. 수준 -->
+      <div class="form-block">
+        <div class="form-label">
+          <span>▸ 수준</span>
+          <span class="optional">기본값: 기본</span>
         </div>
-        <div class="summary-row">
-          <span class="k">세부 주제</span>
-          <span class="v" id="sum-topic">—</span>
-        </div>
-        <div class="summary-row">
-          <span class="k">수준</span>
-          <span class="v" id="sum-level">—</span>
-        </div>
-        <div class="summary-row">
-          <span class="k">내 전공</span>
-          <span class="v" id="sum-major">—</span>
-        </div>
-        <div class="summary-row">
-          <span class="k">매칭 범위</span>
-          <span class="v" id="sum-range">—</span>
-        </div>
-        <div class="summary-row">
-          <span class="k">시간대</span>
-          <span class="v" id="sum-times">—</span>
-        </div>
-        <div class="summary-row">
-          <span class="k">학습 스타일</span>
-          <span class="v" id="sum-style">—</span>
-        </div>
-        <div class="summary-row">
-          <span class="k">모임 방식</span>
-          <span class="v" id="sum-meet">—</span>
+        <div class="chip-group" id="level-chips">
+          <button class="chip" data-value="intro" onclick="selectLevel(this)">🌱 입문</button>
+          <button class="chip active" data-value="basic" onclick="selectLevel(this)">📖 기본</button>
+          <button class="chip" data-value="mid" onclick="selectLevel(this)">⚡ 중급</button>
+          <button class="chip" data-value="advanced" onclick="selectLevel(this)">🔥 심화</button>
         </div>
       </div>
-    </div>
 
-    <!-- 09. 한 줄 소개 -->
-    <div class="form-block">
-      <div class="form-label-row">
-        <span class="form-num">09</span>
-        <span class="form-label">간단한 자기소개 <span class="opt">선택</span></span>
+      <!-- 6. 모임 방식 -->
+      <div class="form-block">
+        <div class="form-label">
+          <span>▸ 모임 방식</span>
+          <span class="optional">기본값: 둘 다</span>
+        </div>
+        <div class="form-sub">최소 1개는 선택해주세요.</div>
+        <div class="chip-group" id="mode-chips">
+          <button class="chip active" data-value="offline" onclick="toggleChip(this)">🤝 오프라인</button>
+          <button class="chip active" data-value="online" onclick="toggleChip(this)">💻 온라인</button>
+        </div>
       </div>
-      <p class="form-sub">매칭된 감자들에게 보여져요. 30자 이내로 자유롭게.</p>
-      <div class="textarea-wrap">
-        <textarea class="form-textarea" id="bio-input" placeholder="예: 트리 챕터에서 막혔어요. 같이 헤쳐나가요." maxlength="30" oninput="updateCharCount()"></textarea>
-      </div>
-      <div class="char-counter" id="char-counter">0 / 30</div>
-    </div>
 
-    <!-- 10. 팀장 희망 -->
-    <div class="form-block">
-      <div class="form-label-row">
-        <span class="form-num">10</span>
-        <span class="form-label">팀장 희망 <span class="opt">선택</span></span>
+      <!-- 7. 빈도 -->
+      <div class="form-block">
+        <div class="form-label">
+          <span>▸ 빈도</span>
+          <span class="optional">기본값: 자유</span>
+        </div>
+        <div class="chip-group" id="frequency-chips">
+          <button class="chip" data-value="once" onclick="selectFrequency(this)">주 1회</button>
+          <button class="chip" data-value="twice" onclick="selectFrequency(this)">주 2회</button>
+          <button class="chip active" data-value="free" onclick="selectFrequency(this)">자유</button>
+        </div>
       </div>
-      <label class="leader-check" for="leader-check">
-        <input type="checkbox" id="leader-check" onchange="card.wantLeader = this.checked">
-        <span class="leader-check-box" aria-hidden="true"></span>
-        <span class="leader-check-text">
-          <strong>저는 팀장이 되고 싶어요</strong>
-          <span class="leader-check-sub">매칭된 팀의 팀장은 희망자 우선으로 배정돼요. 팀장이 되어 스터디를 주도해보세요!</span>
-        </span>
-      </label>
-    </div>
 
-    <div class="bottom-area">
-      <button class="btn-primary orange" onclick="submitCard()">
-        🥔 매칭 시작하기
-      </button>
+      <!-- 8. 기간 -->
+      <div class="form-block">
+        <div class="form-label">
+          <span>▸ 기간</span>
+          <span class="optional">기본값: 학기</span>
+        </div>
+        <div class="form-sub">⏱️ 협의 후 연장 가능해요.</div>
+        <div class="chip-group" id="duration-chips">
+          <button class="chip" data-value="1week" onclick="selectDuration(this)">1주</button>
+          <button class="chip" data-value="3weeks" onclick="selectDuration(this)">3주</button>
+          <button class="chip" data-value="4weeks" onclick="selectDuration(this)">4주</button>
+          <button class="chip active" data-value="semester" onclick="selectDuration(this)">학기</button>
+        </div>
+      </div>
+
+      <!-- 9. 익명 옵션 -->
+      <div class="form-block">
+        <div class="form-label">
+          <span>▸ 익명으로 등록</span>
+          <span class="optional">기본값: 닉네임</span>
+        </div>
+        <div class="form-sub">대기 중에는 익명으로 표시되고, 매칭 알림 후 "함께할까요?" 단계에서 닉네임이 공개돼요.</div>
+        <div class="toggle-row" onclick="toggleAnon()">
+          <div>
+            <div class="label" id="anon-label">닉네임으로 등록</div>
+            <div class="desc" id="anon-desc">다른 사람에게 닉네임이 보여요.</div>
+          </div>
+          <div class="toggle" id="anon-toggle"></div>
+        </div>
+      </div>
+
+      <!-- 한 줄 소개 -->
+      <div class="form-block" style="padding-bottom: 4px;">
+        <div class="form-label">
+          <span>▸ 한 줄 소개</span>
+          <span class="char-count" id="intro-count">0 / 100</span>
+        </div>
+        <textarea class="form-textarea" id="intro-input"
+                  placeholder="어떤 분과 함께하고 싶은지, 어떤 분위기를 원하는지 자유롭게 적어주세요. (적게 써도 OK)"
+                  maxlength="100"
+                  oninput="onIntroChange()"></textarea>
+      </div>
+
     </div>
-  </section>
+  </div>
 
 </div>
 
-<!-- 토스트 -->
+<!-- 하단 고정 버튼 -->
+<div class="bottom-bar">
+  <button class="btn-secondary" id="save-draft-btn" onclick="saveDraft()">임시 저장</button>
+  <button class="btn-primary" id="activate-btn" disabled onclick="saveAndActivate()">자동매칭에 등록</button>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script>
-  /* ========== 매칭 카드 상태 ========== */
-  const card = {
-    category: '',       // 단일
-    topic: '',          // 자유 입력 (선택)
-    level: '',          // 단일
-    major: '',          // 셀렉트
-    majorRange: '',     // 단일
-    times: [],          // 복수
-    style: [],          // 복수
-    meet: [],           // 복수
-    bio: '',            // 자유 입력 (선택)
-    wantLeader: false   // 팀장 희망 여부
+  /* ============================================================
+     Supabase 초기화 + 인증 가드
+     ============================================================ */
+  let supabaseClient = null;
+  const SUPABASE_URL = 'https://mleypjquzggtyouepfha.supabase.co';
+  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1sZXlwanF1emdndHlvdWVwZmhhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg4MTAzMDIsImV4cCI6MjA5NDM4NjMwMn0.eM4nh50tC-ZxVRoIA1NZit4JtMJqPlUBZ5LEnTrRB5Q';
+
+  try {
+    if(window.supabase) supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  } catch(e){ console.error(e); }
+
+  let currentUser = null;
+
+  /* 인증 가드 + 보유 카드 수 조회 */
+  async function bootCard(){
+    if(!supabaseClient){ document.body.classList.add('ready'); return; }
+    const { data: { session } } = await supabaseClient.auth.getSession();
+    if(!session){ location.replace('auth.html'); return; }
+    currentUser = session.user;
+
+    // 현재 보유 중인 카드 수 (만료/아카이브 제외)
+    const { count } = await supabaseClient
+      .from('match_cards')
+      .select('id', { count: 'exact', head: true })
+      .eq('user_id', currentUser.id)
+      .not('status', 'in', '(expired,archived)');
+
+    const cardCount = count || 0;
+    document.getElementById('card-count').textContent = `${cardCount} / 3`;
+
+    if(cardCount >= 3){
+      document.getElementById('save-draft-btn').disabled = true;
+      document.getElementById('activate-btn').disabled = true;
+      showToast('카드는 최대 3개까지 보유할 수 있어요. 기존 카드를 정리해주세요.');
+    }
+
+    document.body.classList.add('ready');
+  }
+  bootCard();
+
+  /* ============================================================
+     폼 상태 관리
+     ============================================================ */
+  const form = {
+    title: '',
+    category: '',
+    subject: '',
+    schedule: { days: [], periods: [] },
+    level: 'basic',
+    mode: ['offline', 'online'],
+    frequency: 'free',
+    duration: 'semester',
+    is_anonymous: false,
+    intro: ''
   };
 
-  /* ========== 단일 선택 ========== */
-  function selectSingle(btn, key, value){
-    const group = btn.parentElement;
-    group.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+  /* ========== 입력 핸들러 ========== */
+  function onTitleChange(){
+    form.title = document.getElementById('title-input').value.trim();
+    document.getElementById('title-count').textContent = `${form.title.length} / 50`;
+    updateActivateBtn();
+  }
+
+  function onSubjectChange(){
+    form.subject = document.getElementById('subject-input').value.trim();
+    document.getElementById('subject-count').textContent = `${form.subject.length} / 30`;
+    updateActivateBtn();
+  }
+
+  function onIntroChange(){
+    form.intro = document.getElementById('intro-input').value.trim();
+    document.getElementById('intro-count').textContent = `${form.intro.length} / 100`;
+  }
+
+  /* ========== 단일 선택 칩 ========== */
+  function selectCategory(btn){
+    document.querySelectorAll('#category-chips .chip').forEach(c => c.classList.remove('active'));
     btn.classList.add('active');
-    card[key] = value;
+    form.category = btn.dataset.value;
+    updateActivateBtn();
+  }
+  function selectLevel(btn){
+    document.querySelectorAll('#level-chips .chip').forEach(c => c.classList.remove('active'));
+    btn.classList.add('active');
+    form.level = btn.dataset.value;
+  }
+  function selectFrequency(btn){
+    document.querySelectorAll('#frequency-chips .chip').forEach(c => c.classList.remove('active'));
+    btn.classList.add('active');
+    form.frequency = btn.dataset.value;
+  }
+  function selectDuration(btn){
+    document.querySelectorAll('#duration-chips .chip').forEach(c => c.classList.remove('active'));
+    btn.classList.add('active');
+    form.duration = btn.dataset.value;
   }
 
-  /* ========== 복수 선택 (칩) ========== */
-  function toggleMulti(btn, key, value){
+  /* ========== 다중 선택 칩 (요일/시간대/모임방식) ========== */
+  function toggleChip(btn){
     btn.classList.toggle('active');
-    if(btn.classList.contains('active')){
-      if(!card[key].includes(value)) card[key].push(value);
+    const groupId = btn.parentElement.id;
+    const values = Array.from(btn.parentElement.querySelectorAll('.chip.active')).map(c => c.dataset.value);
+
+    if(groupId === 'day-chips') form.schedule.days = values;
+    if(groupId === 'period-chips') form.schedule.periods = values;
+    if(groupId === 'mode-chips'){
+      // 최소 1개 보장
+      if(values.length === 0){
+        btn.classList.add('active');
+        showToast('최소 1개는 선택해주세요.');
+        return;
+      }
+      form.mode = values;
+    }
+    updateActivateBtn();
+  }
+
+  /* ========== 익명 토글 ========== */
+  function toggleAnon(){
+    form.is_anonymous = !form.is_anonymous;
+    const toggle = document.getElementById('anon-toggle');
+    const label = document.getElementById('anon-label');
+    const desc = document.getElementById('anon-desc');
+    if(form.is_anonymous){
+      toggle.classList.add('on');
+      label.textContent = '🎭 익명으로 등록';
+      desc.textContent = '"익명 씩씩한감자" 같은 익명 닉네임으로 표시돼요.';
     } else {
-      card[key] = card[key].filter(v => v !== value);
+      toggle.classList.remove('on');
+      label.textContent = '닉네임으로 등록';
+      desc.textContent = '다른 사람에게 닉네임이 보여요.';
     }
   }
 
-  /* ========== 복수 선택 (큰 카드) ========== */
-  function toggleMultiBig(btn, key, value){
-    btn.classList.toggle('active');
-    if(btn.classList.contains('active')){
-      if(!card[key].includes(value)) card[key].push(value);
-    } else {
-      card[key] = card[key].filter(v => v !== value);
-    }
+  /* ========== 펼치기 ========== */
+  function toggleAccordion(){
+    document.getElementById('more-accordion').classList.toggle('open');
   }
 
-  /* ========== 전공 셀렉트 ========== */
-  document.getElementById('select-major').addEventListener('change', e => {
-    card.major = e.target.value;
-  });
-
-  /* ========== 글자 수 카운터 ========== */
-  function updateCharCount(){
-    const input = document.getElementById('bio-input');
-    const counter = document.getElementById('char-counter');
-    const len = input.value.length;
-    counter.textContent = len + ' / 30';
-    if(len >= 25) counter.classList.add('warn');
-    else counter.classList.remove('warn');
-    card.bio = input.value;
+  /* ========== 자동매칭 등록 버튼 활성화 (필수 4개 모두 채워졌나) ========== */
+  function updateActivateBtn(){
+    const ok = form.title.length >= 2
+      && form.category
+      && form.subject.length >= 1
+      && form.schedule.days.length >= 1
+      && form.schedule.periods.length >= 1;
+    document.getElementById('activate-btn').disabled = !ok;
   }
 
-  /* ========== 단계 이동 ========== */
-  function goStep(num){
-    document.querySelectorAll('.step-screen').forEach(s => s.classList.remove('active'));
-    document.getElementById('step-' + num).classList.add('active');
-    window.scrollTo(0, 0);
+  /* ============================================================
+     저장 — Step 3에서 RPC 연결 (지금은 더미 alert)
+     ============================================================ */
+  function saveDraft(){
+    showToast('💾 임시 저장 (Step 3에서 DB 연결 예정)');
+  }
+  function saveAndActivate(){
+    if(document.getElementById('activate-btn').disabled){
+      showToast('필수 4개를 모두 입력해주세요.');
+      return;
+    }
+    showToast('🚀 자동매칭 등록 (Step 3에서 DB 연결 예정)');
   }
 
-  function nextStep(current){
-    // Step 1 검증
-    if(current === 1){
-      if(!card.category){ showToast('스터디 종류를 선택해주세요'); return; }
-      if(!card.level){ showToast('수준을 선택해주세요'); return; }
-      // topic은 선택 항목
-      card.topic = document.getElementById('input-topic').value.trim();
-      goStep(2);
-    }
-    // Step 2 검증
-    else if(current === 2){
-      if(!card.major){ showToast('내 전공을 선택해주세요'); return; }
-      if(!card.majorRange){ showToast('원하는 전공 범위를 선택해주세요'); return; }
-      goStep(3);
-    }
-    // Step 3 검증
-    else if(current === 3){
-      if(card.times.length === 0){ showToast('가능한 시간을 하나 이상 선택해주세요'); return; }
-      if(card.style.length === 0){ showToast('학습 스타일을 하나 이상 선택해주세요'); return; }
-      if(card.meet.length === 0){ showToast('모임 방식을 하나 이상 선택해주세요'); return; }
-      fillSummary();
-      goStep(4);
-    }
-  }
-
-  /* ========== 요약 카드 채우기 ========== */
-  function fillSummary(){
-    document.getElementById('sum-category').textContent = card.category || '—';
-    document.getElementById('sum-topic').textContent = card.topic || '미입력';
-    document.getElementById('sum-level').textContent = card.level || '—';
-    document.getElementById('sum-major').textContent = card.major || '—';
-    document.getElementById('sum-range').textContent = card.majorRange || '—';
-    document.getElementById('sum-times').textContent = card.times.length > 0 ? card.times.join(', ') : '—';
-    document.getElementById('sum-style').textContent = card.style.length > 0 ? card.style.join(', ') : '—';
-    document.getElementById('sum-meet').textContent = card.meet.length > 0 ? card.meet.join(', ') : '—';
-
-    // 빈 항목 스타일 처리
-    if(!card.topic){
-      document.getElementById('sum-topic').classList.add('empty');
-    }
-  }
-
-  /* ========== 최종 제출 ========== */
-  function submitCard(){
-    showToast('매칭 카드 생성 완료! 🥔');
-    console.log('생성된 매칭 카드:', card);
-    // 데모: 카드를 localStorage에 저장하면 대시보드가 자동으로 '대기 중' 상태로 표시
-    try{
-      localStorage.setItem('studyPotato.userMatchCard', JSON.stringify({
-        ...card,
-        status: 'waiting',
-        createdAt: Date.now()
-      }));
-    } catch(e){ /* 시크릿 모드 등 */ }
-    // 토스트 보여준 뒤 대시보드(매칭 대기 상태)로 이동
-    setTimeout(() => { window.location.href = 'dashboard.html'; }, 1200);
+  function confirmLeave(){
+    const hasInput = form.title || form.category || form.subject
+      || form.schedule.days.length > 0;
+    if(hasInput && !confirm('입력 중인 내용이 사라져요. 나가시겠어요?')) return;
+    history.back();
   }
 
   /* ========== 토스트 ========== */
-  let toastTimer = null;
-  function showToast(message){
+  let toastTimer;
+  function showToast(msg){
     const toast = document.getElementById('toast');
-    toast.textContent = message;
+    toast.textContent = msg;
     toast.classList.add('show');
     clearTimeout(toastTimer);
     toastTimer = setTimeout(() => toast.classList.remove('show'), 2400);
   }
-</script>
-<script>
-  /* 인증 가드 — 비로그인 시 auth.html로 즉시 이동 */
-  (function(){
-    const SUPABASE_URL = 'https://mleypjquzggtyouepfha.supabase.co';
-    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1sZXlwanF1emdndHlvdWVwZmhhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg4MTAzMDIsImV4cCI6MjA5NDM4NjMwMn0.eM4nh50tC-ZxVRoIA1NZit4JtMJqPlUBZ5LEnTrRB5Q';
-    if(!window.supabase){ document.body.classList.add('ready'); return; }
-    const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-    sb.auth.getSession().then(({ data: { session } }) => {
-      if(!session){ location.replace('auth.html'); return; }
-      document.body.classList.add('ready');
-    }).catch(() => document.body.classList.add('ready'));
-  })();
 </script>
 </body>
 </html>

@@ -1636,6 +1636,24 @@
     </div>
 
     <button class="btn-primary" onclick="confirmSettingsSave()">설정 저장</button>
+
+    <div class="sub-head" style="color: var(--error); margin-top: 32px;">🚨 긴급 운영 중단 (admin 전용)</div>
+    <div class="write-form" style="border: 2px solid var(--error); background: #FFF5F5;">
+      <div style="font-size: 13px; color: var(--error); line-height: 1.6; margin-bottom: 14px;">
+        <strong>⚠️ 침해사고, 심각한 버그, 부적절 콘텐츠 폭증, 봇 공격 등 긴급 상황에서만 사용하세요.</strong><br>
+        클릭 즉시 모든 일반 사용자의 접근이 차단됩니다 (운영자 콘솔만 접근 가능).
+      </div>
+      <div class="form-block">
+        <label class="form-label" style="color: var(--error);">중단 사유 (사용자에게 표시될 안내)</label>
+        <div class="input-wrap" style="border-color: var(--error);">
+          <textarea id="maint-reason" placeholder="예: 보안 점검 중입니다. 약 2시간 후 재개됩니다."></textarea>
+        </div>
+      </div>
+      <button onclick="confirmEmergencyStop()" style="width: 100%; background: var(--error); color: white; padding: 16px; border-radius: var(--radius-m); font-size: 15px; font-weight: 800; letter-spacing: -0.01em;">🚨 즉시 운영 중단</button>
+      <div style="font-size: 11px; color: var(--ink-mute); margin-top: 10px; text-align: center; line-height: 1.5;">
+        해제도 admin만 가능 / 중단 시간은 활동 로그에 기록됨
+      </div>
+    </div>
   </div>
 
   <!-- 🙂 내 정보 -->
@@ -2001,6 +2019,29 @@
     if(!ok) return;
     filterChip(btn);
     showToast('정책이 변경됐어요 (저장 버튼을 눌러야 최종 적용)');
+  }
+
+  /* ========== 🚨 긴급 운영 중단 (admin 전용) — 두 번 confirm ========== */
+  function confirmEmergencyStop(){
+    const reason = document.getElementById('maint-reason').value.trim();
+    if(!reason){
+      alert('중단 사유를 입력해주세요. 사용자에게 표시될 안내문이에요.');
+      return;
+    }
+    const ok1 = confirm(
+      '🚨 긴급 운영 중단\n\n' +
+      '클릭하면 즉시 모든 일반 사용자의 접근이 차단됩니다.\n' +
+      '운영자 콘솔만 접근 가능해져요.\n\n' +
+      '계속하시겠어요?'
+    );
+    if(!ok1) return;
+    const ok2 = confirm(
+      '⚠️ 다시 한 번 확인합니다.\n\n' +
+      '진짜로 운영을 즉시 중단하시겠어요?\n' +
+      '중단 시간은 활동 로그에 기록되며, 해제 전까지 사용자 접근 차단됩니다.'
+    );
+    if(!ok2) return;
+    showToast('🚨 운영이 중단됐어요 (더미). 실제 백엔드 연동은 추후 구현');
   }
 
   /* ========== 시스템 설정 최종 저장 confirm ========== */
