@@ -558,33 +558,113 @@
   } catch(e){ console.error(e); }
 
   let currentUser = null;
+  let editingCardId = null;  // URL ?id=... 있으면 편집 모드
 
-  /* 인증 가드 + 보유 카드 수 조회 */
+  /* 인증 가드 + 보유 카드 수 조회 + 편집 모드 분기 */
   async function bootCard(){
     if(!supabaseClient){ document.body.classList.add('ready'); return; }
     const { data: { session } } = await supabaseClient.auth.getSession();
     if(!session){ location.replace('auth.html'); return; }
     currentUser = session.user;
 
-    // 현재 보유 중인 카드 수 (만료/아카이브 제외)
-    const { count } = await supabaseClient
-      .from('match_cards')
-      .select('id', { count: 'exact', head: true })
-      .eq('user_id', currentUser.id)
-      .not('status', 'in', '(expired,archived)');
+    // URL ?id=cardId → 편집 모드
+    const urlId = new URLSearchParams(location.search).get('id');
+    if(urlId){
+      // 편집 모드: 기존 카드 로드
+      const { data: card, error } = await supabaseClient
+        .from('match_cards').select('*').eq('id', urlId)
+        .eq('user_id', currentUser.id).maybeSingle();
+      if(error || !card){
+        alert('카드를 찾을 수 없거나 권한이 없어요.');
+        location.replace('dashboard.html');
+        return;
+      }
+      editingCardId = card.id;
+      // 페이지 헤더/버튼 텍스트 변경
+      document.querySelector('.topbar-title').textContent = '매칭 카드 수정';
+      document.querySelector('.page-head h1').innerHTML = '매칭 카드 <em style="font-style:normal;color:var(--knu-orange)">수정</em>';
+      document.querySelector('.page-head .sub').textContent = '변경하고 싶은 항목만 수정해주세요.';
+      document.getElementById('save-draft-btn').textContent = '변경 사항 저장';
+      document.getElementById('activate-btn').textContent = card.status === 'active' ? '저장하고 자동매칭 유지' : '저장 + 자동매칭 등록';
+      document.getElementById('card-count').style.display = 'none';  // 편집 모드는 카드 수 표시 X
+      // 안내박스 다시 작성
+      document.querySelector('.info-box').innerHTML = '✏️ <strong>수정 모드</strong> · 변경 후 저장하면 즉시 반영돼요.';
 
-    const cardCount = count || 0;
-    document.getElementById('card-count').textContent = `${cardCount} / 3`;
-
-    if(cardCount >= 3){
-      // 3개 초과 → 만들기 화면 자체 차단, 안내만 보여주고 dashboard로
-      alert('카드는 최대 3개까지 보유할 수 있어요.\n기존 카드를 정리하고 다시 시도해주세요.');
-      location.replace('dashboard.html');
-      return;
+      // 폼에 기존 데이터 채움
+      Object.assign(form, {
+        category: card.category,
+        subject: card.subject,
+        schedule: card.schedule || { days: [], periods: [] },
+        intro: card.intro || '',
+        level: card.level,
+        mode: card.mode || ['offline', 'online'],
+        frequency: card.frequency,
+        duration: card.duration,
+        is_anonymous: card.is_anonymous
+      });
+      fillFormFromCard(card);
+    } else {
+      // 신규 모드: 카드 수 체크 (3개 도달 시 차단)
+      const { count } = await supabaseClient
+        .from('match_cards')
+        .select('id', { count: 'exact', head: true })
+        .eq('user_id', currentUser.id)
+        .not('status', 'in', '(expired,archived)');
+      const cardCount = count || 0;
+      document.getElementById('card-count').textContent = `${cardCount} / 3`;
+      if(cardCount >= 3){
+        alert('카드는 최대 3개까지 보유할 수 있어요.\n기존 카드를 정리하고 다시 시도해주세요.');
+        location.replace('dashboard.html');
+        return;
+      }
     }
 
     document.body.classList.add('ready');
   }
+
+  /* 편집 모드: 기존 카드 데이터로 폼 UI 채우기 */
+  function fillFormFromCard(card){
+    document.getElementById('subject-input').value = card.subject;
+    onSubjectChange();
+    document.getElementById('intro-input').value = card.intro || '';
+    onIntroChange();
+    // 카테고리 칩 active
+    document.querySelectorAll('#category-chips .chip').forEach(c => {
+      c.classList.toggle('active', c.dataset.value === card.category);
+    });
+    // 시간대
+    document.querySelectorAll('#day-chips .chip').forEach(c => {
+      c.classList.toggle('active', (card.schedule?.days || []).includes(c.dataset.value));
+    });
+    document.querySelectorAll('#period-chips .chip').forEach(c => {
+      c.classList.toggle('active', (card.schedule?.periods || []).includes(c.dataset.value));
+    });
+    // 수준
+    document.querySelectorAll('#level-chips .chip').forEach(c => {
+      c.classList.toggle('active', c.dataset.value === card.level);
+    });
+    // 모임 방식
+    document.querySelectorAll('#mode-chips .chip').forEach(c => {
+      c.classList.toggle('active', (card.mode || []).includes(c.dataset.value));
+    });
+    // 빈도
+    document.querySelectorAll('#frequency-chips .chip').forEach(c => {
+      c.classList.toggle('active', c.dataset.value === card.frequency);
+    });
+    // 기간
+    document.querySelectorAll('#duration-chips .chip').forEach(c => {
+      c.classList.toggle('active', c.dataset.value === card.duration);
+    });
+    // 익명
+    if(card.is_anonymous){
+      form.is_anonymous = false;  // toggleAnon이 toggle하니까 false로 두고 호출
+      toggleAnon();
+    }
+    // 펼치기 자동 열기 (선택 항목 다 보이도록)
+    document.getElementById('more-accordion').classList.add('open');
+    updateActivateBtn();
+  }
+
   bootCard();
 
   /* ============================================================
@@ -738,12 +818,26 @@
     };
 
     try {
-      const { error } = await supabaseClient
-        .from('match_cards')
-        .insert(payload);
+      let error;
+      if(editingCardId){
+        // 편집 모드: UPDATE
+        // user_id는 변경 X (RLS), payload에서 제거
+        const { user_id, ...updatePayload } = payload;
+        const res = await supabaseClient
+          .from('match_cards')
+          .update(updatePayload)
+          .eq('id', editingCardId);
+        error = res.error;
+      } else {
+        // 신규 모드: INSERT
+        const res = await supabaseClient
+          .from('match_cards')
+          .insert(payload);
+        error = res.error;
+      }
 
       if(error){
-        console.error('카드 생성 실패:', error);
+        console.error('카드 저장 실패:', error);
         const msg = (error.message || '').toLowerCase();
         if(msg.includes('max_cards_exceeded')){
           showToast('카드는 최대 3개까지 보유할 수 있어요.');
@@ -757,7 +851,7 @@
         return;
       }
 
-      showToast(asActive ? '🚀 자동매칭에 등록됐어요!' : '💾 임시 저장됐어요');
+      showToast(editingCardId ? '✏️ 변경 사항이 저장됐어요' : (asActive ? '🚀 자동매칭에 등록됐어요!' : '💾 저장됐어요'));
       setTimeout(() => { location.href = 'dashboard.html'; }, 1000);
     } catch(err){
       console.error(err);

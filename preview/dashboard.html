@@ -229,6 +229,45 @@
     gap: 10px;
     margin-bottom: 14px;
   }
+  /* ===== Active 카드 큰 배너 (Step 4-2) ===== */
+  #active-card-banner{
+    display: none;
+    margin: 0 20px 14px;
+    background: linear-gradient(135deg, var(--knu-orange) 0%, #FF7A30 100%);
+    color: white;
+    border-radius: var(--radius-m);
+    padding: 16px 18px;
+    box-shadow: 0 4px 16px rgba(254,80,0,0.25);
+  }
+  #active-card-banner .head{
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 8px;
+  }
+  #active-card-banner .head .badge{
+    font-family: var(--font-mono); font-size: 10px;
+    background: rgba(255,255,255,0.25); padding: 3px 8px; border-radius: 999px;
+    font-weight: 700; letter-spacing: 0.05em;
+  }
+  #active-card-banner .head .dday{
+    font-family: var(--font-mono); font-size: 11px; font-weight: 700;
+    opacity: 0.95;
+  }
+  #active-card-banner .title{
+    font-size: 16px; font-weight: 800; letter-spacing: -0.02em;
+    margin-bottom: 4px;
+  }
+  #active-card-banner .desc{
+    font-size: 12px; opacity: 0.9; line-height: 1.5;
+  }
+  #active-card-banner .next-match{
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px solid rgba(255,255,255,0.25);
+    font-size: 11px;
+    display: flex; justify-content: space-between; align-items: center;
+    font-family: var(--font-mono);
+  }
+
   /* ===== 내 매칭 카드 목록 (Step 4-1) ===== */
   #my-cards-section{ display: none; padding: 0 20px; margin-bottom: 24px; }
   .my-cards-head{
@@ -1747,6 +1786,21 @@
       <button onclick="setState('waiting', this)">매칭 대기 중</button>
     </div>
 
+    <!-- ========== Active 카드 큰 배너 (Step 4-2) ==========
+         자동매칭 등록된 카드 있을 때만 표시 -->
+    <div id="active-card-banner">
+      <div class="head">
+        <span class="badge">🔥 자동매칭 진행 중</span>
+        <span class="dday" id="active-banner-dday">⏱ D-7</span>
+      </div>
+      <div class="title" id="active-banner-title">—</div>
+      <div class="desc" id="active-banner-desc">—</div>
+      <div class="next-match">
+        <span>📅 다음 매칭</span>
+        <span id="active-banner-next">매주 월/목 20:00</span>
+      </div>
+    </div>
+
     <!-- ========== 내 매칭 카드 목록 (실데이터, Step 4-1) ==========
          카드 1개 이상 있을 때만 표시. 0개면 아래 state-empty 보임 -->
     <div id="my-cards-section">
@@ -2728,7 +2782,70 @@
       createBtn.disabled = true;
       createBtn.textContent = '카드 3개 도달 (기존 카드 정리 필요)';
       createBtn.style.opacity = '0.5';
+    } else {
+      createBtn.disabled = false;
+      createBtn.textContent = '+ 새 매칭 카드 만들기';
+      createBtn.style.opacity = '1';
     }
+
+    // Active 카드 큰 배너 표시
+    renderActiveBanner(cards.find(c => c.status === 'active'));
+  }
+
+  // Active 카드 배너 (홈 헤더 영역 강조)
+  function renderActiveBanner(activeCard){
+    const banner = document.getElementById('active-card-banner');
+    if(!banner) return;
+    if(!activeCard){
+      banner.style.display = 'none';
+      return;
+    }
+    banner.style.display = 'block';
+
+    const cat = CAT_LABELS[activeCard.category] || activeCard.category;
+    document.getElementById('active-banner-title').textContent = `${cat} · ${activeCard.subject}`;
+    document.getElementById('active-banner-desc').textContent = activeCard.intro;
+
+    // 만료 D-day
+    const exp = new Date(activeCard.expires_at);
+    const now = new Date();
+    const daysLeft = Math.ceil((exp - now) / (24*3600*1000));
+    const ddayEl = document.getElementById('active-banner-dday');
+    if(daysLeft <= 0){
+      ddayEl.textContent = '⏱ 곧 만료';
+    } else {
+      ddayEl.textContent = `⏱ 만료까지 D-${daysLeft}`;
+    }
+
+    // 다음 매칭 시간 (정해진 매칭 시기 — 추후 시즌별 분기)
+    // 임시: 매주 월/목 20시 가정
+    const nextMatch = computeNextMatchTime();
+    document.getElementById('active-banner-next').textContent = nextMatch;
+  }
+
+  // 다음 매칭 시간 계산 (월/목 20시 기준 임시 — 추후 시즌별 분기)
+  function computeNextMatchTime(){
+    const now = new Date();
+    const day = now.getDay();  // 0=일, 1=월, ..., 4=목
+    const hour = now.getHours();
+    const candidates = [];
+    // 다음 월요일 또는 목요일 20시 찾기
+    for(let i = 0; i < 14; i++){
+      const d = new Date(now);
+      d.setDate(d.getDate() + i);
+      d.setHours(20, 0, 0, 0);
+      const wd = d.getDay();
+      if((wd === 1 || wd === 4) && d > now){
+        candidates.push(d);
+        break;
+      }
+    }
+    if(candidates.length === 0) return '미정';
+    const next = candidates[0];
+    const wdLabel = ['일','월','화','수','목','금','토'][next.getDay()];
+    const m = next.getMonth() + 1;
+    const dd = next.getDate();
+    return `${m}/${dd} (${wdLabel}) 20:00`;
   }
 
   function renderCardHtml(c){
@@ -2737,6 +2854,20 @@
     const periods = (c.schedule?.periods || []).map(p => PERIOD_LABELS[p] || p).join('·');
     const isActive = c.status === 'active';
     const anonBadge = c.is_anonymous ? '<span class="anon">🎭 익명</span>' : '';
+
+    // 만료 D-day 계산 (active 카드만 강조)
+    let expireBadge = '';
+    if(c.expires_at){
+      const exp = new Date(c.expires_at);
+      const now = new Date();
+      const daysLeft = Math.ceil((exp - now) / (24*3600*1000));
+      if(daysLeft <= 0){
+        expireBadge = `<span style="color:var(--error); font-weight:700;">⏱ 곧 만료</span>`;
+      } else if(isActive){
+        expireBadge = `<span style="color:${daysLeft <= 2 ? 'var(--error)' : 'var(--knu-orange)'}; font-weight:700;">⏱ 만료까지 D-${daysLeft}</span>`;
+      }
+    }
+
     return `
       <div class="my-card ${isActive ? 'active-card' : ''}" data-id="${c.id}">
         <div class="my-card-head">
@@ -2744,15 +2875,21 @@
           <span class="my-card-status ${isActive ? 'active' : 'draft'}">${isActive ? '🔥 자동매칭 중' : '💾 저장됨'}</span>
         </div>
         <div class="my-card-intro">${escapeHtml(c.intro || '')}</div>
-        <div class="my-card-meta">${anonBadge}${days || '-'} · ${periods || '-'}</div>
+        <div class="my-card-meta">${anonBadge}${days || '-'} · ${periods || '-'}${expireBadge ? ' · ' + expireBadge : ''}</div>
         <div class="my-card-actions">
           ${isActive
-            ? `<button class="my-card-btn deactivate" onclick="toggleCardActive('${c.id}', false)">자동매칭 해제</button>`
+            ? `<button class="my-card-btn deactivate" onclick="toggleCardActive('${c.id}', false)">해제</button>`
             : `<button class="my-card-btn activate" onclick="toggleCardActive('${c.id}', true)">자동매칭 등록</button>`}
+          <button class="my-card-btn delete" onclick="editMyCard('${c.id}')" style="color:var(--knu-blue); flex:0 0 56px;">수정</button>
           <button class="my-card-btn delete" onclick="deleteMyCard('${c.id}')">삭제</button>
         </div>
       </div>
     `;
+  }
+
+  // 카드 수정 화면으로 이동
+  function editMyCard(cardId){
+    location.href = 'matchcard.html?id=' + encodeURIComponent(cardId);
   }
 
   // active 토글 — true로 만들 때 다른 active 카드가 있으면 confirm

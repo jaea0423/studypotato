@@ -78,6 +78,19 @@
   - Partial unique index: active 사용자당 1개
   - 7일 자동 만료 (`expire_old_cards()` 함수)
   - RLS: 본인 카드 CRUD + 다른 사용자 active 카드 SELECT
+- ✅ 매칭 카드 Step 4-2: 카드 수정 + active 시각화 강화
+  - **수정**: matchcard.html에 `?id=cardId` 파라미터 처리
+    - 편집 모드 시 기존 카드 fetch + form 자동 채움 (모든 칩 active 복원)
+    - 페이지 헤더/버튼 카피 동적 변경 ("매칭 카드 수정", "변경 사항 저장")
+    - 펼치기 영역 자동 열기 (선택 항목 다 보이게)
+    - 저장 시 INSERT → UPDATE 분기
+  - **dashboard 카드뷰**: "수정" 버튼 추가 (파란색 강조)
+  - **만료 D-day**: 카드뷰 메타에 표시 (active 카드만, D-2 이하 빨강)
+  - **Active 큰 배너** (`#active-card-banner`):
+    - 오렌지 그라데이션 + 화이트 텍스트 + 그림자
+    - "🔥 자동매칭 진행 중" 배지 + 만료 D-day
+    - 카테고리 · 과목, 한 줄 소개, 다음 매칭 시간 표시
+    - 다음 매칭은 월/목 20시 기준 자동 계산 (임시)
 - ✅ 매칭 카드 Step 4-1: dashboard 본인 카드 목록 실데이터 표시
   - 새 섹션 `#my-cards-section` 추가 (홈 탭, state-empty 위)
   - 카드 0개 → state-empty 자동 표시
