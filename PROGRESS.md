@@ -78,6 +78,12 @@
   - Partial unique index: active 사용자당 1개
   - 7일 자동 만료 (`expire_old_cards()` 함수)
   - RLS: 본인 카드 CRUD + 다른 사용자 active 카드 SELECT
+- ✅ 매칭 카드 Step 3: 카드 생성 INSERT 연결
+  - `saveCard(asActive)` — 임시저장(draft) / 바로 활성화(active) 분기
+  - 활성화 시 필수 4개 검증, 임시저장은 제목만 검증
+  - 에러 분기: max_cards_exceeded / active 1개 unique / CHECK 위반
+  - 성공 시 토스트 + 1초 후 dashboard로 이동
+- ✅ matchcard 펼치기 카피 변경: "더 자세히 선택 — 매칭 정확도를 더 높일 수 있어요!"
 - ✅ 매칭 카드 Step 2: `matchcard.html` 9개 항목 재구성
   - 단일 화면 + 펼치기 (필수 4 항상 보임 / 선택 5 펼치기)
   - 시간대: 요일 + 시간대 매트릭스
@@ -315,6 +321,10 @@ Authentication → Providers → Email 에서 두 값 모두 변경
 - [ ] anonymous.js 파일 import 후 표시 시 변환
 
 ### 🔒 보안 보강 (정식 출시 전)
+- [ ] **정보보안 교수님 자문 메일 초안 작성** — 서비스 개발 완료 후 진행 (지금은 보류, 어느 정도 완성된 상태에서 검토 받아야 의미 있음)
+  - 강원대 컴공과 정보보안 전공 교수님 컨택
+  - 학생 신분 무료 자문 가능성 ↑
+  - 메일 내용: 서비스 소개 + 보안 구조 + 자문 요청 + docx 첨부
 - [ ] **자동 로그아웃** — 일정 시간 비활성 시 강제 logout (예: 30분~1시간)
   - 또는 "이 기기는 다른 사람도 사용해요" 체크박스 → sessionStorage 사용
 - [ ] **로그인 5회 실패 잠금 DB 강화** — 현재는 localStorage라 우회 가능

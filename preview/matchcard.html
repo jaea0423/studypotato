@@ -455,7 +455,7 @@
 
   <div class="accordion" id="more-accordion">
     <div class="accordion-head" onclick="toggleAccordion()">
-      <span>⚙️ 더 자세히 설정 (선택)</span>
+      <span>✨ 더 자세히 선택 <span style="color:var(--knu-orange); font-weight:600; font-size:11px;">매칭 정확도를 더 높일 수 있어요!</span></span>
       <span class="arrow">▼</span>
     </div>
     <div class="accordion-body">
@@ -707,18 +707,88 @@
   }
 
   /* ============================================================
-     저장 — Step 3에서 RPC 연결 (지금은 더미 alert)
+     저장 — Supabase match_cards INSERT
      ============================================================ */
-  function saveDraft(){
-    showToast('💾 임시 저장 (Step 3에서 DB 연결 예정)');
-  }
-  function saveAndActivate(){
-    if(document.getElementById('activate-btn').disabled){
-      showToast('필수 4개를 모두 입력해주세요.');
+  async function saveCard(asActive){
+    if(!supabaseClient || !currentUser){
+      showToast('서버 연결을 준비 중이에요.');
       return;
     }
-    showToast('🚀 자동매칭 등록 (Step 3에서 DB 연결 예정)');
+    // 필수 4개 검증 (활성화일 때만 엄격하게)
+    if(asActive){
+      if(form.title.length < 2){ showToast('제목은 2자 이상 입력해주세요.'); return; }
+      if(!form.category){ showToast('카테고리를 선택해주세요.'); return; }
+      if(form.subject.length < 1){ showToast('과목·분야를 입력해주세요.'); return; }
+      if(form.schedule.days.length === 0 || form.schedule.periods.length === 0){
+        showToast('요일과 시간대 모두 1개 이상 선택해주세요.');
+        return;
+      }
+    } else {
+      // 임시 저장도 최소 제목은 있어야 함
+      if(form.title.length < 2){ showToast('제목은 최소 2자 이상이어야 임시 저장 가능해요.'); return; }
+    }
+
+    // 버튼 잠금
+    const draftBtn = document.getElementById('save-draft-btn');
+    const activeBtn = document.getElementById('activate-btn');
+    draftBtn.disabled = true;
+    activeBtn.disabled = true;
+    const targetBtn = asActive ? activeBtn : draftBtn;
+    const origText = targetBtn.textContent;
+    targetBtn.textContent = '저장 중...';
+
+    // payload — 임시 저장은 빈 값도 허용해야 하지만 필수 필드는 NOT NULL이라 기본값 채움
+    const payload = {
+      user_id: currentUser.id,
+      title: form.title || '제목 없음',
+      category: form.category || 'etc',
+      subject: form.subject || '미정',
+      schedule: form.schedule.days.length > 0 && form.schedule.periods.length > 0
+        ? form.schedule : { days: ['mon'], periods: ['evening'] },  // 임시 기본값
+      level: form.level,
+      mode: form.mode,
+      frequency: form.frequency,
+      duration: form.duration,
+      is_anonymous: form.is_anonymous,
+      intro: form.intro || null,
+      status: asActive ? 'active' : 'draft'
+    };
+
+    try {
+      const { error } = await supabaseClient
+        .from('match_cards')
+        .insert(payload);
+
+      if(error){
+        console.error('카드 생성 실패:', error);
+        const msg = (error.message || '').toLowerCase();
+        if(msg.includes('max_cards_exceeded')){
+          showToast('카드는 최대 3개까지 보유할 수 있어요.');
+        } else if(msg.includes('idx_one_active_card_per_user') || msg.includes('unique')){
+          showToast('이미 자동매칭에 등록된 카드가 있어요. 그 카드를 먼저 비활성화해주세요.');
+        } else if(msg.includes('check constraint')){
+          showToast('입력 형식이 올바르지 않아요.');
+        } else {
+          showToast('카드 저장에 실패했어요. 잠시 후 다시 시도해주세요.');
+        }
+        return;
+      }
+
+      showToast(asActive ? '🚀 자동매칭에 등록됐어요!' : '💾 임시 저장됐어요');
+      setTimeout(() => { location.href = 'dashboard.html'; }, 1000);
+    } catch(err){
+      console.error(err);
+      showToast('네트워크 오류가 발생했어요.');
+    } finally {
+      draftBtn.disabled = false;
+      // active 버튼은 필수 검증 후 다시 활성화
+      updateActivateBtn();
+      targetBtn.textContent = origText;
+    }
   }
+
+  function saveDraft(){ saveCard(false); }
+  function saveAndActivate(){ saveCard(true); }
 
   function confirmLeave(){
     const hasInput = form.title || form.category || form.subject
