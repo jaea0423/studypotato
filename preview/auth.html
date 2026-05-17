@@ -889,13 +889,14 @@
       <p class="page-desc" style="text-align: center;"><strong id="lock-email" style="color:var(--ink);">—</strong>의<br>비밀번호를 5회 이상 잘못 입력했어요.</p>
 
       <div style="background: var(--knu-orange-soft); color: #8B4500; border-radius: var(--radius-m); padding: 14px 16px; font-size: 13px; line-height: 1.6; text-align: left; margin-bottom: 16px;">
-        보안을 위해 비밀번호 입력이 일시 차단됐어요.<br>강원대 웹메일로 인증해서 잠금을 해제할 수 있어요.
+        보안을 위해 비밀번호 입력이 일시 차단됐어요.<br>
+        강원대 웹메일 인증 후 <strong>새 비밀번호를 다시 설정</strong>해야 해요.<br>
+        <span style="font-size:12px; opacity:0.85;">(5회 틀렸다는 건 비밀번호를 기억하지 못한다는 뜻이라 보안상 재설정이 필요해요)</span>
       </div>
     </div>
 
     <div class="bottom-area">
-      <button class="btn-primary" onclick="startUnlock()">메일로 잠금 해제</button>
-      <button class="btn-text" onclick="go('reset-email')">비밀번호 재설정 →</button>
+      <button class="btn-primary" onclick="startUnlock()">메일 인증 후 비밀번호 재설정 →</button>
     </div>
   </section>
 
@@ -1938,16 +1939,13 @@
         return;
       }
       stopResetTimer();
-      // 잠금 해제 모드 vs 새 비번 모드 분기
+      // 5회 틀렸다 = 비번을 모른다 → 항상 새 비번 재설정 강제
+      // (unlockMode 분기는 보안상 제거. 잠금 해제 = 무조건 재설정)
       if(unlockMode){
-        setAttempts(state.email, 0);
+        setAttempts(state.email, 0);  // 카운터는 리셋
         unlockMode = false;
-        alert('잠금이 해제됐어요. 다시 로그인해주세요.');
-        go('login');
-      } else {
-        // 새 비번 입력으로
-        go('reset-newpw');
       }
+      go('reset-newpw');
     } finally {
       btn.disabled = false; btn.textContent = origText;
     }

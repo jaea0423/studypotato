@@ -78,6 +78,13 @@
   - Partial unique index: active 사용자당 1개
   - 7일 자동 만료 (`expire_old_cards()` 함수)
   - RLS: 본인 카드 CRUD + 다른 사용자 active 카드 SELECT
+- ✅ 7가지 피드백 반영
+  - **탭 URL hash 동기화**: 새로고침 시 같은 탭 유지 (dashboard `#home/#match/#community/#study/#profile`)
+  - **"내가 만든 팀" → "내가 모집 중인 팀"** 카피 (2곳)
+  - **팀 카드 외부 지원하기 버튼 제거**: "자세히 →" 로 변경 (지원은 카드 내부에서만)
+  - **잠금 해제 시 비번 재설정 강제**: 5회 틀림 = 비번 모름 → unlockMode 분기 제거, 항상 새 비번 입력으로
+  - 잠금 화면 카피 변경 ("메일 인증 후 비밀번호 재설정 →")
+  - 자동매칭 해제 시 카드는 status='draft'로 유지 (이미 동작 중, 확인 완료)
 - ✅ 매칭 카드 Step 4-2: 카드 수정 + active 시각화 강화
   - **수정**: matchcard.html에 `?id=cardId` 파라미터 처리
     - 편집 모드 시 기존 카드 fetch + form 자동 채움 (모든 칩 active 복원)
@@ -362,6 +369,13 @@ Authentication → Providers → Email 에서 두 값 모두 변경
     team-detail, matchcard, groupcreate, matchresponse, teamresponse,
     teamconfirm-leader/member, notifications, community-write/detail
   - dashboard와 같은 패턴 (head visibility hidden + bootAuth 후 ready 클래스)
+
+### 🔧 매칭 탭 + 내 스터디 탭 실데이터 연동 (다음 세션)
+- [ ] **매칭 탭 (#tab-match)**: 현재 더미 (dev-toggle로만 동작). active 카드 있을 때 자동으로 "매칭 대기 중" 상태로 전환 + 카드 정보 표시
+  - 홈 탭 active 카드 배너와 같은 데이터 공유 또는 동일 영역 재사용
+- [ ] **내 스터디 탭 (#tab-study)**: study-card 더미 (모집 완료된 팀처럼 보여야 하는데 team-detail 들어가면 모집 중처럼 보임)
+  - team-detail.html에 ?completed=1 플래그 처리 또는 study-detail.html 분리
+  - 매칭 백엔드 만들 때 함께 실데이터로 정리
 
 ### 🤝 매칭 시스템 백엔드 (가장 큰 작업)
 
