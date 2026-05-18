@@ -78,6 +78,15 @@
   - Partial unique index: active 사용자당 1개
   - 7일 자동 만료 (`expire_old_cards()` 함수)
   - RLS: 본인 카드 CRUD + 다른 사용자 active 카드 SELECT
+- ✅ 감자사이 색 변경 (보라 → **딥 그린 #16A34A**) + 학년 제한
+  - 일괄 변경: mentoring-list/create/detail + dashboard 배너
+  - CSS 변수 `--mentor-green` (#16A34A) / `--mentor-green-deep` (#15803D) / `--mentor-green-soft` (#DCFCE7)
+  - 학년 제한: **2학년 이상만 멘토** 가능
+    - 1학년 → 멘토 등록 차단 + 안내문
+    - 2학년 → "1학년만"
+    - 3학년 → "1학년만 / 2학년만 / 1~2학년"
+    - 4학년+/대학원 → "1학년만 / 2학년만 / 3학년만 / 1~2 / 2~3 / 1~3학년"
+  - 본인 학년 자동 조회 (profiles.grade) 후 옵션 동적 생성
 - ✅ 감자사이 멘토링 시스템 화면 구현 (커밍순 더미)
   - **mentoring-list.html**: 멘토링 카드 목록 + 카테고리 필터 + 보라톤 히어로 + 커밍순 안내 + 멘토 등록 FAB
   - **mentoring-create.html**: 분야/주제/인원(±버튼)/조건(학년·학과)/기간/형태/소개 + **질문 카드 편집 영역** (기본 7개 + 추가/삭제/수정)

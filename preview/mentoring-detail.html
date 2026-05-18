@@ -21,7 +21,7 @@
     --ink:#1A1A1A; --ink-soft:#555E68; --ink-mute:#8B95A4;
     --line:#E8E2D4; --line-soft:#F0EBDF;
     --error:#DC3545; --success:#2D7A3E;
-    --mentor-purple:#7C4DFF; --mentor-purple-deep:#5E2EE6; --mentor-purple-soft:#EDE7F6;
+    --mentor-green:#16A34A; --mentor-green-deep:#15803D; --mentor-green-soft:#DCFCE7;
     --font-kr:'Pretendard Variable',Pretendard,sans-serif;
     --font-mono:'JetBrains Mono',monospace;
     --radius-s:10px; --radius-m:16px;
@@ -38,11 +38,11 @@
   .topbar-title{font-size:16px; font-weight:800; flex:1;}
 
   /* 헤더 카드 */
-  .head-card{background:linear-gradient(180deg, var(--mentor-purple-soft) 0%, var(--paper) 100%); padding:24px;}
-  .cat-tag{display:inline-block; background:var(--mentor-purple); color:white; font-size:11px; font-weight:700; padding:4px 10px; border-radius:999px; margin-bottom:10px;}
+  .head-card{background:linear-gradient(180deg, var(--mentor-green-soft) 0%, var(--paper) 100%); padding:24px;}
+  .cat-tag{display:inline-block; background:var(--mentor-green); color:white; font-size:11px; font-weight:700; padding:4px 10px; border-radius:999px; margin-bottom:10px;}
   .head-card h1{font-size:22px; font-weight:800; letter-spacing:-0.02em; margin-bottom:14px; line-height:1.3;}
   .mentor-info{display:flex; align-items:center; gap:10px;}
-  .mentor-avatar{width:42px; height:42px; border-radius:50%; background:var(--mentor-purple); color:white; display:flex; align-items:center; justify-content:center; font-weight:700;}
+  .mentor-avatar{width:42px; height:42px; border-radius:50%; background:var(--mentor-green); color:white; display:flex; align-items:center; justify-content:center; font-weight:700;}
   .mentor-text .name{font-size:14px; font-weight:700;}
   .mentor-text .desc{font-size:11px; color:var(--ink-mute); margin-top:2px;}
 
@@ -53,9 +53,9 @@
   .recruit-card .label{font-size:12px; color:var(--ink-mute);}
   .recruit-card .value{font-size:13px; font-weight:700;}
   .recruit-card .value.orange{color:var(--knu-orange);}
-  .recruit-card .value.purple{color:var(--mentor-purple);}
+  .recruit-card .value.purple{color:var(--mentor-green);}
   .progress-bar{height:6px; background:var(--line-soft); border-radius:999px; overflow:hidden; margin-top:8px;}
-  .progress-fill{height:100%; background:var(--mentor-purple); border-radius:999px;}
+  .progress-fill{height:100%; background:var(--mentor-green); border-radius:999px;}
 
   /* 섹션 */
   .section{padding:18px 24px 0;}
@@ -75,8 +75,8 @@
 
   /* 하단 버튼 */
   .bottom-bar{position:fixed; bottom:0; left:50%; transform:translateX(-50%); width:100%; max-width:480px; background:var(--paper); border-top:1px solid var(--line); padding:12px 20px 16px;}
-  .btn-apply{width:100%; background:var(--mentor-purple); color:white; padding:15px; border-radius:var(--radius-m); font-size:15px; font-weight:700;}
-  .btn-apply:active{background:var(--mentor-purple-deep);}
+  .btn-apply{width:100%; background:var(--mentor-green); color:white; padding:15px; border-radius:var(--radius-m); font-size:15px; font-weight:700;}
+  .btn-apply:active{background:var(--mentor-green-deep);}
   .btn-apply:disabled{background:var(--line); color:var(--ink-mute); cursor:not-allowed;}
 
   /* 지원 모달 */
@@ -89,7 +89,7 @@
   .modal textarea{width:100%; padding:12px 14px; background:var(--paper-warm); border:1px solid var(--line); border-radius:var(--radius-s); font-size:14px; min-height:90px; resize:vertical; margin-bottom:12px;}
   .modal .actions{display:flex; gap:8px;}
   .modal .cancel{flex:1; padding:14px; background:var(--paper-warm); border:1.5px solid var(--line); border-radius:var(--radius-m); font-size:14px; font-weight:700; color:var(--ink-soft);}
-  .modal .submit{flex:2; padding:14px; background:var(--mentor-purple); color:white; border-radius:var(--radius-m); font-size:14px; font-weight:700;}
+  .modal .submit{flex:2; padding:14px; background:var(--mentor-green); color:white; border-radius:var(--radius-m); font-size:14px; font-weight:700;}
 
   .toast{position:fixed; bottom:90px; left:50%; transform:translateX(-50%) translateY(20px); background:var(--ink); color:white; padding:12px 18px; border-radius:var(--radius-m); font-size:13px; font-weight:600; opacity:0; pointer-events:none; transition:all 0.25s; z-index:200;}
   .toast.show{opacity:1; transform:translateX(-50%) translateY(0);}

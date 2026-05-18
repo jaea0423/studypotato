@@ -22,7 +22,7 @@
     --ink:#1A1A1A; --ink-soft:#555E68; --ink-mute:#8B95A4;
     --line:#E8E2D4; --line-soft:#F0EBDF;
     --error:#DC3545; --success:#2D7A3E;
-    --mentor-purple:#7C4DFF; --mentor-purple-deep:#5E2EE6; --mentor-purple-soft:#EDE7F6;
+    --mentor-green:#16A34A; --mentor-green-deep:#15803D; --mentor-green-soft:#DCFCE7;
     --font-kr:'Pretendard Variable',Pretendard,sans-serif;
     --font-mono:'JetBrains Mono',monospace;
     --radius-s:10px; --radius-m:16px;
@@ -42,7 +42,7 @@
   .page-head h1{font-size:22px; font-weight:800; letter-spacing:-0.02em; margin-bottom:6px;}
   .page-head .sub{font-size:13px; color:var(--ink-soft); line-height:1.5;}
 
-  .info-box{margin:14px 24px 0; background:var(--mentor-purple-soft); color:var(--mentor-purple-deep); border-radius:var(--radius-m); padding:12px 14px; font-size:12px; line-height:1.6;}
+  .info-box{margin:14px 24px 0; background:var(--mentor-green-soft); color:var(--mentor-green-deep); border-radius:var(--radius-m); padding:12px 14px; font-size:12px; line-height:1.6;}
   .info-box strong{font-weight:700;}
 
   .form-block{padding:18px 24px 0;}
@@ -52,12 +52,12 @@
   .form-sub{font-size:11px; color:var(--ink-mute); margin-bottom:10px; line-height:1.5;}
 
   .form-input,.form-textarea{width:100%; background:var(--paper); border:1px solid var(--line); border-radius:var(--radius-s); padding:12px 14px; font-size:14px; color:var(--ink); transition:border-color 0.15s;}
-  .form-input:focus,.form-textarea:focus{border-color:var(--mentor-purple);}
+  .form-input:focus,.form-textarea:focus{border-color:var(--mentor-green);}
   .form-textarea{resize:vertical; min-height:80px; line-height:1.55;}
 
   .chip-group{display:flex; flex-wrap:wrap; gap:6px;}
   .chip{background:var(--paper); border:1px solid var(--line); padding:9px 14px; border-radius:999px; font-size:13px; font-weight:500; color:var(--ink-soft);}
-  .chip.active{background:var(--mentor-purple); color:white; border-color:var(--mentor-purple); font-weight:600;}
+  .chip.active{background:var(--mentor-green); color:white; border-color:var(--mentor-green); font-weight:600;}
 
   .num-input{display:flex; align-items:center; gap:12px;}
   .num-btn{width:36px; height:36px; background:var(--paper); border:1.5px solid var(--line); border-radius:50%; font-size:18px; font-weight:700; color:var(--ink-soft);}
@@ -67,23 +67,23 @@
   .char-count{font-family:var(--font-mono); font-size:11px; color:var(--ink-mute); margin-top:6px; text-align:right;}
 
   /* 질문 카드 영역 */
-  .question-section{margin:20px 24px 0; background:var(--mentor-purple-soft); border:1px solid var(--mentor-purple); border-radius:var(--radius-m); padding:14px;}
-  .question-section h3{font-size:14px; font-weight:800; color:var(--mentor-purple-deep); margin-bottom:6px;}
-  .question-section .desc{font-size:11px; color:var(--mentor-purple-deep); opacity:0.85; margin-bottom:12px; line-height:1.55;}
+  .question-section{margin:20px 24px 0; background:var(--mentor-green-soft); border:1px solid var(--mentor-green); border-radius:var(--radius-m); padding:14px;}
+  .question-section h3{font-size:14px; font-weight:800; color:var(--mentor-green-deep); margin-bottom:6px;}
+  .question-section .desc{font-size:11px; color:var(--mentor-green-deep); opacity:0.85; margin-bottom:12px; line-height:1.55;}
   .question-list{background:var(--paper); border-radius:var(--radius-s); padding:6px;}
   .question-item{display:flex; align-items:center; gap:8px; padding:10px; border-bottom:1px solid var(--line-soft);}
   .question-item:last-child{border-bottom:0;}
   .question-item .num{font-family:var(--font-mono); font-size:11px; color:var(--ink-mute); font-weight:700; flex-shrink:0; width:18px;}
   .question-item .text{flex:1; font-size:13px;}
   .question-item .text input{width:100%; padding:6px 0; border-bottom:1px dashed var(--line); font-size:13px;}
-  .question-item .text input:focus{border-bottom-color:var(--mentor-purple);}
+  .question-item .text input:focus{border-bottom-color:var(--mentor-green);}
   .question-item .del-btn{color:var(--error); font-size:18px; padding:4px;}
-  .add-q-btn{width:100%; margin-top:8px; padding:10px; border:1px dashed var(--mentor-purple); border-radius:var(--radius-s); color:var(--mentor-purple); font-size:12px; font-weight:600;}
+  .add-q-btn{width:100%; margin-top:8px; padding:10px; border:1px dashed var(--mentor-green); border-radius:var(--radius-s); color:var(--mentor-green); font-size:12px; font-weight:600;}
 
   /* 하단 버튼 */
   .bottom-bar{position:fixed; bottom:0; left:50%; transform:translateX(-50%); width:100%; max-width:480px; background:var(--paper); border-top:1px solid var(--line); padding:12px 20px 16px;}
-  .btn-primary{width:100%; background:var(--mentor-purple); color:white; padding:15px; border-radius:var(--radius-m); font-size:15px; font-weight:700;}
-  .btn-primary:active{transform:scale(0.98); background:var(--mentor-purple-deep);}
+  .btn-primary{width:100%; background:var(--mentor-green); color:white; padding:15px; border-radius:var(--radius-m); font-size:15px; font-weight:700;}
+  .btn-primary:active{transform:scale(0.98); background:var(--mentor-green-deep);}
   .btn-primary:disabled{background:var(--line); color:var(--ink-mute);}
 
   .toast{position:fixed; bottom:90px; left:50%; transform:translateX(-50%) translateY(20px); background:var(--ink); color:white; padding:12px 18px; border-radius:var(--radius-m); font-size:13px; font-weight:600; opacity:0; pointer-events:none; transition:all 0.25s; z-index:200;}
@@ -102,7 +102,7 @@
   </div>
 
   <div class="page-head">
-    <h1>후배에게 <span style="color:var(--mentor-purple)">도움</span>이 되어주세요</h1>
+    <h1>후배에게 <span style="color:var(--mentor-green)">도움</span>이 되어주세요</h1>
     <div class="sub">멘토링 카드를 만들고 후배 멘티를 모집해요.</div>
   </div>
 
@@ -143,15 +143,18 @@
     </div>
   </div>
 
-  <!-- 조건 — 학년 -->
+  <!-- 조건 — 학년 (본인 학년 기반 자동 제한) -->
   <div class="form-block">
-    <div class="form-label"><span>▸ 멘티 학년 조건 <span class="opt">기본: 무관</span></span></div>
-    <div class="chip-group">
-      <button class="chip active" onclick="selectChip(this, 'grade')">무관</button>
-      <button class="chip" onclick="selectChip(this, 'grade')">1학년만</button>
-      <button class="chip" onclick="selectChip(this, 'grade')">1~2학년</button>
-      <button class="chip" onclick="selectChip(this, 'grade')">2~3학년</button>
-      <button class="chip" onclick="selectChip(this, 'grade')">3~4학년</button>
+    <div class="form-label">
+      <span>▸ 멘티 학년 <span class="req">[필수]</span></span>
+      <span class="opt" id="my-grade-label">— 학년 기준</span>
+    </div>
+    <div class="form-sub">멘토는 본인보다 낮은 학년만 받을 수 있어요.</div>
+    <div class="chip-group" id="grade-chips">
+      <!-- JS로 본인 학년에 따라 동적 생성 -->
+    </div>
+    <div id="grade-blocked" style="display:none; margin-top:10px; background:var(--knu-orange-soft); color:#8B4500; border-radius:var(--radius-s); padding:12px 14px; font-size:12px; line-height:1.55;">
+      🚫 <strong>1학년은 멘토 등록이 어려워요.</strong> 같은 학년/선배의 도움이 더 적절합니다.<br>대신 후배가 되어 멘토를 신청하실 수 있어요.
     </div>
   </div>
 
@@ -223,12 +226,50 @@
       'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1sZXlwanF1emdndHlvdWVwZmhhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg4MTAzMDIsImV4cCI6MjA5NDM4NjMwMn0.eM4nh50tC-ZxVRoIA1NZit4JtMJqPlUBZ5LEnTrRB5Q'
     );
   }catch(e){}
+  let myGrade = null;
   (async function(){
-    if(!supabaseClient){ document.body.classList.add('ready'); return; }
+    if(!supabaseClient){
+      // 데모 — 더미 학년 (3학년 가정)
+      myGrade = '3학년';
+      renderGradeOptions();
+      document.body.classList.add('ready');
+      return;
+    }
     const { data: { session } } = await supabaseClient.auth.getSession();
     if(!session){ location.replace('auth.html'); return; }
+    // 본인 학년 조회
+    const { data: profile } = await supabaseClient
+      .from('profiles').select('grade').eq('id', session.user.id).maybeSingle();
+    myGrade = profile?.grade || '2학년';
+    renderGradeOptions();
     document.body.classList.add('ready');
   })();
+
+  /* 본인 학년 기반 멘티 학년 옵션 생성 */
+  function renderGradeOptions(){
+    const label = document.getElementById('my-grade-label');
+    const chips = document.getElementById('grade-chips');
+    const blocked = document.getElementById('grade-blocked');
+    label.textContent = `내 학년: ${myGrade}`;
+
+    let opts = [];
+    if(myGrade === '1학년'){
+      // 1학년은 멘토 등록 X
+      chips.style.display = 'none';
+      blocked.style.display = 'block';
+      document.querySelector('.btn-primary').disabled = true;
+      document.querySelector('.btn-primary').textContent = '1학년은 멘토 등록 불가';
+      return;
+    } else if(myGrade === '2학년'){
+      opts = [['1학년만', '1학년만']];
+    } else if(myGrade === '3학년'){
+      opts = [['1학년만', '1학년만'], ['2학년만', '2학년만'], ['1~2학년', '1~2학년 (전체)']];
+    } else if(myGrade === '4학년 이상' || myGrade === '대학원'){
+      opts = [['1학년만', '1학년만'], ['2학년만', '2학년만'], ['3학년만', '3학년만'],
+              ['1~2학년', '1~2학년'], ['2~3학년', '2~3학년'], ['1~3학년', '1~3학년 (전체)']];
+    }
+    chips.innerHTML = opts.map((o, i) => `<button class="chip${i === opts.length-1 ? ' active' : ''}" onclick="selectChip(this, 'grade')" data-value="${o[0]}">${o[1]}</button>`).join('');
+  }
 
   /* 폼 ========== */
   let capacity = 2;
