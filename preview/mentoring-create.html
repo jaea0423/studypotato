@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<title>공부하는 감자 — 멘토 등록</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🥔</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/variable/pretendardvariable.css" />
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<style>
+  body { visibility: hidden; }
+  body.ready { visibility: visible; }
+</style>
+<style>
+  :root{
+    --knu-blue:#0047BB; --knu-blue-soft:#E5ECF8;
+    --knu-orange:#FE5000; --knu-orange-soft:#FFE8DD;
+    --cream:#F7F3EC; --paper:#FFFFFF; --paper-warm:#FBF8F2;
+    --ink:#1A1A1A; --ink-soft:#555E68; --ink-mute:#8B95A4;
+    --line:#E8E2D4; --line-soft:#F0EBDF;
+    --error:#DC3545; --success:#2D7A3E;
+    --mentor-purple:#7C4DFF; --mentor-purple-deep:#5E2EE6; --mentor-purple-soft:#EDE7F6;
+    --font-kr:'Pretendard Variable',Pretendard,sans-serif;
+    --font-mono:'JetBrains Mono',monospace;
+    --radius-s:10px; --radius-m:16px;
+  }
+  *{margin:0; padding:0; box-sizing:border-box;}
+  body{font-family:var(--font-kr); background:var(--paper-warm); color:var(--ink); line-height:1.5; word-break:keep-all;}
+  button{font-family:inherit; cursor:pointer; border:0; background:none; color:inherit;}
+  input,textarea{font-family:inherit; color:inherit; border:0; outline:none; background:none;}
+  .app{max-width:480px; min-height:100vh; margin:0 auto; background:var(--cream); padding-bottom:100px;}
+  @media(min-width:481px){body{background:#E8E2D4;}}
+
+  .topbar{display:flex; align-items:center; gap:12px; padding:14px 20px; background:var(--cream); position:sticky; top:0; z-index:10; border-bottom:1px solid var(--line-soft);}
+  .back-btn{width:36px; height:36px; border-radius:50%; display:flex; align-items:center; justify-content:center; color:var(--ink-soft);}
+  .topbar-title{font-size:16px; font-weight:800; flex:1;}
+
+  .page-head{padding:16px 24px 8px;}
+  .page-head h1{font-size:22px; font-weight:800; letter-spacing:-0.02em; margin-bottom:6px;}
+  .page-head .sub{font-size:13px; color:var(--ink-soft); line-height:1.5;}
+
+  .info-box{margin:14px 24px 0; background:var(--mentor-purple-soft); color:var(--mentor-purple-deep); border-radius:var(--radius-m); padding:12px 14px; font-size:12px; line-height:1.6;}
+  .info-box strong{font-weight:700;}
+
+  .form-block{padding:18px 24px 0;}
+  .form-label{display:flex; align-items:center; justify-content:space-between; font-size:12px; font-weight:700; color:var(--ink-soft); margin-bottom:8px; font-family:var(--font-mono); letter-spacing:0.04em; text-transform:uppercase;}
+  .form-label .req{color:var(--knu-orange); font-size:10px;}
+  .form-label .opt{color:var(--ink-mute); font-size:10px; font-family:var(--font-kr); font-weight:500; text-transform:none;}
+  .form-sub{font-size:11px; color:var(--ink-mute); margin-bottom:10px; line-height:1.5;}
+
+  .form-input,.form-textarea{width:100%; background:var(--paper); border:1px solid var(--line); border-radius:var(--radius-s); padding:12px 14px; font-size:14px; color:var(--ink); transition:border-color 0.15s;}
+  .form-input:focus,.form-textarea:focus{border-color:var(--mentor-purple);}
+  .form-textarea{resize:vertical; min-height:80px; line-height:1.55;}
+
+  .chip-group{display:flex; flex-wrap:wrap; gap:6px;}
+  .chip{background:var(--paper); border:1px solid var(--line); padding:9px 14px; border-radius:999px; font-size:13px; font-weight:500; color:var(--ink-soft);}
+  .chip.active{background:var(--mentor-purple); color:white; border-color:var(--mentor-purple); font-weight:600;}
+
+  .num-input{display:flex; align-items:center; gap:12px;}
+  .num-btn{width:36px; height:36px; background:var(--paper); border:1.5px solid var(--line); border-radius:50%; font-size:18px; font-weight:700; color:var(--ink-soft);}
+  .num-btn:active{transform:scale(0.95);}
+  .num-display{font-family:var(--font-mono); font-size:22px; font-weight:800; min-width:40px; text-align:center;}
+
+  .char-count{font-family:var(--font-mono); font-size:11px; color:var(--ink-mute); margin-top:6px; text-align:right;}
+
+  /* 질문 카드 영역 */
+  .question-section{margin:20px 24px 0; background:var(--mentor-purple-soft); border:1px solid var(--mentor-purple); border-radius:var(--radius-m); padding:14px;}
+  .question-section h3{font-size:14px; font-weight:800; color:var(--mentor-purple-deep); margin-bottom:6px;}
+  .question-section .desc{font-size:11px; color:var(--mentor-purple-deep); opacity:0.85; margin-bottom:12px; line-height:1.55;}
+  .question-list{background:var(--paper); border-radius:var(--radius-s); padding:6px;}
+  .question-item{display:flex; align-items:center; gap:8px; padding:10px; border-bottom:1px solid var(--line-soft);}
+  .question-item:last-child{border-bottom:0;}
+  .question-item .num{font-family:var(--font-mono); font-size:11px; color:var(--ink-mute); font-weight:700; flex-shrink:0; width:18px;}
+  .question-item .text{flex:1; font-size:13px;}
+  .question-item .text input{width:100%; padding:6px 0; border-bottom:1px dashed var(--line); font-size:13px;}
+  .question-item .text input:focus{border-bottom-color:var(--mentor-purple);}
+  .question-item .del-btn{color:var(--error); font-size:18px; padding:4px;}
+  .add-q-btn{width:100%; margin-top:8px; padding:10px; border:1px dashed var(--mentor-purple); border-radius:var(--radius-s); color:var(--mentor-purple); font-size:12px; font-weight:600;}
+
+  /* 하단 버튼 */
+  .bottom-bar{position:fixed; bottom:0; left:50%; transform:translateX(-50%); width:100%; max-width:480px; background:var(--paper); border-top:1px solid var(--line); padding:12px 20px 16px;}
+  .btn-primary{width:100%; background:var(--mentor-purple); color:white; padding:15px; border-radius:var(--radius-m); font-size:15px; font-weight:700;}
+  .btn-primary:active{transform:scale(0.98); background:var(--mentor-purple-deep);}
+  .btn-primary:disabled{background:var(--line); color:var(--ink-mute);}
+
+  .toast{position:fixed; bottom:90px; left:50%; transform:translateX(-50%) translateY(20px); background:var(--ink); color:white; padding:12px 18px; border-radius:var(--radius-m); font-size:13px; font-weight:600; opacity:0; pointer-events:none; transition:all 0.25s; z-index:200;}
+  .toast.show{opacity:1; transform:translateX(-50%) translateY(0);}
+</style>
+</head>
+<body>
+
+<div class="app">
+
+  <div class="topbar">
+    <button class="back-btn" onclick="history.back()">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+    </button>
+    <div class="topbar-title">멘토로 등록하기</div>
+  </div>
+
+  <div class="page-head">
+    <h1>후배에게 <span style="color:var(--mentor-purple)">도움</span>이 되어주세요</h1>
+    <div class="sub">멘토링 카드를 만들고 후배 멘티를 모집해요.</div>
+  </div>
+
+  <div class="info-box">
+    🚧 <strong>커밍순 — 정식 출시 후 본격 운영</strong>. 지금은 화면 미리보기로 둘러볼 수 있어요.
+  </div>
+
+  <!-- 분야 -->
+  <div class="form-block">
+    <div class="form-label"><span>▸ 분야 <span class="req">[필수]</span></span></div>
+    <div class="chip-group">
+      <button class="chip" onclick="selectCat(this)">📚 전공</button>
+      <button class="chip" onclick="selectCat(this)">🌏 어학</button>
+      <button class="chip" onclick="selectCat(this)">📜 자격증</button>
+      <button class="chip" onclick="selectCat(this)">💼 취업·진로</button>
+      <button class="chip" onclick="selectCat(this)">✨ 기타</button>
+    </div>
+  </div>
+
+  <!-- 주제 -->
+  <div class="form-block">
+    <div class="form-label">
+      <span>▸ 주제 <span class="req">[필수]</span></span>
+      <span class="char-count" id="subj-count">0 / 40</span>
+    </div>
+    <input class="form-input" type="text" placeholder="예) 자료구조 트리·그래프 정복" maxlength="40" oninput="countChar('subj', 40, this)">
+  </div>
+
+  <!-- 모집 인원 -->
+  <div class="form-block">
+    <div class="form-label"><span>▸ 모집 인원 <span class="req">[필수]</span></span></div>
+    <div class="form-sub">1~3명까지 모집 가능. 지원자 초과 시 랜덤 추첨.</div>
+    <div class="num-input">
+      <button class="num-btn" onclick="changeNum(-1)">−</button>
+      <div class="num-display" id="capacity">2</div>
+      <button class="num-btn" onclick="changeNum(1)">+</button>
+      <span style="font-size:13px; color:var(--ink-mute);">명</span>
+    </div>
+  </div>
+
+  <!-- 조건 — 학년 -->
+  <div class="form-block">
+    <div class="form-label"><span>▸ 멘티 학년 조건 <span class="opt">기본: 무관</span></span></div>
+    <div class="chip-group">
+      <button class="chip active" onclick="selectChip(this, 'grade')">무관</button>
+      <button class="chip" onclick="selectChip(this, 'grade')">1학년만</button>
+      <button class="chip" onclick="selectChip(this, 'grade')">1~2학년</button>
+      <button class="chip" onclick="selectChip(this, 'grade')">2~3학년</button>
+      <button class="chip" onclick="selectChip(this, 'grade')">3~4학년</button>
+    </div>
+  </div>
+
+  <!-- 조건 — 학과 -->
+  <div class="form-block">
+    <div class="form-label"><span>▸ 멘티 학과 조건 <span class="opt">기본: 무관</span></span></div>
+    <div class="chip-group">
+      <button class="chip active" onclick="selectChip(this, 'college')">무관</button>
+      <button class="chip" onclick="selectChip(this, 'college')">같은 단과대</button>
+      <button class="chip" onclick="selectChip(this, 'college')">같은 학과</button>
+    </div>
+  </div>
+
+  <!-- 모집 기간 -->
+  <div class="form-block">
+    <div class="form-label"><span>▸ 모집 기간 <span class="req">[필수]</span></span></div>
+    <div class="chip-group">
+      <button class="chip" onclick="selectChip(this, 'period')">3일</button>
+      <button class="chip active" onclick="selectChip(this, 'period')">1주</button>
+      <button class="chip" onclick="selectChip(this, 'period')">2주</button>
+    </div>
+  </div>
+
+  <!-- 진행 형태 -->
+  <div class="form-block">
+    <div class="form-label"><span>▸ 진행 형태 <span class="req">[필수]</span></span></div>
+    <div class="chip-group">
+      <button class="chip" onclick="selectChip(this, 'form')">1회 만남</button>
+      <button class="chip active" onclick="selectChip(this, 'form')">단기 (3~4주)</button>
+      <button class="chip" onclick="selectChip(this, 'form')">한 학기</button>
+    </div>
+  </div>
+
+  <!-- 한 줄 소개 -->
+  <div class="form-block">
+    <div class="form-label">
+      <span>▸ 한 줄 소개 <span class="req">[필수]</span></span>
+      <span class="char-count" id="intro-count">0 / 150</span>
+    </div>
+    <div class="form-sub">멘토 본인 + 어떤 도움을 줄 수 있는지 자유롭게 적어주세요.</div>
+    <textarea class="form-textarea" placeholder="예) 카카오 인턴 합격 경험 있어요. 자소서 1편 같이 첨삭하고 면접 팁 공유합니다." maxlength="150" oninput="countChar('intro', 150, this)"></textarea>
+  </div>
+
+  <!-- 💬 질문 카드 -->
+  <div class="question-section">
+    <h3>💬 첫 만남 전 질문 카드</h3>
+    <div class="desc">
+      매칭 확정 후 멘티에게 자동으로 보내져요. 멘티가 답변하면 멘토님이 미리 확인 가능.<br>
+      기본 7개 질문이 제공됩니다. 자유롭게 수정/삭제/추가하세요.
+    </div>
+    <div class="question-list" id="q-list"></div>
+    <button class="add-q-btn" onclick="addQuestion()">+ 질문 추가</button>
+  </div>
+
+</div>
+
+<div class="bottom-bar">
+  <button class="btn-primary" onclick="saveMentoring()">멘토링 카드 만들기</button>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  /* 인증 가드 */
+  let supabaseClient = null;
+  try{
+    supabaseClient = window.supabase?.createClient(
+      'https://mleypjquzggtyouepfha.supabase.co',
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1sZXlwanF1emdndHlvdWVwZmhhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg4MTAzMDIsImV4cCI6MjA5NDM4NjMwMn0.eM4nh50tC-ZxVRoIA1NZit4JtMJqPlUBZ5LEnTrRB5Q'
+    );
+  }catch(e){}
+  (async function(){
+    if(!supabaseClient){ document.body.classList.add('ready'); return; }
+    const { data: { session } } = await supabaseClient.auth.getSession();
+    if(!session){ location.replace('auth.html'); return; }
+    document.body.classList.add('ready');
+  })();
+
+  /* 폼 ========== */
+  let capacity = 2;
+
+  function changeNum(delta){
+    capacity = Math.max(1, Math.min(3, capacity + delta));
+    document.getElementById('capacity').textContent = capacity;
+  }
+
+  function selectCat(btn){
+    btn.parentElement.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+    btn.classList.add('active');
+  }
+  function selectChip(btn, group){
+    btn.parentElement.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+    btn.classList.add('active');
+  }
+
+  function countChar(prefix, max, el){
+    document.getElementById(prefix + '-count').textContent = `${el.value.length} / ${max}`;
+  }
+
+  /* 질문 카드 ========== */
+  const DEFAULT_QUESTIONS = [
+    '관련 과목을 수강한 적이 있나요? 학점은 어느 정도였나요?',
+    '현재 어느 정도 수준이라고 생각하시나요?',
+    '학교생활은 어떻게 보내고 계신가요? (적응, 친구, 동아리 등)',
+    '요즘 가장 큰 고민이나 어려움은 무엇인가요?',
+    '이번 멘토링을 통해 가장 얻고 싶은 게 무엇인가요?',
+    '저(멘토)에게 가장 궁금한 점이 있다면?',
+    '진로 방향이 정해져 있다면 알려주세요. (선택)'
+  ];
+
+  let questions = [...DEFAULT_QUESTIONS];
+
+  function renderQuestions(){
+    const el = document.getElementById('q-list');
+    el.innerHTML = questions.map((q, i) => `
+      <div class="question-item">
+        <span class="num">${i+1}.</span>
+        <div class="text"><input type="text" value="${escapeHtml(q)}" oninput="updateQ(${i}, this.value)"></div>
+        <button class="del-btn" onclick="removeQ(${i})" aria-label="삭제">×</button>
+      </div>
+    `).join('');
+  }
+  function updateQ(i, val){ questions[i] = val; }
+  function removeQ(i){
+    if(!confirm('이 질문을 삭제하시겠어요?')) return;
+    questions.splice(i, 1);
+    renderQuestions();
+  }
+  function addQuestion(){
+    if(questions.length >= 10){ showToast('질문은 최대 10개까지 가능해요.'); return; }
+    questions.push('');
+    renderQuestions();
+  }
+
+  function escapeHtml(s){ return s.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+  function saveMentoring(){
+    // 커밍순 — 더미. 백엔드 연동은 정식 출시 시
+    showToast('🚧 커밍순 — 정식 출시 후 저장됩니다');
+    setTimeout(() => { location.href = 'mentoring-list.html'; }, 1500);
+  }
+
+  function showToast(msg){
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2400);
+  }
+
+  renderQuestions();
+</script>
+</body>
+</html>
