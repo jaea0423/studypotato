@@ -3,242 +3,169 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>공부하는 감자 — 디자인 프리뷰</title>
+<title>공부하는 감자 — 디자인 프리뷰 (트리)</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🥔</text></svg>">
-
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/variable/pretendardvariable.css" />
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
-
 <style>
   :root{
-    --knu-blue: #0047BB;
-    --knu-orange: #FE5000;
-    --knu-orange-soft: #FFE8DD;
-    --knu-blue-soft: #E5ECF8;
+    --knu-blue:#0047BB; --knu-blue-soft:#E5ECF8;
+    --knu-orange:#FE5000; --knu-orange-soft:#FFE8DD;
+    --mentor-green:#16A34A; --mentor-green-soft:#DCFCE7;
+    --cream:#F7F3EC; --paper:#FFFFFF; --paper-warm:#FBF8F2;
+    --ink:#1A1A1A; --ink-soft:#555E68; --ink-mute:#8B95A4;
+    --line:#E8E2D4; --line-soft:#F0EBDF;
+    --success:#2D7A3E; --warn:#B45309; --error:#DC3545;
+    --font-kr:'Pretendard Variable',Pretendard,sans-serif;
+    --font-mono:'JetBrains Mono',monospace;
+  }
+  *,*::before,*::after{margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+  html,body{overflow-x:hidden; max-width:100%; width:100%;}
+  body{font-family:var(--font-kr); background:var(--cream); color:var(--ink); line-height:1.5; min-height:100vh; word-break:keep-all;}
+  a{text-decoration:none; color:inherit;}
 
-    --cream: #F7F3EC;
-    --paper: #FFFFFF;
-    --paper-warm: #FBF8F2;
-    --ink: #1A1A1A;
-    --ink-soft: #555E68;
-    --ink-mute: #8B95A4;
-    --line: #E8E2D4;
+  .container{max-width:1080px; margin:0 auto; padding:32px 20px 60px;}
 
-    --font-kr: 'Pretendard Variable', Pretendard, -apple-system, sans-serif;
-    --font-mono: 'JetBrains Mono', monospace;
+  /* ─── 헤더 ─── */
+  .header{margin-bottom:28px;}
+  .brand-mark{display:inline-flex; align-items:center; gap:10px; margin-bottom:14px;}
+  .brand-emoji{font-size:28px;}
+  .brand-text{font-family:var(--font-mono); font-size:11px; color:var(--ink-mute); letter-spacing:0.12em; font-weight:600;}
+  .header h1{font-size:30px; font-weight:800; letter-spacing:-0.03em; line-height:1.2; margin-bottom:10px;}
+  .header h1 em{color:var(--knu-orange); font-style:normal;}
+  .header p{font-size:14px; color:var(--ink-soft); max-width:640px;}
 
-    --radius-s: 10px;
-    --radius-m: 16px;
-    --radius-l: 22px;
+  /* ─── 컨트롤 ─── */
+  .controls{
+    display:flex; flex-wrap:wrap; gap:8px; margin:18px 0 8px;
+    background:var(--paper); padding:10px 12px; border:1px solid var(--line); border-radius:14px;
+    font-size:12px;
   }
+  .ctrl-chip{
+    padding:6px 12px; border-radius:999px; background:var(--paper-warm); cursor:pointer; font-weight:600;
+    border:1px solid var(--line-soft); transition:all 0.15s;
+  }
+  .ctrl-chip:hover{border-color:var(--knu-orange); color:var(--knu-orange);}
+  .ctrl-chip.active{background:var(--knu-orange); color:white; border-color:var(--knu-orange);}
+  .legend{display:flex; gap:14px; flex-wrap:wrap; font-size:11px; color:var(--ink-soft); margin-left:auto; align-items:center;}
+  .legend-dot{display:inline-block; width:10px; height:10px; border-radius:3px; margin-right:4px; vertical-align:-1px;}
 
-  *, *::before, *::after{ margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-  html, body{ overflow-x: hidden; max-width: 100%; width: 100%; }
-  html{ font-size: 16px; -webkit-text-size-adjust: 100%; }
-  body{
-    font-family: var(--font-kr);
-    background: var(--cream);
-    color: var(--ink);
-    line-height: 1.5;
-    min-height: 100vh;
-    word-break: keep-all;
+  /* ─── 그룹 (큰 박스) ─── */
+  .group{
+    background:var(--paper); border:1px solid var(--line);
+    border-radius:18px; padding:16px 18px 18px; margin-bottom:18px;
+    position:relative;
   }
-  a{ text-decoration: none; color: inherit; }
+  .group-head{
+    display:flex; align-items:center; gap:10px; margin-bottom:14px;
+    padding-bottom:10px; border-bottom:1px dashed var(--line);
+  }
+  .group-tag{
+    font-family:var(--font-mono); font-size:10px; font-weight:700;
+    padding:3px 8px; border-radius:5px; letter-spacing:0.08em;
+    background:var(--knu-orange-soft); color:var(--knu-orange);
+  }
+  .group-title{font-size:15px; font-weight:800; letter-spacing:-0.02em;}
+  .group-desc{font-size:12px; color:var(--ink-mute); margin-left:auto; font-family:var(--font-mono);}
 
-  .container{
-    max-width: 880px;
-    margin: 0 auto;
-    padding: 40px 24px 60px;
-  }
+  /* 그룹 색상 변형 */
+  .group.g-auth .group-tag{background:var(--knu-blue-soft); color:var(--knu-blue);}
+  .group.g-mentor .group-tag{background:var(--mentor-green-soft); color:var(--mentor-green);}
+  .group.g-admin .group-tag{background:#FEE2E2; color:#B91C1C;}
+  .group.g-doc .group-tag{background:#F3F4F6; color:#374151;}
 
-  /* ========== 헤더 ========== */
-  .header{
-    margin-bottom: 40px;
+  /* ─── 트리 노드 ─── */
+  .tree{padding-left:0;}
+  .tree-node{
+    position:relative;
+    padding-left:24px;
   }
-  .brand-mark{
-    display: inline-flex;
-    align-items: center;
-    gap: 10px;
-    margin-bottom: 18px;
-  }
-  .brand-emoji{
-    font-size: 32px;
-    line-height: 1;
-  }
-  .brand-text{
-    font-family: var(--font-mono);
-    font-size: 11px;
-    color: var(--ink-mute);
-    letter-spacing: 0.12em;
-    font-weight: 600;
-  }
-  .header h1{
-    font-size: 36px;
-    font-weight: 800;
-    letter-spacing: -0.03em;
-    line-height: 1.15;
-    margin-bottom: 12px;
-  }
-  .header h1 em{ color: var(--knu-orange); font-style: normal; }
-  .header p{
-    font-size: 15px;
-    color: var(--ink-soft);
-    line-height: 1.6;
-    max-width: 520px;
-  }
-  .header-note{
-    background: var(--knu-blue-soft);
-    border-radius: var(--radius-m);
-    padding: 12px 16px;
-    margin-top: 20px;
-    font-size: 13px;
-    color: var(--knu-blue);
-    line-height: 1.55;
-    display: flex;
-    gap: 10px;
-    align-items: flex-start;
-    max-width: 520px;
-  }
+  /* 들여쓰기에 트리 라인 */
+  .tree-node.lv-1{padding-left:24px;}
+  .tree-node.lv-2{padding-left:56px;}
+  .tree-node.lv-3{padding-left:88px;}
 
-  /* ========== 섹션 ========== */
-  .section{ margin-bottom: 36px; }
-  .section-head{
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin-bottom: 14px;
-    padding: 0 4px;
+  /* 트리 가지 그리기 */
+  .tree-node::before{
+    content:''; position:absolute; left:8px; top:0; bottom:0; width:1px;
+    background:var(--line);
   }
-  .section-tag{
-    font-family: var(--font-mono);
-    font-size: 11px;
-    color: var(--knu-orange);
-    font-weight: 700;
-    letter-spacing: 0.1em;
-    background: var(--knu-orange-soft);
-    padding: 4px 10px;
-    border-radius: 6px;
+  .tree-node.lv-2::before{left:40px;}
+  .tree-node.lv-3::before{left:72px;}
+  .tree-node:last-child::before{height:18px;}
+  .tree-node::after{
+    content:''; position:absolute; left:8px; top:18px; width:14px; height:1px;
+    background:var(--line);
   }
-  .section-title{
-    font-size: 16px;
-    font-weight: 700;
-    letter-spacing: -0.02em;
-    color: var(--ink);
-  }
+  .tree-node.lv-2::after{left:40px;}
+  .tree-node.lv-3::after{left:72px;}
+  .tree-node.lv-0::before, .tree-node.lv-0::after{display:none;}
 
-  /* ========== 카드 그리드 ========== */
-  .card-grid{
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 10px;
+  /* ─── 화면 카드 (트리 노드 내부) ─── */
+  .scr-card{
+    display:flex; gap:10px; align-items:center;
+    padding:10px 12px; border:1px solid var(--line); background:var(--paper);
+    border-radius:12px; margin-bottom:6px; cursor:pointer; transition:all 0.15s;
   }
-  @media (min-width: 640px){
-    .card-grid{ grid-template-columns: 1fr 1fr; }
+  .scr-card:hover{
+    border-color:var(--knu-orange); background:var(--knu-orange-soft);
+    transform:translateX(2px);
   }
+  .scr-emoji{font-size:18px; flex-shrink:0;}
+  .scr-body{flex:1; min-width:0;}
+  .scr-title{font-size:13px; font-weight:700; letter-spacing:-0.01em; margin-bottom:2px;
+             white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+  .scr-file{font-family:var(--font-mono); font-size:10px; color:var(--ink-mute);}
+  .scr-status{
+    font-family:var(--font-mono); font-size:9.5px; font-weight:700;
+    padding:3px 7px; border-radius:5px; letter-spacing:0.05em; flex-shrink:0;
+  }
+  .st-done{background:#DCFCE7; color:#166534;}
+  .st-draft{background:#FEF3C7; color:#92400E;}
+  .st-soon{background:#E0E7FF; color:#3730A3;}
+  .st-dummy{background:#F3F4F6; color:#4B5563;}
+  .scr-arrow{color:var(--ink-mute); font-family:var(--font-mono); font-size:12px; flex-shrink:0;}
 
-  .screen-card{
-    background: var(--paper);
-    border: 1px solid var(--line);
-    border-radius: var(--radius-l);
-    padding: 22px 22px 20px;
-    transition: all 0.2s;
-    position: relative;
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
-    min-height: 160px;
-  }
-  .screen-card:hover{
-    transform: translateY(-2px);
-    box-shadow: 0 12px 24px rgba(14,26,43,0.07);
-    border-color: var(--knu-orange);
-  }
-  .screen-card:active{ transform: translateY(0); }
-
-  /* 좌측 컬러 라인 */
-  .screen-card::before{
-    content: '';
-    position: absolute;
-    left: 0; top: 0; bottom: 0;
-    width: 4px;
-  }
-  .screen-card.c-orange::before{ background: var(--knu-orange); }
-  .screen-card.c-blue::before{ background: var(--knu-blue); }
-  .screen-card.c-dark::before{ background: var(--ink); }
-  .screen-card.c-success::before{ background: #2D7A3E; }
-
-  .card-emoji{
-    font-size: 26px;
-    line-height: 1;
-    margin-bottom: 10px;
-  }
-  .card-filename{
-    font-family: var(--font-mono);
-    font-size: 11px;
-    color: var(--ink-mute);
-    letter-spacing: 0.04em;
-    margin-bottom: 4px;
-  }
-  .card-title{
-    font-size: 17px;
-    font-weight: 800;
-    letter-spacing: -0.02em;
-    margin-bottom: 6px;
-    line-height: 1.3;
-  }
-  .card-desc{
-    font-size: 12.5px;
-    color: var(--ink-soft);
-    line-height: 1.55;
-    flex: 1;
-    margin-bottom: 14px;
-  }
-  .card-foot{
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding-top: 12px;
-    border-top: 1px dashed var(--line);
-  }
-  .card-status{
-    display: inline-flex;
-    align-items: center;
-    gap: 5px;
-    font-family: var(--font-mono);
-    font-size: 10px;
-    color: var(--ink-mute);
-    letter-spacing: 0.05em;
-  }
-  .status-dot{
-    width: 6px; height: 6px;
-    border-radius: 50%;
-    background: #2D7A3E;
-    box-shadow: 0 0 0 3px rgba(45,122,62,0.15);
-  }
-  .card-arrow{
-    color: var(--ink-mute);
-    transition: all 0.2s;
-  }
-  .screen-card:hover .card-arrow{
-    color: var(--knu-orange);
-    transform: translateX(3px);
+  /* 진입 경로 라벨 */
+  .entry-label{
+    display:inline-block; font-family:var(--font-mono); font-size:9.5px; font-weight:700;
+    color:var(--ink-mute); background:var(--paper-warm); padding:2px 6px; border-radius:4px;
+    margin-left:6px; vertical-align:1px;
+    border:1px solid var(--line-soft);
   }
 
-  /* ========== 푸터 ========== */
-  .footer{
-    margin-top: 50px;
-    padding-top: 30px;
-    border-top: 1px dashed var(--line);
-    text-align: center;
-    font-family: var(--font-mono);
-    font-size: 11px;
-    color: var(--ink-mute);
-    letter-spacing: 0.05em;
-    line-height: 1.7;
+  /* 화면 카드 색상 강조 (왼쪽 점) */
+  .scr-card.c-orange{box-shadow:inset 3px 0 0 var(--knu-orange);}
+  .scr-card.c-blue{box-shadow:inset 3px 0 0 var(--knu-blue);}
+  .scr-card.c-green{box-shadow:inset 3px 0 0 var(--mentor-green);}
+  .scr-card.c-success{box-shadow:inset 3px 0 0 var(--success);}
+  .scr-card.c-dark{box-shadow:inset 3px 0 0 var(--ink);}
+  .scr-card.c-red{box-shadow:inset 3px 0 0 var(--error);}
+
+  /* ─── 푸터 ─── */
+  .footer{margin-top:40px; padding-top:24px; border-top:1px dashed var(--line);
+          text-align:center; font-family:var(--font-mono); font-size:11px;
+          color:var(--ink-mute); letter-spacing:0.05em; line-height:1.7;}
+  .footer strong{color:var(--knu-orange); font-weight:700;}
+
+  /* 검색 결과 강조 */
+  .scr-card.hidden{display:none;}
+  .scr-card.match{background:#FEF3C7;}
+
+  @media (max-width:640px){
+    .container{padding:24px 14px 60px;}
+    .tree-node.lv-1{padding-left:18px;}
+    .tree-node.lv-2{padding-left:36px;}
+    .tree-node.lv-3{padding-left:54px;}
+    .tree-node.lv-2::before{left:24px;}
+    .tree-node.lv-2::after{left:24px;}
+    .tree-node.lv-3::before{left:42px;}
+    .tree-node.lv-3::after{left:42px;}
+    .scr-title{font-size:12.5px;}
+    .legend{display:none;}
   }
-  .footer strong{ color: var(--knu-orange); font-weight: 700; }
 </style>
 </head>
 <body>
@@ -249,387 +176,439 @@
   <header class="header">
     <div class="brand-mark">
       <span class="brand-emoji">🥔</span>
-      <span class="brand-text">STUDY POTATO · DESIGN PREVIEW</span>
+      <span class="brand-text">STUDY POTATO · SCREEN TREE</span>
     </div>
-    <h1>공부하는 감자<br><em>디자인 프리뷰</em></h1>
-    <p>강원대학교 춘천캠퍼스 학생 스터디 매칭 플랫폼의 화면 디자인 모음이에요. 출시 전 디자인 검토용 페이지입니다.</p>
-    <div class="header-note">
-      <span>💡</span>
-      <span>각 카드를 눌러 화면을 확인해보세요. 모든 화면은 모바일 기준으로 디자인되었습니다.</span>
-    </div>
+    <h1>화면 트리 <em>(Site Map)</em></h1>
+    <p>각 화면이 어디서 진입하는지 트리 형태로 정리한 페이지입니다. 카드를 누르면 해당 화면이 열려요.</p>
   </header>
 
-  <!-- 섹션 0: 랜딩 (출시 전) -->
-  <section class="section">
-    <div class="section-head">
-      <span class="section-tag">00</span>
-      <span class="section-title">랜딩</span>
+  <!-- 컨트롤 -->
+  <div class="controls">
+    <input type="search" id="search" placeholder="화면명/파일명 검색"
+           style="flex:1; min-width:160px; padding:8px 12px; border:1px solid var(--line); border-radius:8px; font-family:inherit; font-size:13px;">
+    <div class="legend">
+      <span><span class="legend-dot" style="background:var(--knu-orange);"></span>핵심</span>
+      <span><span class="legend-dot" style="background:var(--knu-blue);"></span>인증·정보</span>
+      <span><span class="legend-dot" style="background:var(--mentor-green);"></span>감자사이</span>
+      <span><span class="legend-dot" style="background:var(--success);"></span>완료/확정</span>
+      <span><span class="legend-dot" style="background:var(--ink);"></span>운영</span>
+      <span><span class="legend-dot" style="background:var(--error);"></span>관리자</span>
     </div>
-    <div class="card-grid">
+  </div>
 
-      <a href="../index.html" class="screen-card c-blue">
-        <div class="card-emoji">🥔</div>
-        <div class="card-filename">index.html</div>
-        <div class="card-title">출시 전 사전신청</div>
-        <div class="card-desc">서비스 오픈 전 첫 화면. 사전신청 진행률 + 미리보기 카드 4장 + 공유 기능.</div>
-        <div class="card-foot">
-          <span class="card-status"><span class="status-dot"></span>완료</span>
-          <svg class="card-arrow" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-        </div>
-      </a>
-
+  <!-- ──────────────────────────────────────────── -->
+  <!-- 그룹 1: 진입점 (랜딩 + 가입/로그인)         -->
+  <!-- ──────────────────────────────────────────── -->
+  <div class="group g-auth">
+    <div class="group-head">
+      <span class="group-tag">00</span>
+      <span class="group-title">🚪 진입점</span>
+      <span class="group-desc">서비스 첫 화면 · 가입/로그인</span>
     </div>
-  </section>
 
-  <!-- 섹션 1: 회원 -->
-  <section class="section">
-    <div class="section-head">
-      <span class="section-tag">01</span>
-      <span class="section-title">회원</span>
+    <div class="tree">
+      <div class="tree-node lv-0">
+        <a href="../index.html" class="scr-card c-blue">
+          <span class="scr-emoji">🥔</span>
+          <div class="scr-body">
+            <div class="scr-title">출시 전 사전신청 <span class="entry-label">studypotato.com /</span></div>
+            <div class="scr-file">../index.html</div>
+          </div>
+          <span class="scr-status st-done">완료</span>
+          <span class="scr-arrow">→</span>
+        </a>
+      </div>
+
+      <div class="tree-node lv-0">
+        <a href="./auth.html" class="scr-card c-blue">
+          <span class="scr-emoji">🔐</span>
+          <div class="scr-body">
+            <div class="scr-title">회원가입 / 로그인 <span class="entry-label">/auth</span></div>
+            <div class="scr-file">auth.html — 가입 8단계 + 잠금/재설정 흐름</div>
+          </div>
+          <span class="scr-status st-done">완료</span>
+          <span class="scr-arrow">→</span>
+        </a>
+      </div>
     </div>
-    <div class="card-grid">
+  </div>
 
-      <a href="./auth.html" class="screen-card c-blue">
-        <div class="card-emoji">🔐</div>
-        <div class="card-filename">auth.html</div>
-        <div class="card-title">회원가입 / 로그인</div>
-        <div class="card-desc">강원대 웹메일 인증, 닉네임, 비밀번호, 학년·재학상태·출생연도 등 8단계 가입 흐름.</div>
-        <div class="card-foot">
-          <span class="card-status"><span class="status-dot"></span>완료</span>
-          <svg class="card-arrow" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-        </div>
-      </a>
-
+  <!-- ──────────────────────────────────────────── -->
+  <!-- 그룹 2: 대시보드 + 탭별 자식                   -->
+  <!-- ──────────────────────────────────────────── -->
+  <div class="group">
+    <div class="group-head">
+      <span class="group-tag">01</span>
+      <span class="group-title">🏠 대시보드 (모든 탭의 허브)</span>
+      <span class="group-desc">로그인 후 진입 · 하단탭 5개</span>
     </div>
-  </section>
 
-  <!-- 섹션 2: 메인 -->
-  <section class="section">
-    <div class="section-head">
-      <span class="section-tag">02</span>
-      <span class="section-title">메인</span>
+    <div class="tree">
+      <!-- 루트 -->
+      <div class="tree-node lv-0">
+        <a href="./dashboard.html" class="scr-card c-orange">
+          <span class="scr-emoji">🏠</span>
+          <div class="scr-body">
+            <div class="scr-title">대시보드 (홈) <span class="entry-label">auth → dashboard</span></div>
+            <div class="scr-file">dashboard.html</div>
+          </div>
+          <span class="scr-status st-done">완료</span>
+          <span class="scr-arrow">→</span>
+        </a>
+      </div>
+
+      <!-- 홈 탭 자식 -->
+      <div class="tree-node lv-1">
+        <a href="./matchcard.html" class="scr-card c-orange">
+          <span class="scr-emoji">🥔</span>
+          <div class="scr-body">
+            <div class="scr-title">매칭 카드 만들기/수정 <span class="entry-label">[홈]</span></div>
+            <div class="scr-file">matchcard.html — 9개 항목(필수4+선택5) · 최대 3개</div>
+          </div>
+          <span class="scr-status st-done">완료</span>
+          <span class="scr-arrow">→</span>
+        </a>
+      </div>
+
+      <div class="tree-node lv-1">
+        <a href="./groupcreate.html" class="scr-card c-dark">
+          <span class="scr-emoji">📋</span>
+          <div class="scr-body">
+            <div class="scr-title">팀 만들기 (팀장) <span class="entry-label">[홈]</span></div>
+            <div class="scr-file">groupcreate.html</div>
+          </div>
+          <span class="scr-status st-done">완료</span>
+          <span class="scr-arrow">→</span>
+        </a>
+      </div>
+
+      <!-- 매칭 탭 자식 -->
+      <div class="tree-node lv-1">
+        <a href="./team-detail.html?id=1" class="scr-card c-dark">
+          <span class="scr-emoji">🔍</span>
+          <div class="scr-body">
+            <div class="scr-title">팀 상세 + 지원 모달 <span class="entry-label">[매칭]</span></div>
+            <div class="scr-file">team-detail.html</div>
+          </div>
+          <span class="scr-status st-done">완료</span>
+          <span class="scr-arrow">→</span>
+        </a>
+      </div>
+
+      <div class="tree-node lv-1">
+        <a href="./matchresponse.html" class="scr-card c-success">
+          <span class="scr-emoji">🎯</span>
+          <div class="scr-body">
+            <div class="scr-title">자동 매칭 응답 알림 <span class="entry-label">[매칭/알림]</span></div>
+            <div class="scr-file">matchresponse.html — 24h 응답</div>
+          </div>
+          <span class="scr-status st-done">완료</span>
+          <span class="scr-arrow">→</span>
+        </a>
+      </div>
+
+      <div class="tree-node lv-1">
+        <a href="./teamresponse.html" class="scr-card c-success">
+          <span class="scr-emoji">🎉</span>
+          <div class="scr-body">
+            <div class="scr-title">팀 매칭 알림 <span class="entry-label">[매칭/알림]</span></div>
+            <div class="scr-file">teamresponse.html — 인원 충족 알림</div>
+          </div>
+          <span class="scr-status st-done">완료</span>
+          <span class="scr-arrow">→</span>
+        </a>
+      </div>
+
+      <!-- 매칭 확정 (teamresponse 이후) -->
+      <div class="tree-node lv-2">
+        <a href="./teamconfirm-leader.html" class="scr-card c-orange">
+          <span class="scr-emoji">🎉</span>
+          <div class="scr-body">
+            <div class="scr-title">팀 확정 (팀장) <span class="entry-label">매칭 수락 후</span></div>
+            <div class="scr-file">teamconfirm-leader.html</div>
+          </div>
+          <span class="scr-status st-done">완료</span>
+          <span class="scr-arrow">→</span>
+        </a>
+      </div>
+
+      <div class="tree-node lv-2">
+        <a href="./teamconfirm-member.html" class="scr-card c-success">
+          <span class="scr-emoji">🥔</span>
+          <div class="scr-body">
+            <div class="scr-title">팀 확정 (팀원) <span class="entry-label">매칭 수락 후</span></div>
+            <div class="scr-file">teamconfirm-member.html</div>
+          </div>
+          <span class="scr-status st-done">완료</span>
+          <span class="scr-arrow">→</span>
+        </a>
+      </div>
+
+      <!-- 커뮤니티 탭 -->
+      <div class="tree-node lv-1">
+        <a href="./community-write.html" class="scr-card c-orange">
+          <span class="scr-emoji">✏️</span>
+          <div class="scr-body">
+            <div class="scr-title">커뮤니티 글쓰기 <span class="entry-label">[커뮤니티]</span></div>
+            <div class="scr-file">community-write.html</div>
+          </div>
+          <span class="scr-status st-done">완료</span>
+          <span class="scr-arrow">→</span>
+        </a>
+      </div>
+
+      <div class="tree-node lv-1">
+        <a href="./community-detail.html" class="scr-card c-blue">
+          <span class="scr-emoji">💬</span>
+          <div class="scr-body">
+            <div class="scr-title">커뮤니티 게시글 상세 + 댓글 <span class="entry-label">[커뮤니티]</span></div>
+            <div class="scr-file">community-detail.html</div>
+          </div>
+          <span class="scr-status st-done">완료</span>
+          <span class="scr-arrow">→</span>
+        </a>
+      </div>
+
+      <!-- 알림 -->
+      <div class="tree-node lv-1">
+        <a href="./notifications.html" class="scr-card c-blue">
+          <span class="scr-emoji">🔔</span>
+          <div class="scr-body">
+            <div class="scr-title">알림 목록 <span class="entry-label">[상단벨]</span></div>
+            <div class="scr-file">notifications.html</div>
+          </div>
+          <span class="scr-status st-done">완료</span>
+          <span class="scr-arrow">→</span>
+        </a>
+      </div>
     </div>
-    <div class="card-grid">
+  </div>
 
-      <a href="./dashboard.html" class="screen-card c-orange">
-        <div class="card-emoji">🏠</div>
-        <div class="card-filename">dashboard.html</div>
-        <div class="card-title">대시보드 (홈)</div>
-        <div class="card-desc">하단 탭바 4개(홈/매칭/내 스터디/프로필). 매칭 카드 상태별 화면, 매칭 탭의 AI/직접 찾아보기 분리.</div>
-        <div class="card-foot">
-          <span class="card-status"><span class="status-dot"></span>완료</span>
-          <svg class="card-arrow" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-        </div>
-      </a>
-
+  <!-- ──────────────────────────────────────────── -->
+  <!-- 그룹 3: 프로필/계정 설정 (대시보드 프로필 탭) -->
+  <!-- ──────────────────────────────────────────── -->
+  <div class="group g-auth">
+    <div class="group-head">
+      <span class="group-tag">02</span>
+      <span class="group-title">👤 프로필 · 계정 · 설정</span>
+      <span class="group-desc">대시보드 [프로필] 탭에서 진입</span>
     </div>
-  </section>
 
-  <!-- 섹션 3: 자동 매칭 흐름 -->
-  <section class="section">
-    <div class="section-head">
-      <span class="section-tag">03</span>
-      <span class="section-title">자동 매칭 흐름</span>
+    <div class="tree">
+      <div class="tree-node lv-0">
+        <a href="./profile-edit.html" class="scr-card c-blue">
+          <span class="scr-emoji">⚙️</span>
+          <div class="scr-body">
+            <div class="scr-title">프로필 수정</div>
+            <div class="scr-file">profile-edit.html — 닉네임/학과/학년 등</div>
+          </div>
+          <span class="scr-status st-done">완료</span>
+          <span class="scr-arrow">→</span>
+        </a>
+      </div>
+
+      <div class="tree-node lv-0">
+        <a href="./password-change.html" class="scr-card c-orange">
+          <span class="scr-emoji">🔐</span>
+          <div class="scr-body">
+            <div class="scr-title">비밀번호 변경 (PIN 6자리)</div>
+            <div class="scr-file">password-change.html</div>
+          </div>
+          <span class="scr-status st-done">완료</span>
+          <span class="scr-arrow">→</span>
+        </a>
+      </div>
+
+      <div class="tree-node lv-0">
+        <a href="./notification-settings.html" class="scr-card c-success">
+          <span class="scr-emoji">🔔</span>
+          <div class="scr-body">
+            <div class="scr-title">알림 설정</div>
+            <div class="scr-file">notification-settings.html — 매칭/공지 토글</div>
+          </div>
+          <span class="scr-status st-done">완료</span>
+          <span class="scr-arrow">→</span>
+        </a>
+      </div>
+
+      <div class="tree-node lv-0">
+        <a href="./language-settings.html" class="scr-card c-blue">
+          <span class="scr-emoji">🌐</span>
+          <div class="scr-body">
+            <div class="scr-title">언어 설정 <span class="entry-label">한국어 / EN soon / 中文 soon</span></div>
+            <div class="scr-file">language-settings.html</div>
+          </div>
+          <span class="scr-status st-done">완료</span>
+          <span class="scr-arrow">→</span>
+        </a>
+      </div>
+
+      <div class="tree-node lv-0">
+        <a href="./feedback.html" class="scr-card c-blue">
+          <span class="scr-emoji">💬</span>
+          <div class="scr-body">
+            <div class="scr-title">고객의 소리 (문의/신고/제안)</div>
+            <div class="scr-file">feedback.html</div>
+          </div>
+          <span class="scr-status st-done">완료</span>
+          <span class="scr-arrow">→</span>
+        </a>
+      </div>
     </div>
-    <div class="card-grid">
+  </div>
 
-      <a href="./matchcard.html" class="screen-card c-orange">
-        <div class="card-emoji">🥔</div>
-        <div class="card-filename">matchcard.html</div>
-        <div class="card-title">매칭 카드 만들기</div>
-        <div class="card-desc">자동 매칭에 사용되는 사용자 카드. 카테고리/수준/전공/시간대/학습 스타일/모임 방식. 4단계.</div>
-        <div class="card-foot">
-          <span class="card-status"><span class="status-dot"></span>완료</span>
-          <svg class="card-arrow" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-        </div>
-      </a>
-
-      <a href="./matchresponse.html" class="screen-card c-success">
-        <div class="card-emoji">🎯</div>
-        <div class="card-filename">matchresponse.html</div>
-        <div class="card-title">매칭 응답 알림</div>
-        <div class="card-desc">자동 매칭 후 알림. 잘 맞는 감자 5명 + 매칭 카드 펼쳐보기. 24시간 응답.</div>
-        <div class="card-foot">
-          <span class="card-status"><span class="status-dot"></span>완료</span>
-          <svg class="card-arrow" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-        </div>
-      </a>
-
+  <!-- ──────────────────────────────────────────── -->
+  <!-- 그룹 4: 감자사이 (멘토링) — 별도 흐름        -->
+  <!-- ──────────────────────────────────────────── -->
+  <div class="group g-mentor">
+    <div class="group-head">
+      <span class="group-tag">03</span>
+      <span class="group-title">🤝 감자사이 (멘토링)</span>
+      <span class="group-desc">대시보드 홈 → 감자사이 배너 · COMING SOON</span>
     </div>
-  </section>
 
-  <!-- 섹션 4: 직접 모집 흐름 -->
-  <section class="section">
-    <div class="section-head">
-      <span class="section-tag">04</span>
-      <span class="section-title">직접 모집 흐름</span>
+    <div class="tree">
+      <div class="tree-node lv-0">
+        <a href="./mentoring-list.html" class="scr-card c-green">
+          <span class="scr-emoji">🤝</span>
+          <div class="scr-body">
+            <div class="scr-title">멘토링 목록 (감자사이 메인) <span class="entry-label">[홈 배너]</span></div>
+            <div class="scr-file">mentoring-list.html</div>
+          </div>
+          <span class="scr-status st-soon">커밍순</span>
+          <span class="scr-arrow">→</span>
+        </a>
+      </div>
+
+      <div class="tree-node lv-1">
+        <a href="./mentoring-create.html" class="scr-card c-green">
+          <span class="scr-emoji">✏️</span>
+          <div class="scr-body">
+            <div class="scr-title">멘토 카드 작성 <span class="entry-label">[FAB +]</span></div>
+            <div class="scr-file">mentoring-create.html — 분야/주제/조건/질문카드</div>
+          </div>
+          <span class="scr-status st-soon">커밍순</span>
+          <span class="scr-arrow">→</span>
+        </a>
+      </div>
+
+      <div class="tree-node lv-1">
+        <a href="./mentoring-detail.html?id=1" class="scr-card c-green">
+          <span class="scr-emoji">📋</span>
+          <div class="scr-body">
+            <div class="scr-title">멘토링 상세 + 지원 <span class="entry-label">목록 카드 클릭</span></div>
+            <div class="scr-file">mentoring-detail.html</div>
+          </div>
+          <span class="scr-status st-soon">커밍순</span>
+          <span class="scr-arrow">→</span>
+        </a>
+      </div>
     </div>
-    <div class="card-grid">
+  </div>
 
-      <a href="./groupcreate.html" class="screen-card c-dark">
-        <div class="card-emoji">📋</div>
-        <div class="card-filename">groupcreate.html</div>
-        <div class="card-title">팀 만들기 (팀장)</div>
-        <div class="card-desc">팀장이 직접 팀 만들기. 팀 이름/인원(2-6)/마감일/팀 소개. 4단계 + 실시간 미리보기.</div>
-        <div class="card-foot">
-          <span class="card-status"><span class="status-dot"></span>완료</span>
-          <svg class="card-arrow" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-        </div>
-      </a>
-
-      <a href="./teamresponse.html" class="screen-card c-success">
-        <div class="card-emoji">🎉</div>
-        <div class="card-filename">teamresponse.html</div>
-        <div class="card-title">팀 매칭 알림</div>
-        <div class="card-desc">팀 인원 충족 시 알림. 팀 정보 + 팀원 4명(닉네임/학과/학년/출생연도). 최소 인원 이상 수락 시 확정.</div>
-        <div class="card-foot">
-          <span class="card-status"><span class="status-dot"></span>완료</span>
-          <svg class="card-arrow" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-        </div>
-      </a>
-
-      <a href="./team-detail.html?id=1" class="screen-card c-dark">
-        <div class="card-emoji">🔍</div>
-        <div class="card-filename">team-detail.html</div>
-        <div class="card-title">팀 상세 + 지원 모달</div>
-        <div class="card-desc">직접 찾아보기에서 팀 카드 클릭 시 진입. 전체 정보(시간대/스타일/모임방식 모두) + 배지 + 모집 현황 + 팀 소개. 하단 지원 버튼 → 한 줄 소개 입력 바텀시트.</div>
-        <div class="card-foot">
-          <span class="card-status"><span class="status-dot"></span>완료</span>
-          <svg class="card-arrow" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-        </div>
-      </a>
-
+  <!-- ──────────────────────────────────────────── -->
+  <!-- 그룹 5: 정책 · 약관 · 규칙                    -->
+  <!-- ──────────────────────────────────────────── -->
+  <div class="group g-doc">
+    <div class="group-head">
+      <span class="group-tag">04</span>
+      <span class="group-title">📜 정책 · 약관 · 규칙</span>
+      <span class="group-desc">가입 동의 · 푸터 · 더보기에서 진입</span>
     </div>
-  </section>
 
-  <!-- 섹션 5: 매칭 확정 (팀장 / 팀원) -->
-  <section class="section">
-    <div class="section-head">
-      <span class="section-tag">05</span>
-      <span class="section-title">매칭 확정</span>
+    <div class="tree">
+      <div class="tree-node lv-0">
+        <a href="./terms.html" class="scr-card c-dark">
+          <span class="scr-emoji">📜</span>
+          <div class="scr-body">
+            <div class="scr-title">이용약관</div>
+            <div class="scr-file">terms.html — 법률 검토 전 초안</div>
+          </div>
+          <span class="scr-status st-draft">초안</span>
+          <span class="scr-arrow">→</span>
+        </a>
+      </div>
+
+      <div class="tree-node lv-0">
+        <a href="./privacy.html" class="scr-card c-dark">
+          <span class="scr-emoji">🔒</span>
+          <div class="scr-body">
+            <div class="scr-title">개인정보 처리방침</div>
+            <div class="scr-file">privacy.html — 법률 검토 전 초안</div>
+          </div>
+          <span class="scr-status st-draft">초안</span>
+          <span class="scr-arrow">→</span>
+        </a>
+      </div>
+
+      <div class="tree-node lv-0">
+        <a href="./rules.html" class="scr-card c-orange">
+          <span class="scr-emoji">🎯</span>
+          <div class="scr-body">
+            <div class="scr-title">매칭 운영 규칙</div>
+            <div class="scr-file">rules.html — 페널티/No-Show/익명</div>
+          </div>
+          <span class="scr-status st-done">완료</span>
+          <span class="scr-arrow">→</span>
+        </a>
+      </div>
     </div>
-    <div class="card-grid">
+  </div>
 
-      <a href="./teamconfirm-leader.html" class="screen-card c-orange">
-        <div class="card-emoji">🎉</div>
-        <div class="card-filename">teamconfirm-leader.html</div>
-        <div class="card-title">팀 확정 (팀장)</div>
-        <div class="card-desc">매칭 수락 후 본인이 팀장인 경우. 팀원 명단 / 24h 카운트다운 / 3단계 체크리스트 / 오픈채팅 링크 등록 + 메시지 복사 / 오픈채팅 만드는 법 가이드.</div>
-        <div class="card-foot">
-          <span class="card-status"><span class="status-dot"></span>완료</span>
-          <svg class="card-arrow" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-        </div>
-      </a>
-
-      <a href="./teamconfirm-member.html" class="screen-card c-success">
-        <div class="card-emoji">🥔</div>
-        <div class="card-filename">teamconfirm-member.html</div>
-        <div class="card-title">팀 확정 (팀원)</div>
-        <div class="card-desc">팀장이 아닌 일반 팀원용. 팀명 / 팀원 명단(펼치면 매칭카드 표시) / 채팅방 안내 박스(메일 안내 약속) / 팀원으로서 할 일 3단계. 거절 버튼 없음.</div>
-        <div class="card-foot">
-          <span class="card-status"><span class="status-dot"></span>완료</span>
-          <svg class="card-arrow" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-        </div>
-      </a>
-
+  <!-- ──────────────────────────────────────────── -->
+  <!-- 그룹 6: 운영자 (별도 서비스)                  -->
+  <!-- ──────────────────────────────────────────── -->
+  <div class="group g-admin">
+    <div class="group-head">
+      <span class="group-tag">99</span>
+      <span class="group-title">🛠️ 운영자 콘솔 (별도 서비스)</span>
+      <span class="group-desc">사용자 사이트와 완전 분리 · 별도 ID/PW + 2차 PIN</span>
     </div>
-  </section>
 
-  <!-- 섹션 6: 알림 / 약관 -->
-  <section class="section">
-    <div class="section-head">
-      <span class="section-tag">06</span>
-      <span class="section-title">알림 & 약관</span>
+    <div class="tree">
+      <div class="tree-node lv-0">
+        <a href="./admin.html" class="scr-card c-red">
+          <span class="scr-emoji">🛠️</span>
+          <div class="scr-body">
+            <div class="scr-title">운영자 콘솔 <span class="entry-label">jaea_admin / jaea1234 / 123456</span></div>
+            <div class="scr-file">admin.html — 11개 기능 · 30분 idle 자동로그아웃</div>
+          </div>
+          <span class="scr-status st-dummy">더미</span>
+          <span class="scr-arrow">→</span>
+        </a>
+      </div>
     </div>
-    <div class="card-grid">
-
-      <a href="./notifications.html" class="screen-card c-blue">
-        <div class="card-emoji">🔔</div>
-        <div class="card-filename">notifications.html</div>
-        <div class="card-title">알림 목록</div>
-        <div class="card-desc">매칭/팀 활동/시스템 공지 알림 모음. 오늘/어제/지난주 그룹. 안 읽음 강조, 모두 읽음 처리, 클릭 시 해당 화면 이동.</div>
-        <div class="card-foot">
-          <span class="card-status"><span class="status-dot"></span>완료</span>
-          <svg class="card-arrow" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-        </div>
-      </a>
-
-      <a href="./terms.html" class="screen-card c-dark">
-        <div class="card-emoji">📜</div>
-        <div class="card-filename">terms.html</div>
-        <div class="card-title">이용약관</div>
-        <div class="card-desc">표준 템플릿 기반 초안. 출시 전 법률 검토 필요 배너. 가입 자격/계정/페널티/면책 등.</div>
-        <div class="card-foot">
-          <span class="card-status"><span class="status-dot"></span>초안</span>
-          <svg class="card-arrow" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-        </div>
-      </a>
-
-      <a href="./privacy.html" class="screen-card c-dark">
-        <div class="card-emoji">🔒</div>
-        <div class="card-filename">privacy.html</div>
-        <div class="card-title">개인정보 처리방침</div>
-        <div class="card-desc">수집 항목 표 / 이용 목적 / 보관 기간 / 제3자 제공 / 위탁 / 이용자 권리. 법률 검토 필수 배너.</div>
-        <div class="card-foot">
-          <span class="card-status"><span class="status-dot"></span>초안</span>
-          <svg class="card-arrow" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-        </div>
-      </a>
-
-      <a href="./rules.html" class="screen-card c-orange">
-        <div class="card-emoji">🎯</div>
-        <div class="card-filename">rules.html</div>
-        <div class="card-title">매칭 운영 규칙</div>
-        <div class="card-desc">결정된 정책 정리: 자동 매칭/직접 모집/팀장 배정/페널티/No-Show. 표·카드 시각화 위주.</div>
-        <div class="card-foot">
-          <span class="card-status"><span class="status-dot"></span>완료</span>
-          <svg class="card-arrow" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-        </div>
-      </a>
-
-    </div>
-  </section>
-
-  <!-- 섹션 7: 회원 관리 -->
-  <section class="section">
-    <div class="section-head">
-      <span class="section-tag">07</span>
-      <span class="section-title">회원 관리</span>
-    </div>
-    <div class="card-grid">
-
-      <a href="./profile-edit.html" class="screen-card c-blue">
-        <div class="card-emoji">⚙️</div>
-        <div class="card-filename">profile-edit.html</div>
-        <div class="card-title">프로필 수정</div>
-        <div class="card-desc">닉네임(중복확인)/알림 메일/학년/재학상태/출생연도 변경. 강대 메일은 수정 불가. 변경 사항 감지 + 저장 버튼 활성화.</div>
-        <div class="card-foot">
-          <span class="card-status"><span class="status-dot"></span>완료</span>
-          <svg class="card-arrow" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-        </div>
-      </a>
-
-      <a href="./password-change.html" class="screen-card c-orange">
-        <div class="card-emoji">🔐</div>
-        <div class="card-filename">password-change.html</div>
-        <div class="card-title">비밀번호 변경</div>
-        <div class="card-desc">현재/새/확인 3단계 PIN. 5회 실패 시 잠금. 새 비밀번호는 현재와 달라야 함. 완료 화면 분기.</div>
-        <div class="card-foot">
-          <span class="card-status"><span class="status-dot"></span>완료</span>
-          <svg class="card-arrow" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-        </div>
-      </a>
-
-      <a href="./notification-settings.html" class="screen-card c-success">
-        <div class="card-emoji">🔔</div>
-        <div class="card-filename">notification-settings.html</div>
-        <div class="card-title">알림 설정</div>
-        <div class="card-desc">필수 알림(매칭/팀 확정/계정 보안 — 끌 수 없음) + 선택 알림(커뮤니티/공지) 토글. 메일로만 발송.</div>
-        <div class="card-foot">
-          <span class="card-status"><span class="status-dot"></span>완료</span>
-          <svg class="card-arrow" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-        </div>
-      </a>
-
-      <a href="./feedback.html" class="screen-card c-blue">
-        <div class="card-emoji">💬</div>
-        <div class="card-filename">feedback.html</div>
-        <div class="card-title">고객의 소리</div>
-        <div class="card-desc">문의/신고/제안 카테고리 선택 + 카테고리별 안내 동적 변경. 답변은 알림 메일로 발송 안내. 백엔드 연동은 추후.</div>
-        <div class="card-foot">
-          <span class="card-status"><span class="status-dot"></span>완료</span>
-          <svg class="card-arrow" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-        </div>
-      </a>
-
-      <a href="./mentoring-list.html" class="screen-card c-blue">
-        <div class="card-emoji">🤝</div>
-        <div class="card-filename">mentoring-list.html</div>
-        <div class="card-title">감자사이 — 멘토링 목록 (커밍순)</div>
-        <div class="card-desc">선후배 멘토링 카드 목록 + 카테고리 필터. 멘토 등록 FAB. 출시 전 미리보기. 보라톤 디자인.</div>
-        <div class="card-foot">
-          <span class="card-status"><span class="status-dot"></span>커밍순 더미</span>
-          <svg class="card-arrow" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-        </div>
-      </a>
-
-      <a href="./mentoring-create.html" class="screen-card c-blue">
-        <div class="card-emoji">✏️</div>
-        <div class="card-filename">mentoring-create.html</div>
-        <div class="card-title">감자사이 — 멘토 카드 작성</div>
-        <div class="card-desc">분야/주제/인원(1-3)/조건/기간/형태/소개 + 질문 카드 7개 기본 + 수정 가능. 보라 강조.</div>
-        <div class="card-foot">
-          <span class="card-status"><span class="status-dot"></span>커밍순 더미</span>
-          <svg class="card-arrow" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-        </div>
-      </a>
-
-      <a href="./mentoring-detail.html?id=1" class="screen-card c-blue">
-        <div class="card-emoji">📋</div>
-        <div class="card-filename">mentoring-detail.html</div>
-        <div class="card-title">감자사이 — 멘토링 상세 + 지원</div>
-        <div class="card-desc">멘토링 카드 상세 (보라 그라데이션 헤더) + 모집 진행률 + 조건 자동 체크 + 지원 모달 (한 줄 메시지).</div>
-        <div class="card-foot">
-          <span class="card-status"><span class="status-dot"></span>커밍순 더미</span>
-          <svg class="card-arrow" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-        </div>
-      </a>
-
-      <a href="./admin.html" class="screen-card c-orange">
-        <div class="card-emoji">🛠️</div>
-        <div class="card-filename">admin.html</div>
-        <div class="card-title">운영자 콘솔 (별도 인증)</div>
-        <div class="card-desc">일반 사용자 계정과 분리된 별도 ID/PW + 2차 PIN 6자리. 탭 4개(대시보드/신고/사용자/CS) + 사이드 메뉴(공지/운영자게시판/운영자관리/로그/설정/내정보). 좌우 검은 띠 + 보라 헤더로 시각적 구분. 30분 idle + 탭 닫기 시 자동 로그아웃. 더미 계정: jaea_admin / jaea1234 / 123456</div>
-        <div class="card-foot">
-          <span class="card-status"><span class="status-dot"></span>더미 완료</span>
-          <svg class="card-arrow" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-        </div>
-      </a>
-
-    </div>
-  </section>
-
-  <!-- 섹션 8: 커뮤니티 -->
-  <section class="section">
-    <div class="section-head">
-      <span class="section-tag">08</span>
-      <span class="section-title">커뮤니티</span>
-    </div>
-    <div class="card-grid">
-
-      <a href="./community-write.html" class="screen-card c-orange">
-        <div class="card-emoji">✏️</div>
-        <div class="card-filename">community-write.html</div>
-        <div class="card-title">글쓰기</div>
-        <div class="card-desc">카테고리 선택(자유/정보 공유/질문/스터디 후기) + 제목 + 본문(2000자). 운영 안내 + 작성 가이드 포함.</div>
-        <div class="card-foot">
-          <span class="card-status"><span class="status-dot"></span>완료</span>
-          <svg class="card-arrow" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-        </div>
-      </a>
-
-      <a href="./community-detail.html" class="screen-card c-blue">
-        <div class="card-emoji">💬</div>
-        <div class="card-filename">community-detail.html</div>
-        <div class="card-title">게시글 상세 + 댓글</div>
-        <div class="card-desc">게시글 본문 / 좋아요·저장·신고 / 댓글 + 대댓글(작성자 표시) / 하단 고정 입력 바. 욕설 등 안내 없이 삭제 안내.</div>
-        <div class="card-foot">
-          <span class="card-status"><span class="status-dot"></span>완료</span>
-          <svg class="card-arrow" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-        </div>
-      </a>
-
-    </div>
-  </section>
+  </div>
 
   <!-- 푸터 -->
   <footer class="footer">
     <div>© 2026 STUDY POTATO · MADE IN CHUNCHEON</div>
     <div>강원대학교 춘천캠퍼스 재학생이 운영, 배포 중입니다</div>
-    <div style="margin-top: 8px;">총 <strong>6개</strong> 화면 · 디자인 검토 중</div>
+    <div style="margin-top:8px;">총 <strong id="screen-count">—</strong>개 화면 · 트리 보기</div>
   </footer>
 
 </div>
+
+<script>
+  // 검색 — 카드 제목/파일명에 매칭되는 것만 강조
+  const searchInput = document.getElementById('search');
+  const allCards = Array.from(document.querySelectorAll('.scr-card'));
+  document.getElementById('screen-count').textContent = allCards.length;
+
+  searchInput.addEventListener('input', e => {
+    const q = e.target.value.trim().toLowerCase();
+    if(!q){
+      allCards.forEach(c => { c.classList.remove('hidden','match'); });
+      return;
+    }
+    allCards.forEach(c => {
+      const txt = c.textContent.toLowerCase();
+      const hit = txt.includes(q);
+      c.classList.toggle('hidden', !hit);
+      c.classList.toggle('match', hit);
+    });
+  });
+</script>
 
 </body>
 </html>

@@ -9,14 +9,98 @@
 
 ## 🎯 다음에 시작할 작업 (TOP PRIORITY)
 
-**OTP 인증코드가 8자리로 옴 → 6자리로 수정**
+### 🔐 새 인증 모델: 비밀번호(필수) + PIN(편의, 선택)
 
-원인 추정: Supabase Auth 설정 어딘가에 OTP 길이 옵션이 있음. 확인 위치 후보:
-- Authentication → Providers → Email → "Email OTP Length" 설정
-- Authentication → Settings → "Email OTP Expiry / Length"
-- 또는 Email Templates의 `{{ .Token }}` 변수 옆에 길이 옵션이 따로 있을 수도
+**배경**:
+- 기존: 6자리 PIN = 비밀번호 → 학번 노출 시 100만 조합으로 약함
+- 변경: **비밀번호(강력)** = 본인 인증 기준선, **PIN(6자리, 선택)** = 등록 기기 간편 로그인용
+- 표준 패턴 (카카오뱅크/토스 등) 따라감
 
-현재 클라이언트 코드(`auth.html`)는 PIN 셀 6칸으로 고정되어 있고 `verifyOtp`도 6자리 코드를 모아서 보내는 상태. **Supabase 대시보드에서 6자리로 강제하는 게 우선.** 만약 Supabase에서 8자리만 가능하다면 클라이언트 PIN 셀을 8개로 늘려야 함.
+**완료된 부분 (이전 세션)**:
+- `sql/registered_devices.sql` — 기기 등록 테이블 + RLS + RPC 3개
+  - `is_my_device_registered(device_id)`, `register_my_device(...)`, `revoke_other_devices(...)`
+- `preview/js/device.js` — localStorage UUID 발급, 브라우저·OS 라벨
+- `auth.html` `finishSignup` 끝에 `register_my_device` 호출 추가 (try/catch)
+
+---
+
+**최종 흐름 (목표)**
+
+| 케이스 | 입력 |
+|---|---|
+| 신규 가입 | 메일 OTP → 비밀번호(필수) + (선택) PIN 설정 |
+| 등록 기기 + PIN 설정함 | PIN 6자리 |
+| 등록 기기 + PIN 미설정 | 비밀번호 |
+| 새 기기 | 메일 OTP + 비밀번호 → 기기 등록 → PIN 설정 가능 |
+
+---
+
+**남은 작업 (다음 세션, 우선순위 순)**
+
+#### 1단계. 결정해야 할 사항 (사용자 합의 필요)
+- [ ] 비밀번호 정책 — 최소 자릿수? 영문+숫자 필수? 특수문자 필수?
+  - **권장**: 최소 8자, 영문+숫자 조합 (특수문자는 선택 — 모바일 UX)
+- [ ] 가입 직후 PIN 설정 단계 — 모달? 작은 "PIN 등록하기" 버튼? 별도 화면?
+  - **권장**: 가입 완료 화면(done)에 "💡 다음 로그인부터 6자리 PIN으로 빨라요" 안내 + 작은 버튼
+- [ ] PIN 잠금 횟수 (현재 비밀번호 5회와 동일하게 가져갈지)
+- [ ] PIN 분실 시 — 비밀번호 로그인 → PIN 재설정 (구현 단순)
+
+#### 2단계. DB 변경 (SQL)
+- [ ] `profiles` 에 컬럼 추가: `pin_hash text NULL`, `pin_set_at timestamptz NULL`
+  - NULL = PIN 미설정 (비밀번호로만 로그인)
+- [ ] RPC `set_my_pin(p_pin text)` — bcrypt 해시 저장 (pgcrypto)
+- [ ] RPC `verify_my_pin(p_pin text) returns boolean`
+- [ ] RPC `clear_my_pin()` — PIN 삭제 (기기 분실 시)
+- [ ] RPC `has_pin_set() returns boolean` — 로그인 화면 분기용 (단, 공개되면 사용자 추론 가능. 차라리 RPC 응답 통일)
+- [ ] PIN 잠금 카운터 — 클라이언트 localStorage가 아닌 DB 컬럼 (`pin_failed_count`, `pin_locked_until`)
+
+#### 3단계. auth.html 대규모 수정
+- [ ] **회원가입**: 비밀번호 입력 셀 6칸 → 일반 input (8자 이상, 영문+숫자)
+  - 비밀번호 강도 측정 표시 (약/보통/강)
+  - 동일 입력 두 번(확인) 단계
+- [ ] **가입 완료 화면 (done)**: "🥔 다음부터 더 간편하게 — PIN 6자리 설정" 작은 버튼
+- [ ] **로그인 화면**:
+  - 메일 입력 → 등록 기기 + PIN 설정 여부에 따라 자동 분기
+  - PIN 화면: 6셀 (기존 디자인) + 하단 "비밀번호로 로그인" 링크
+  - 비밀번호 화면: 일반 input + 하단 "PIN으로 로그인" 링크 (PIN 설정한 사람만)
+- [ ] **새 기기 진입**: OTP 인증 → 비밀번호 입력 → 로그인 성공 → 기기 등록 → "PIN 설정" 권유
+
+#### 4단계. 마이페이지 (프로필 메뉴)
+- [ ] 신규 화면: `pin-setup.html` (PIN 설정/변경/해제)
+  - PIN 미설정 상태: "PIN 등록하기" → 6셀 두 번 입력 → `set_my_pin` 호출
+  - PIN 설정 상태: 현재 PIN 확인 → 새 PIN 두 번 입력
+  - "PIN 해제" 버튼 — `clear_my_pin` 호출
+- [ ] dashboard 프로필 메뉴에 "간편 로그인 PIN 설정" 추가
+
+#### 5단계. 기기 관리 화면 (Option C 후속)
+- [ ] 신규 화면: `device-management.html` 또는 `profile-edit.html` 안
+  - 본인 등록 기기 목록 (라벨/등록일/마지막 사용)
+  - 개별 "해제" 버튼
+  - "이 기기 외 모두 로그아웃" 버튼 → `revoke_other_devices`
+  - 현재 기기는 "이 기기" 라벨로 별도 표시
+
+#### 6단계. 비밀번호 변경 화면 재구성
+- [ ] `password-change.html` — 6자리 PIN UI 제거하고 일반 비밀번호 input 3개 (현재/새/확인)
+- [ ] 비밀번호 재설정 화면(`auth.html` 잠금해제 흐름) — 일반 비밀번호로 변경
+
+#### 7단계. 마이그레이션 (현재 사용자 0명이라 단순)
+- [ ] 현재 가입자는 운영자 본인 계정뿐 → 그냥 비밀번호 재설정 후 새 모델로 사용
+
+---
+
+**작업량 추정**: 6~10시간 (UI 수정이 큼)
+
+**먼저 사용자가 할 일**:
+1. Supabase SQL Editor에서 `sql/registered_devices.sql` 실행 (Option C 기본)
+2. 위 1단계 결정사항 합의
+
+---
+
+### 그 외 보류된 작업
+
+- [ ] OTP 8자리 → 6자리 (Supabase Dashboard 설정 — 이전 작업)
+- [ ] consents.consent_type CHECK 제약 재정의 (campus, rules 추가) — task #76
+- [ ] 메일 지연 원인 진단 — task #70
 
 ---
 

@@ -59,10 +59,13 @@
 
   .ment-card{background:var(--paper); border:1px solid var(--line); border-radius:var(--radius-m); padding:16px; margin-bottom:10px; cursor:pointer; transition:border-color 0.15s;}
   .ment-card:active{border-color:var(--mentor-green);}
-  .ment-card .head{display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; gap:8px;}
+  .ment-card .head{display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:8px; gap:8px;}
   .ment-card .cat-tag{background:var(--mentor-green-soft); color:var(--mentor-green); font-size:11px; font-weight:700; padding:3px 8px; border-radius:999px;}
+  /* 모집 인원 표기 — 기본 주황. .hot 이면 빨강(가득 차거나 초과 = 핫한 멘토링) */
+  .ment-card .recruit-wrap{display:flex; flex-direction:column; align-items:flex-end; gap:2px;}
   .ment-card .recruiting{font-size:11px; color:var(--knu-orange); font-weight:700; font-family:var(--font-mono);}
-  .ment-card .recruiting.full{color:var(--ink-mute);}
+  .ment-card .recruiting.hot{color:var(--error);}
+  .ment-card .deadline-soon{font-size:10px; color:var(--error); font-weight:700; font-family:var(--font-mono);}
   .ment-card .subject{font-size:16px; font-weight:800; margin-bottom:6px; letter-spacing:-0.02em;}
   .ment-card .intro{font-size:13px; color:var(--ink-soft); line-height:1.55; margin-bottom:10px; overflow:hidden; text-overflow:ellipsis; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical;}
   .ment-card .meta{display:flex; flex-wrap:wrap; gap:6px; font-size:11px; color:var(--ink-mute); font-family:var(--font-mono);}
@@ -184,12 +187,18 @@
       return;
     }
     el.innerHTML = list.map(c => {
-      const full = c.applied >= c.capacity;
+      // 인원이 가득 차거나 초과 = 핫한 멘토링 (빨강), 아직 모집 가능
+      const hot = c.applied >= c.capacity;
+      // 마감 임박: D-3 이하 (= closesIn <= 3)
+      const deadlineSoon = c.closesIn <= 3;
       return `
         <div class="ment-card" onclick="location.href='mentoring-detail.html?id=${c.id}'">
           <div class="head">
             <span class="cat-tag">${c.catLabel}</span>
-            <span class="recruiting ${full ? 'full' : ''}">${c.applied} / ${c.capacity}명 ${full ? '(마감 임박)' : '모집 중'}</span>
+            <div class="recruit-wrap">
+              <span class="recruiting ${hot ? 'hot' : ''}">${c.applied} / ${c.capacity}명 모집 중</span>
+              ${deadlineSoon ? '<span class="deadline-soon">⏰ 마감 임박</span>' : ''}
+            </div>
           </div>
           <div class="subject">${c.subject}</div>
           <div class="intro">${c.intro}</div>

@@ -14,6 +14,9 @@
 <!-- Supabase JS SDK (UMD 빌드) -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
 
+<!-- 시간 포맷터 (지금/N분 전/HH:MM/어제/M월 D일) -->
+<script src="js/time.js"></script>
+
 <!-- 인증 확인 전까지 콘텐츠 숨김 (FOUC 방지 + 보안)
      bootAuth 성공 시 body.ready 클래스가 붙어 visibility 복원됨 -->
 <style>
@@ -2273,7 +2276,7 @@
         <div class="post-foot">
           <span class="author" style="color:var(--knu-orange);">🥔 감자운영자</span>
           <span class="dot">·</span>
-          <span class="time">5월 6일</span>
+          <span class="time" data-mins-ago="18720">5월 6일</span>
           <span class="dot">·</span>
           <span class="meta">💬 12</span>
           <span class="meta">👁 312</span>
@@ -2287,7 +2290,7 @@
         <div class="post-foot">
           <span class="author">호빵맨</span>
           <span class="dot">·</span>
-          <span class="time">2시간 전</span>
+          <span class="time" data-mins-ago="120">2시간 전</span>
           <span class="dot">·</span>
           <span class="meta">💬 8</span>
           <span class="meta">🥔 운영자 답변</span>
@@ -2302,7 +2305,7 @@
         <div class="post-foot">
           <span class="author">코드몬스터</span>
           <span class="dot">·</span>
-          <span class="time">어제</span>
+          <span class="time" data-mins-ago="1620">어제</span>
           <span class="dot">·</span>
           <span class="meta">💬 5</span>
           <span class="meta">👁 89</span>
@@ -2316,7 +2319,7 @@
         <div class="post-foot">
           <span class="author" style="color:var(--ink-mute);">🎭 익명 씩씩한감자</span>
           <span class="dot">·</span>
-          <span class="time">3일 전</span>
+          <span class="time" data-mins-ago="4320">3일 전</span>
           <span class="dot">·</span>
           <span class="meta">💬 14</span>
           <span class="meta">🥔 운영자 답변</span>
@@ -2331,7 +2334,7 @@
         <div class="post-foot">
           <span class="author" style="color:var(--ink-mute);">🎭 익명 졸린대파</span>
           <span class="dot">·</span>
-          <span class="time">4일 전</span>
+          <span class="time" data-mins-ago="5760">4일 전</span>
           <span class="dot">·</span>
           <span class="meta">💬 23</span>
           <span class="meta">👁 287</span>
@@ -2345,7 +2348,7 @@
         <div class="post-foot">
           <span class="author">박수빈</span>
           <span class="dot">·</span>
-          <span class="time">5일 전</span>
+          <span class="time" data-mins-ago="7200">5일 전</span>
           <span class="dot">·</span>
           <span class="meta">💬 22</span>
           <span class="meta">👁 401</span>
@@ -2524,6 +2527,10 @@
       </button>
       <button class="menu-item" onclick="location.href='notification-settings.html'">
         <span>알림 설정</span>
+        <span class="right">→</span>
+      </button>
+      <button class="menu-item" onclick="location.href='language-settings.html'">
+        <span>언어 설정 <span style="color:var(--ink-mute); font-size:11px; font-weight:500; margin-left:4px;">한국어</span></span>
         <span class="right">→</span>
       </button>
     </div>
