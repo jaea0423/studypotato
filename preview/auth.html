@@ -577,13 +577,8 @@
 
     <div class="form-block">
       <label class="form-label">비밀번호</label>
-      <div class="pin-grid" id="pin-login">
-        <input class="pin-cell pin-pwd" type="text" inputmode="numeric" maxlength="1" />
-        <input class="pin-cell pin-pwd" type="text" inputmode="numeric" maxlength="1" />
-        <input class="pin-cell pin-pwd" type="text" inputmode="numeric" maxlength="1" />
-        <input class="pin-cell pin-pwd" type="text" inputmode="numeric" maxlength="1" />
-        <input class="pin-cell pin-pwd" type="text" inputmode="numeric" maxlength="1" />
-        <input class="pin-cell pin-pwd" type="text" inputmode="numeric" maxlength="1" />
+      <div class="input-wrap">
+        <input type="password" id="input-login-pw" placeholder="비밀번호" autocomplete="current-password">
       </div>
       <div class="input-hint" id="login-hint">5회 틀리면 메일 인증으로 잠금을 풀 수 있어요.</div>
     </div>
@@ -689,26 +684,16 @@
 
     <div class="form-block">
       <label class="form-label">비밀번호 등록</label>
-      <div class="pin-grid" id="pin-set-1">
-        <input class="pin-cell pin-pwd" type="text" inputmode="numeric" maxlength="1" />
-        <input class="pin-cell pin-pwd" type="text" inputmode="numeric" maxlength="1" />
-        <input class="pin-cell pin-pwd" type="text" inputmode="numeric" maxlength="1" />
-        <input class="pin-cell pin-pwd" type="text" inputmode="numeric" maxlength="1" />
-        <input class="pin-cell pin-pwd" type="text" inputmode="numeric" maxlength="1" />
-        <input class="pin-cell pin-pwd" type="text" inputmode="numeric" maxlength="1" />
+      <div class="input-wrap">
+        <input type="password" id="input-signup-pw" placeholder="8자 이상, 영문·숫자·특수문자" autocomplete="new-password">
       </div>
-      <div class="input-hint">숫자 6자리. 로그인할 때 사용해요.</div>
+      <div class="input-hint" id="signup-pw-hint">8자 이상이며 영문·숫자·특수문자를 모두 포함해주세요.</div>
     </div>
 
     <div class="form-block">
       <label class="form-label">비밀번호 확인</label>
-      <div class="pin-grid" id="pin-set-2">
-        <input class="pin-cell pin-pwd" type="text" inputmode="numeric" maxlength="1" />
-        <input class="pin-cell pin-pwd" type="text" inputmode="numeric" maxlength="1" />
-        <input class="pin-cell pin-pwd" type="text" inputmode="numeric" maxlength="1" />
-        <input class="pin-cell pin-pwd" type="text" inputmode="numeric" maxlength="1" />
-        <input class="pin-cell pin-pwd" type="text" inputmode="numeric" maxlength="1" />
-        <input class="pin-cell pin-pwd" type="text" inputmode="numeric" maxlength="1" />
+      <div class="input-wrap">
+        <input type="password" id="input-signup-pw2" placeholder="비밀번호 다시 입력" autocomplete="new-password">
       </div>
       <div class="input-hint" id="pin-confirm-hint">위에서 입력한 비밀번호와 같게 입력해주세요.</div>
     </div>
@@ -978,29 +963,20 @@
     </div>
 
     <h1 class="page-title">새 비밀번호를 정해주세요</h1>
-    <p class="page-desc">숫자 6자리. 다른 사람이 추측하기 어려운 번호로 정해주세요.</p>
+    <p class="page-desc">8자 이상이며 영문·숫자·특수문자를 모두 포함해주세요.</p>
 
     <div class="form-block">
       <label class="form-label">새 비밀번호</label>
-      <div class="pin-grid" id="reset-pin-1">
-        <input class="pin-cell pin-pwd" type="text" inputmode="numeric" maxlength="1" />
-        <input class="pin-cell pin-pwd" type="text" inputmode="numeric" maxlength="1" />
-        <input class="pin-cell pin-pwd" type="text" inputmode="numeric" maxlength="1" />
-        <input class="pin-cell pin-pwd" type="text" inputmode="numeric" maxlength="1" />
-        <input class="pin-cell pin-pwd" type="text" inputmode="numeric" maxlength="1" />
-        <input class="pin-cell pin-pwd" type="text" inputmode="numeric" maxlength="1" />
+      <div class="input-wrap">
+        <input type="password" id="input-reset-pw" placeholder="8자 이상, 영문·숫자·특수문자" autocomplete="new-password">
       </div>
+      <div class="input-hint" id="reset-pw-hint">8자 이상이며 영문·숫자·특수문자를 모두 포함해주세요.</div>
     </div>
 
     <div class="form-block">
       <label class="form-label">새 비밀번호 확인</label>
-      <div class="pin-grid" id="reset-pin-2">
-        <input class="pin-cell pin-pwd" type="text" inputmode="numeric" maxlength="1" />
-        <input class="pin-cell pin-pwd" type="text" inputmode="numeric" maxlength="1" />
-        <input class="pin-cell pin-pwd" type="text" inputmode="numeric" maxlength="1" />
-        <input class="pin-cell pin-pwd" type="text" inputmode="numeric" maxlength="1" />
-        <input class="pin-cell pin-pwd" type="text" inputmode="numeric" maxlength="1" />
-        <input class="pin-cell pin-pwd" type="text" inputmode="numeric" maxlength="1" />
+      <div class="input-wrap">
+        <input type="password" id="input-reset-pw2" placeholder="비밀번호 다시 입력" autocomplete="new-password">
       </div>
       <div class="input-hint" id="reset-pin-hint">위에서 입력한 비밀번호와 같게 입력해주세요.</div>
     </div>
@@ -1182,9 +1158,8 @@
     }
 
     const rawInput = document.getElementById('input-login-email').value.trim().toLowerCase();
-    const pinCells = document.querySelectorAll('#pin-login .pin-cell');
-    // 마스킹된 셀이라 readPinValue로 실제 값 추출
-    const password = Array.from(pinCells).map(readPinValue).join('');
+    const pwInput = document.getElementById('input-login-pw');
+    const password = pwInput.value;
     const hint = document.getElementById('login-hint');
 
     // 입력 검증
@@ -1210,8 +1185,8 @@
       inputValue = rawInput + '@kangwon.ac.kr';
     }
 
-    if(password.length !== 6 || !/^\d{6}$/.test(password)){
-      hint.textContent = '비밀번호 6자리를 입력해주세요.';
+    if(!password){
+      hint.textContent = '비밀번호를 입력해주세요.';
       hint.classList.add('error');
       return;
     }
@@ -1242,11 +1217,7 @@
         hint.textContent = '해당 메일로 가입된 계정이 없어요.';
         hint.classList.add('error');
         // 비밀번호 클리어 (메일이 잘못된 거니 비번 노출 위험 줄임)
-        pinCells.forEach(c => {
-          c.value = '';
-          delete c.dataset.actualValue;
-          c.classList.remove('filled');
-        });
+        pwInput.value = '';
         return;
       }
 
@@ -1299,12 +1270,8 @@
           hint.classList.add('error');
         }
         // 비밀번호 입력 칸 초기화
-        pinCells.forEach(c => {
-          c.value = '';
-          delete c.dataset.actualValue;
-          c.classList.remove('filled');
-        });
-        pinCells[0].focus();
+        pwInput.value = '';
+        pwInput.focus();
         return;
       }
 
@@ -1489,15 +1456,47 @@
     return cell.value || '';
   }
 
-  // 비밀번호 두 칸 실시간 일치 검사
+  // 비밀번호 정책 검증: 8자 이상 + 영문 + 숫자 + 특수문자
+  // 통과하면 null, 실패하면 안내 문구(string) 반환
+  function validatePassword(pw){
+    if(!pw || pw.length < 8) return '비밀번호는 8자 이상이어야 해요.';
+    if(!/[A-Za-z]/.test(pw)) return '영문을 포함해야 해요.';
+    if(!/[0-9]/.test(pw))    return '숫자를 포함해야 해요.';
+    if(!/[^A-Za-z0-9]/.test(pw)) return '특수문자(!@# 등)를 포함해야 해요.';
+    return null;
+  }
+
+  // 가입 비밀번호 정책 실시간 안내 (input-signup-pw 입력 시)
+  function checkSignupPwPolicy(){
+    const pw = (document.getElementById('input-signup-pw') || {}).value || '';
+    const hint = document.getElementById('signup-pw-hint');
+    if(!hint) return;
+    if(pw.length === 0){
+      hint.textContent = '8자 이상이며 영문·숫자·특수문자를 모두 포함해주세요.';
+      hint.classList.remove('success', 'error');
+      return;
+    }
+    const err = validatePassword(pw);
+    if(err){
+      hint.textContent = err;
+      hint.classList.add('error');
+      hint.classList.remove('success');
+    } else {
+      hint.textContent = '✓ 사용 가능한 비밀번호예요.';
+      hint.classList.add('success');
+      hint.classList.remove('error');
+    }
+  }
+
+  // 비밀번호 두 칸 실시간 일치 검사 (가입 화면)
   function checkPinMatch(){
-    const pin1 = Array.from(document.querySelectorAll('#pin-set-1 .pin-cell')).map(readPinValue).join('');
-    const pin2 = Array.from(document.querySelectorAll('#pin-set-2 .pin-cell')).map(readPinValue).join('');
+    const pw1 = (document.getElementById('input-signup-pw')  || {}).value || '';
+    const pw2 = (document.getElementById('input-signup-pw2') || {}).value || '';
     const hint = document.getElementById('pin-confirm-hint');
     if(!hint) return;
 
-    if(pin2.length === 6){
-      if(pin1 === pin2){
+    if(pw2.length > 0){
+      if(pw1 === pw2){
         hint.textContent = '✓ 비밀번호가 일치해요.';
         hint.classList.add('success');
         hint.classList.remove('error');
@@ -1515,8 +1514,8 @@
   function submitNickname(){
     const nickname = document.getElementById('input-nickname').value.trim();
     const btn = document.getElementById('nickname-check-btn');
-    const pin1 = Array.from(document.querySelectorAll('#pin-set-1 .pin-cell')).map(readPinValue).join('');
-    const pin2 = Array.from(document.querySelectorAll('#pin-set-2 .pin-cell')).map(readPinValue).join('');
+    const pw1 = document.getElementById('input-signup-pw').value;
+    const pw2 = document.getElementById('input-signup-pw2').value;
 
     if(!nickname){
       alert('닉네임을 입력해주세요.');
@@ -1526,18 +1525,19 @@
       alert('닉네임 중복확인을 해주세요.');
       return;
     }
-    if(pin1.length !== 6 || !/^\d{6}$/.test(pin1)){
-      alert('비밀번호는 숫자 6자리로 입력해주세요.');
+    const pwErr = validatePassword(pw1);
+    if(pwErr){
+      alert(pwErr);
       return;
     }
-    if(pin1 !== pin2){
+    if(pw1 !== pw2){
       alert('비밀번호가 일치하지 않아요. 다시 확인해주세요.');
       return;
     }
 
     // state에 임시 저장 (최종 finishSignup에서 Supabase Auth + profiles에 저장)
     state.nickname = nickname;
-    state.password = pin1;
+    state.password = pw1;
     go('signup-grade');
   }
 
@@ -1981,16 +1981,17 @@
   // 5-6-C 3/3: 새 비번 설정 + updateUser
   async function submitNewPassword(){
     if(!supabaseClient){ alert('서버 연결 중'); return; }
-    const pin1 = Array.from(document.querySelectorAll('#reset-pin-1 .pin-cell')).map(readPinValue).join('');
-    const pin2 = Array.from(document.querySelectorAll('#reset-pin-2 .pin-cell')).map(readPinValue).join('');
+    const pw1 = document.getElementById('input-reset-pw').value;
+    const pw2 = document.getElementById('input-reset-pw2').value;
     const hint = document.getElementById('reset-pin-hint');
 
-    if(pin1.length !== 6 || !/^\d{6}$/.test(pin1)){
-      hint.textContent = '비밀번호는 숫자 6자리로 입력해주세요.';
+    const pwErr = validatePassword(pw1);
+    if(pwErr){
+      hint.textContent = pwErr;
       hint.classList.add('error');
       return;
     }
-    if(pin1 !== pin2){
+    if(pw1 !== pw2){
       hint.textContent = '비밀번호가 일치하지 않아요.';
       hint.classList.add('error');
       return;
@@ -2000,7 +2001,7 @@
     btn.disabled = true; btn.textContent = '변경 중...';
 
     try {
-      const { error } = await supabaseClient.auth.updateUser({ password: pin1 });
+      const { error } = await supabaseClient.auth.updateUser({ password: pw1 });
       if(error){
         const msg = (error.message || '').toLowerCase();
         if(msg.includes('different from the old')){
@@ -2055,6 +2056,11 @@
     document.getElementById('input-birth-year').value = '';
     document.getElementById('input-major').value = '';
     document.getElementById('input-notify-email').value = '';
+    // 새 비밀번호 입력 필드 초기화
+    ['input-login-pw','input-signup-pw','input-signup-pw2','input-reset-pw','input-reset-pw2'].forEach(id => {
+      const el = document.getElementById(id);
+      if(el) el.value = '';
+    });
     document.querySelectorAll('.pin-cell').forEach(c => {
       c.value = '';
       c.classList.remove('filled');
@@ -2127,6 +2133,30 @@
         }
       });
     }
+
+    // 가입 비밀번호 실시간 검사 (정책 + 두 칸 일치)
+    const signupPw  = document.getElementById('input-signup-pw');
+    const signupPw2 = document.getElementById('input-signup-pw2');
+    if(signupPw)  signupPw.addEventListener('input', () => { checkSignupPwPolicy(); checkPinMatch(); });
+    if(signupPw2) signupPw2.addEventListener('input', checkPinMatch);
+
+    // 재설정 비밀번호 실시간 일치 검사
+    const resetPw  = document.getElementById('input-reset-pw');
+    const resetPw2 = document.getElementById('input-reset-pw2');
+    function checkResetMatch(){
+      const a = resetPw  ? resetPw.value  : '';
+      const b = resetPw2 ? resetPw2.value : '';
+      const h = document.getElementById('reset-pin-hint');
+      if(!h) return;
+      if(b.length > 0){
+        if(a === b){ h.textContent = '✓ 비밀번호가 일치해요.'; h.classList.add('success'); h.classList.remove('error'); }
+        else { h.textContent = '비밀번호가 일치하지 않아요.'; h.classList.add('error'); h.classList.remove('success'); }
+      } else {
+        h.textContent = '위에서 입력한 비밀번호와 같게 입력해주세요.'; h.classList.remove('success','error');
+      }
+    }
+    if(resetPw)  resetPw.addEventListener('input', checkResetMatch);
+    if(resetPw2) resetPw2.addEventListener('input', checkResetMatch);
   });
 
   document.addEventListener('keydown', e => {
