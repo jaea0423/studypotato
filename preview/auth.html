@@ -1527,11 +1527,17 @@
     }
     const pwErr = validatePassword(pw1);
     if(pwErr){
-      alert(pwErr);
+      // 정책 위반 경고는 "새 비밀번호" 칸에 표시
+      const h = document.getElementById('signup-pw-hint');
+      if(h){ h.textContent = pwErr; h.classList.add('error'); h.classList.remove('success'); }
+      document.getElementById('input-signup-pw').focus();
       return;
     }
     if(pw1 !== pw2){
-      alert('비밀번호가 일치하지 않아요. 다시 확인해주세요.');
+      // 불일치는 "확인" 칸에 표시
+      const h2 = document.getElementById('pin-confirm-hint');
+      if(h2){ h2.textContent = '비밀번호가 일치하지 않아요.'; h2.classList.add('error'); h2.classList.remove('success'); }
+      document.getElementById('input-signup-pw2').focus();
       return;
     }
 
@@ -1983,15 +1989,20 @@
     if(!supabaseClient){ alert('서버 연결 중'); return; }
     const pw1 = document.getElementById('input-reset-pw').value;
     const pw2 = document.getElementById('input-reset-pw2').value;
+    const pwHint = document.getElementById('reset-pw-hint');
     const hint = document.getElementById('reset-pin-hint');
 
     const pwErr = validatePassword(pw1);
     if(pwErr){
-      hint.textContent = pwErr;
-      hint.classList.add('error');
+      // 정책 위반 경고는 "새 비밀번호" 칸에 표시
+      pwHint.textContent = pwErr;
+      pwHint.classList.add('error');
+      pwHint.classList.remove('success');
+      document.getElementById('input-reset-pw').focus();
       return;
     }
     if(pw1 !== pw2){
+      // 불일치는 "확인" 칸에 표시
       hint.textContent = '비밀번호가 일치하지 않아요.';
       hint.classList.add('error');
       return;
@@ -2155,7 +2166,21 @@
         h.textContent = '위에서 입력한 비밀번호와 같게 입력해주세요.'; h.classList.remove('success','error');
       }
     }
-    if(resetPw)  resetPw.addEventListener('input', checkResetMatch);
+    // 재설정 새 비밀번호 정책 실시간 안내 ("새 비밀번호" 칸)
+    function checkResetPwPolicy(){
+      const pw = resetPw ? resetPw.value : '';
+      const h = document.getElementById('reset-pw-hint');
+      if(!h) return;
+      if(pw.length === 0){
+        h.textContent = '8자 이상이며 영문·숫자·특수문자를 모두 포함해주세요.';
+        h.classList.remove('success', 'error');
+        return;
+      }
+      const err = validatePassword(pw);
+      if(err){ h.textContent = err; h.classList.add('error'); h.classList.remove('success'); }
+      else { h.textContent = '✓ 사용 가능한 비밀번호예요.'; h.classList.add('success'); h.classList.remove('error'); }
+    }
+    if(resetPw)  resetPw.addEventListener('input', () => { checkResetPwPolicy(); checkResetMatch(); });
     if(resetPw2) resetPw2.addEventListener('input', checkResetMatch);
   });
 
