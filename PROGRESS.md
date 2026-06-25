@@ -53,20 +53,23 @@
 
 ---
 
+**📊 구현 진행 현황 (2026-06-25)**
+- ✅ **비밀번호 모델 완료** — 가입/로그인/재설정/변경 모두 일반 비밀번호(8자+영문+숫자+특수문자)로 전환. 사용자 테스트 통과.
+- ✅ **DB 완료** — `registered_devices` PIN 컬럼 + RPC들 (`device_pin.sql`) 작성·실행 완료.
+- ⏭️ **남은 것 = PIN 간편로그인** — ① PIN→세션 Edge Function ② 첫 로그인 PIN 권유 ③ 로그인 화면 PIN 분기 ④ 탭 닫으면 로그아웃(sessionStorage) ⑤ PIN 설정/기기 관리 화면
+
 **남은 작업 (다음 세션, 우선순위 순)**
 
-#### 1단계. DB 변경 (SQL) — ⚠️ 기존 계획에서 변경됨 (PIN을 profiles → registered_devices로 이동)
-- [ ] `registered_devices`에 컬럼 추가: `pin_hash text NULL`, `pin_failed_count int DEFAULT 0`
-  - (profiles에는 pin 관련 컬럼 두지 않음. pin_locked_until 불필요)
-- [ ] RPC `set_device_pin(p_device_id, p_pin)` — bcrypt 해시 저장 (pgcrypto), 이 기기 row에
-- [ ] RPC `verify_device_pin(p_device_id, p_pin) returns boolean` — 일치 시 count 리셋, 불일치 시 +1, 5 도달하면 row 삭제(해제)
-- [ ] RPC `clear_device_pin(p_device_id)` — 이 기기 PIN만 해제
-- [ ] 비밀번호 8자+영문+숫자+특수문자 검증 (클라이언트 정규식 + Supabase Auth 설정)
+#### 1단계. DB 변경 (SQL) — ✅ 완료 (2026-06-25, `sql/device_pin.sql` 작성+실행)
+- [x] `registered_devices`에 컬럼 추가: `pin_hash`, `pin_failed_count`
+- [x] RPC `set_device_pin` / `clear_device_pin` / `device_has_pin` (로그인 사용자용)
+- [x] RPC `verify_and_consume_device_pin` (Edge Function/service_role 전용, 5회 실패 시 해제)
+- [x] 비밀번호 8자+영문+숫자+특수문자 검증 — 클라이언트 `validatePassword` 적용
 
 #### 2단계. auth.html 대규모 수정
-- [ ] **회원가입**: 비밀번호 입력 셀 6칸 → 일반 input (8자 이상, 영문+숫자+특수문자)
-  - 비밀번호 강도/규칙 충족 표시
-  - 동일 입력 두 번(확인) 단계
+- [x] **회원가입**: 6칸 PIN → 일반 비밀번호 input (8자+영문+숫자+특수문자) — ✅ 완료. 실시간 정책/일치 안내 포함
+- [x] **로그인 화면 — 비밀번호 부분**: 6칸 PIN → 일반 비밀번호 input — ✅ 완료 (PIN 분기는 아래 미완)
+- [ ] **첫 로그인 PIN 권유**: 가입 완료/새 기기 로그인 성공 직후 "이 기기에서 PIN으로 간편로그인 할래요?" (+ 공용 PC 경고). "나중에" 누르면 다시 안 띄움.
 - [ ] **첫 로그인 PIN 권유**: 가입 완료/새 기기 로그인 성공 직후 "이 기기에서 PIN으로 간편로그인 할래요?" (+ 공용 PC 경고). "나중에" 누르면 다시 안 띄움.
 - [ ] **로그인 화면**:
   - localStorage 힌트(device_id + PIN 사용 사용자)로 화면 자동 분기
@@ -86,20 +89,20 @@
 - [ ] **현재 기기 "이 기기" 표시** + **라벨 이름 변경 기능**
 - [ ] 개별 "해제" 버튼 + "이 기기 외 모두 로그아웃" → `revoke_other_devices`
 
-#### 5단계. 비밀번호 변경/재설정 화면 재구성
-- [ ] `password-change.html` — 6자리 PIN UI 제거, 일반 비밀번호 input 3개 (현재/새/확인), 새 정책 검증
-- [ ] 비밀번호 재설정 흐름(`auth.html` 잠금해제) — 일반 비밀번호 + 새 정책
+#### 5단계. 비밀번호 변경/재설정 화면 재구성 — ✅ 완료 (2026-06-25)
+- [x] `password-change.html` — 6자리 PIN 데모 제거 → 현재 비번 재인증(`signInWithPassword`) + `updateUser` 실제 변경. 정책 경고는 새 비번 칸, 확인칸은 일치만
+- [x] 비밀번호 재설정 흐름(`auth.html`) — 일반 비밀번호 + 정책 검증, 경고는 새 비번 칸
 
 #### 6단계. 마이그레이션 (현재 사용자 0명이라 단순)
 - [ ] 현재 가입자는 운영자 본인 계정뿐 → 비밀번호 재설정 후 새 모델로 사용
 
 ---
 
-**작업량 추정**: 6~10시간 (UI 수정이 큼)
+**작업량 추정**: 남은 PIN 간편로그인 4~7시간 (Edge Function + 화면들)
 
-**먼저 사용자가 할 일**:
-1. Supabase SQL Editor에서 `sql/registered_devices.sql` 실행 (Option C 기본 — 아직 미실행)
-2. 1단계 DB 변경 SQL(추후 작성) 실행
+**사용자가 할 일**:
+- [x] `sql/registered_devices.sql` 실행 — ✅ 완료 (2026-06-25)
+- [x] `sql/device_pin.sql` 실행 — ✅ 완료 (2026-06-25)
 
 ---
 
