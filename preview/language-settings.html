@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/variable/pretendardvariable.css" />
-<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Noto+Sans+SC:wght@400;500;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
   :root{
     --knu-blue:#0047BB; --knu-blue-deep:#00347E; --knu-blue-soft:#E5ECF8;
@@ -60,6 +60,7 @@
   .lang-main{display:flex; flex-direction:column; gap:2px;}
   .lang-name{font-size:15px; font-weight:700;}
   .lang-name.sc{font-family:'Noto Sans SC', var(--font-kr); }
+  .lang-name.jp{font-family:'Noto Sans JP', var(--font-kr); }
   .lang-sub{font-size:12px; color:var(--ink-mute); font-family:var(--font-mono);}
   .lang-right{display:flex; align-items:center; gap:8px;}
   .badge-soon{
@@ -133,16 +134,28 @@
         <span class="badge-soon">即将</span>
       </div>
     </div>
+
+    <!-- 일본어 (지원 예정) -->
+    <div class="lang-item disabled" data-lang="ja" onclick="showSoon('日本語')">
+      <div class="lang-main">
+        <div class="lang-name jp">日本語</div>
+        <div class="lang-sub">近日公開 · Japanese</div>
+      </div>
+      <div class="lang-right">
+        <span class="badge-soon">近日</span>
+      </div>
+    </div>
   </div>
 
   <div class="note">
     <span class="label">📢 다국어 안내</span>
-    영어 / 중국어(간체) 지원은 정식 출시 후 단계적으로 추가됩니다.<br>
+    영어 / 중국어(간체) / 일본어 지원은 정식 출시 후 단계적으로 추가됩니다.<br>
     유학생·교환학생 분들이 이용하실 수 있도록 우선순위 높게 준비 중이에요.
     <div class="multi">
       <span class="ko">한국어 — 기본 제공</span>
       <span>English — Coming soon. We will support international students.</span>
       <span class="sc" style="font-family:'Noto Sans SC',var(--font-kr);">中文(简体) — 即将推出。我们将为留学生提供支持。</span>
+      <span class="jp" style="font-family:'Noto Sans JP',var(--font-kr);">日本語 — 近日公開予定。留学生の皆さんをサポートします。</span>
     </div>
   </div>
 </div>
